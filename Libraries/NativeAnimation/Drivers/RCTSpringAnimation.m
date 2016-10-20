@@ -27,7 +27,6 @@
 
 @implementation RCTSpringAnimation
 {
-  NSArray<NSNumber *> *_frames;
   CGFloat _toValue;
   CGFloat _fromValue;
   BOOL _overshootClamping;
@@ -42,7 +41,6 @@
 
   CGFloat _lastPosition;
   CGFloat _lastVelocity;
-  CGFloat _outputValue;
 }
 
 - (instancetype)initWithId:(NSNumber *)animationId
@@ -63,7 +61,6 @@
     _initialVelocity = [RCTConvert CGFloat:config[@"initialVelocity"]];
     _callback = [callback copy];
 
-    _outputValue = _fromValue;
     _lastPosition = _fromValue;
     _lastVelocity = _initialVelocity;
   }
@@ -155,10 +152,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   _lastPosition = position;
   _lastVelocity = velocity;
 
-  if (_animationHasFinished) {
-    return;
-  }
-
   [self onUpdate:position];
 
   if (_animationHasFinished) {
@@ -190,13 +183,11 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
     }
 
     [self stopAnimation];
-    return;
   }
 }
 
 - (void)onUpdate:(CGFloat)outputValue
 {
-  _outputValue = outputValue;
   _valueNode.value = outputValue;
   [_valueNode setNeedsUpdate];
 }

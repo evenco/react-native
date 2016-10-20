@@ -16,7 +16,7 @@
 #import "RCTDefines.h"
 #import "RCTValueAnimatedNode.h"
 
-const double __SINGLE_FRAME_INTERVAL = 1.0 / 60.0; // <Even> changing the const name fixes linking (!!??)
+const double SINGLE_FRAME_INTERVAL = 1.0 / 60.0;
 
 @interface RCTFrameAnimation ()
 
@@ -104,7 +104,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
 
   // Determine how many frames have passed since last update.
   // Get index of frames that surround the current interval
-  NSUInteger startIndex = floor(currentDuration / __SINGLE_FRAME_INTERVAL);
+  NSUInteger startIndex = floor(currentDuration / SINGLE_FRAME_INTERVAL);
   NSUInteger nextIndex = startIndex + 1;
 
   if (nextIndex >= _frames.count) {
@@ -119,8 +119,8 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   // Do a linear remap of the two frames to safegaurd against variable framerates
   NSNumber *fromFrameValue = _frames[startIndex];
   NSNumber *toFrameValue = _frames[nextIndex];
-  NSTimeInterval fromInterval = startIndex * __SINGLE_FRAME_INTERVAL;
-  NSTimeInterval toInterval = nextIndex * __SINGLE_FRAME_INTERVAL;
+  NSTimeInterval fromInterval = startIndex * SINGLE_FRAME_INTERVAL;
+  NSTimeInterval toInterval = nextIndex * SINGLE_FRAME_INTERVAL;
 
   // Interpolate between the individual frames to ensure the animations are
   //smooth and of the proper duration regardless of the framerate.
@@ -128,14 +128,23 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
                                             fromInterval,
                                             toInterval,
                                             fromFrameValue.doubleValue,
-                                            toFrameValue.doubleValue);
+                                            toFrameValue.doubleValue,
+                                            EXTRAPOLATE_TYPE_EXTEND,
+                                            EXTRAPOLATE_TYPE_EXTEND);
 
   [self updateOutputWithFrameOutput:frameOutput];
 }
 
 - (void)updateOutputWithFrameOutput:(CGFloat)frameOutput
 {
-  CGFloat outputValue = RCTInterpolateValue(frameOutput, 0, 1, _fromValue, _toValue);
+  CGFloat outputValue = RCTInterpolateValue(frameOutput,
+                                            0,
+                                            1,
+                                            _fromValue,
+                                            _toValue,
+                                            EXTRAPOLATE_TYPE_EXTEND,
+                                            EXTRAPOLATE_TYPE_EXTEND);
+
   _valueNode.value = outputValue;
   [_valueNode setNeedsUpdate];
 }

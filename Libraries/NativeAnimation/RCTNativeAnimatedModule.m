@@ -33,10 +33,10 @@
 @implementation RCTNativeAnimatedModule
 {
   NSMutableDictionary<NSNumber *, RCTAnimatedNode *> *_animationNodes;
-  NSMutableDictionary<NSNumber *, NSObject<RCTAnimationDriver> *> *_animationDrivers;
-  NSMutableDictionary<NSNumber *, NSObject<RCTAnimationDriver> *> *_animationDriversByNode;
-  NSMutableSet<NSObject<RCTAnimationDriver> *> *_activeAnimations;
-  NSMutableSet<NSObject<RCTAnimationDriver> *> *_finishedAnimations;
+  NSMutableDictionary<NSNumber *, id<RCTAnimationDriver>> *_animationDrivers;
+  NSMutableDictionary<NSNumber *, id<RCTAnimationDriver>> *_animationDriversByNode;
+  NSMutableSet<id<RCTAnimationDriver>> *_activeAnimations;
+  NSMutableSet<id<RCTAnimationDriver>> *_finishedAnimations;
   NSMutableSet<RCTValueAnimatedNode *> *_updatedValueNodes;
   NSMutableSet<RCTPropsAnimatedNode *> *_propAnimationNodes;
   CADisplayLink *_displayLink;
@@ -151,13 +151,13 @@ RCT_EXPORT_METHOD(startAnimatingNode:(nonnull NSNumber *)animationId
 {
   RCTValueAnimatedNode *valueNode = (RCTValueAnimatedNode *)_animationNodes[nodeTag];
 
-  NSObject<RCTAnimationDriver> *existingDriver = _animationDriversByNode[nodeTag];
+  id<RCTAnimationDriver>existingDriver = _animationDriversByNode[nodeTag];
   if (existingDriver) {
     [self stopAnimation:existingDriver.animationId];
   }
 
   NSString *type = config[@"type"];
-  NSObject<RCTAnimationDriver> *animationDriver;
+  id<RCTAnimationDriver>animationDriver;
 
   if ([type isEqual:@"frames"]) {
     animationDriver = [[RCTFrameAnimation alloc] initWithId:animationId
@@ -185,7 +185,7 @@ RCT_EXPORT_METHOD(startAnimatingNode:(nonnull NSNumber *)animationId
 
 RCT_EXPORT_METHOD(stopAnimation:(nonnull NSNumber *)animationId)
 {
-  NSObject<RCTAnimationDriver> *driver = _animationDrivers[animationId];
+  id<RCTAnimationDriver>driver = _animationDrivers[animationId];
   if (driver) {
     [_animationDriversByNode removeObjectForKey:driver.valueNode.nodeTag];
     [driver removeAnimation];
@@ -328,7 +328,7 @@ RCT_EXPORT_METHOD(stopListeningToAnimatedNodeValue:(nonnull NSNumber *)tag)
 {
   // Step Current active animations
   // This also recursively marks children nodes as needing update
-  for (NSObject<RCTAnimationDriver> *animationDriver in _activeAnimations) {
+  for (id<RCTAnimationDriver>animationDriver in _activeAnimations) {
     [animationDriver stepAnimation];
   }
 
@@ -339,7 +339,7 @@ RCT_EXPORT_METHOD(stopListeningToAnimatedNodeValue:(nonnull NSNumber *)tag)
   }
 
   // Cleanup nodes and prepare for next cycle. Remove updated nodes from bucket.
-  for (NSObject<RCTAnimationDriver> *driverNode in _activeAnimations) {
+  for (id<RCTAnimationDriver>driverNode in _activeAnimations) {
     [driverNode cleanupAnimationUpdate];
   }
   for (RCTValueAnimatedNode *valueNode in _updatedValueNodes) {
@@ -347,13 +347,13 @@ RCT_EXPORT_METHOD(stopListeningToAnimatedNodeValue:(nonnull NSNumber *)tag)
   }
   [_updatedValueNodes removeAllObjects];
 
-  for (NSObject<RCTAnimationDriver> *driverNode in _activeAnimations) {
+  for (id<RCTAnimationDriver>driverNode in _activeAnimations) {
     if (driverNode.animationHasFinished) {
       [driverNode removeAnimation];
       [_finishedAnimations addObject:driverNode];
     }
   }
-  for (NSObject<RCTAnimationDriver> *driverNode in _finishedAnimations) {
+  for (id<RCTAnimationDriver>driverNode in _finishedAnimations) {
     [_activeAnimations removeObject:driverNode];
     [_animationDrivers removeObjectForKey:driverNode.animationId];
   }
