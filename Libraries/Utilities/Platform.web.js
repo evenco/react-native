@@ -6,7 +6,7 @@
 
 var Platform = {
   OS: 'web',
-  isFast: false,
+  supportsNativeAnimations: false,
 };
 
 module.exports = Platform;

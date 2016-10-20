@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface RCTAnimationDriverNode : NSObject
 
+@property (nonatomic, strong) RCTValueAnimatedNode *valueNode;
+
 @property (nonatomic, readonly) NSNumber *animationId;
 @property (nonatomic, readonly) NSNumber *outputValue;
 

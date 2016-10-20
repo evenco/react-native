@@ -10,4 +10,6 @@
 
 @interface RCTNativeAnimatedModule : NSObject <RCTBridgeModule>
 
+- (void)setAnimatedNodeValue:(nonnull NSNumber *)nodeTag value:(nonnull NSNumber *)value;
+
 @end

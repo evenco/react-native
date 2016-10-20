@@ -5,10 +5,13 @@ package com.facebook.react.uimanager.layoutanimation;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 
+import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.OnceCallback;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 
@@ -29,7 +32,7 @@ public class LayoutAnimationController {
   private final AbstractLayoutAnimation mLayoutDeleteAnimation = new LayoutDeleteAnimation();
   private boolean mShouldAnimateLayout;
 
-  public void initializeFromConfig(final @Nullable ReadableMap config) {
+  public void initializeFromConfig(final @Nullable ReadableMap config, @Nullable Callback onSuccess, @Nullable Callback onError) {
     if (!ENABLED) {
       return;
     }
@@ -39,21 +42,30 @@ public class LayoutAnimationController {
       return;
     }
 
+    // <Even> TODO something smarter than this
+    if (onSuccess != null) {
+      onSuccess = new OnceCallback(onSuccess);
+    }
+    if (onError != null) {
+      onError = new OnceCallback(onError);
+    }
+    // </Even>
+
     mShouldAnimateLayout = false;
     int globalDuration = config.hasKey("duration") ? config.getInt("duration") : 0;
     if (config.hasKey(LayoutAnimationType.CREATE.toString())) {
       mLayoutCreateAnimation.initializeFromConfig(
-          config.getMap(LayoutAnimationType.CREATE.toString()), globalDuration);
+          config.getMap(LayoutAnimationType.CREATE.toString()), globalDuration, onSuccess, onError);
       mShouldAnimateLayout = true;
     }
     if (config.hasKey(LayoutAnimationType.UPDATE.toString())) {
       mLayoutUpdateAnimation.initializeFromConfig(
-          config.getMap(LayoutAnimationType.UPDATE.toString()), globalDuration);
+          config.getMap(LayoutAnimationType.UPDATE.toString()), globalDuration, onSuccess, onError);
       mShouldAnimateLayout = true;
     }
     if (config.hasKey(LayoutAnimationType.DELETE.toString())) {
       mLayoutDeleteAnimation.initializeFromConfig(
-          config.getMap(LayoutAnimationType.DELETE.toString()), globalDuration);
+          config.getMap(LayoutAnimationType.DELETE.toString()), globalDuration, onSuccess, onError);
       mShouldAnimateLayout = true;
     }
   }
@@ -91,12 +103,30 @@ public class LayoutAnimationController {
     AbstractLayoutAnimation layoutAnimation = (view.getWidth() == 0 || view.getHeight() == 0) ?
         mLayoutCreateAnimation :
         mLayoutUpdateAnimation;
+    final Callback onSuccess = layoutAnimation.getSuccessCallback();
 
     Animation animation = layoutAnimation.createAnimation(view, x, y, width, height);
     if (animation == null || !(animation instanceof HandleLayout)) {
       view.layout(x, y, x + width, y + height);
+
+      // <Even>
+      if (onSuccess != null) {
+        onSuccess.invoke();
+      }
+      // </Even>
     }
     if (animation != null) {
+      // <Even>
+      animation.setAnimationListener(new Animation.AnimationListener() {
+        @Override public void onAnimationStart(Animation a) {}
+        @Override public void onAnimationRepeat(Animation a) {}
+        @Override public void onAnimationEnd(Animation a) {
+          if (onSuccess != null) {
+            onSuccess.invoke();
+          }
+        }
+      });
+      // </Even>
       view.startAnimation(animation);
     }
   }
@@ -112,6 +142,7 @@ public class LayoutAnimationController {
     UiThreadUtil.assertOnUiThread();
 
     AbstractLayoutAnimation layoutAnimation = mLayoutDeleteAnimation;
+    final Callback onSuccess = layoutAnimation.getSuccessCallback();
 
     Animation animation = layoutAnimation.createAnimation(
         view, view.getLeft(), view.getTop(), view.getWidth(), view.getHeight());
@@ -129,12 +160,24 @@ public class LayoutAnimationController {
         @Override
         public void onAnimationEnd(Animation anim) {
           listener.onAnimationEnd();
+
+          // <Even>
+          if (onSuccess != null) {
+            onSuccess.invoke();
+          }
+          // </Even>
         }
       });
 
       view.startAnimation(animation);
     } else {
       listener.onAnimationEnd();
+
+      // <Even>
+      if (onSuccess != null) {
+        onSuccess.invoke();
+      }
+      // </Even>
     }
   }
 

@@ -17,7 +17,7 @@ var Platform = {
   // $FlowFixMe
   get Version() { return require('NativeModules').AndroidConstants.Version; },
   select: (obj: Object) => obj.android,
-  isFast: true, // [Even]
+  supportsNativeAnimations: true,
 };
 
 module.exports = Platform;

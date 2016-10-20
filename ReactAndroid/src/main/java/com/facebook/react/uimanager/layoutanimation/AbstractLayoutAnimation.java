@@ -14,6 +14,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.IllegalViewOperationException;
@@ -36,12 +37,11 @@ import com.facebook.react.uimanager.IllegalViewOperationException;
    */
   abstract @Nullable Animation createAnimationImpl(View view, int x, int y, int width, int height);
 
-  private static final Map<InterpolatorType, Interpolator> INTERPOLATOR = MapBuilder.of(
+  private static final Map<InterpolatorType, Interpolator> INTERPOLATOR = MapBuilder.<InterpolatorType, Interpolator>of(
       InterpolatorType.LINEAR, new LinearInterpolator(),
       InterpolatorType.EASE_IN, new AccelerateInterpolator(),
       InterpolatorType.EASE_OUT, new DecelerateInterpolator(),
-      InterpolatorType.EASE_IN_EASE_OUT, new AccelerateDecelerateInterpolator(),
-      InterpolatorType.SPRING, new SimpleSpringInterpolator());
+      InterpolatorType.EASE_IN_EASE_OUT, new AccelerateDecelerateInterpolator());
 
   private @Nullable Interpolator mInterpolator;
   private int mDelayMs;
@@ -49,14 +49,21 @@ import com.facebook.react.uimanager.IllegalViewOperationException;
   protected @Nullable AnimatedPropertyType mAnimatedProperty;
   protected int mDurationMs;
 
+  // <Even>
+  protected Callback mSuccessCallback;
+  protected Callback mErrorCallback;
+  // </Even>
+
   public void reset() {
     mAnimatedProperty = null;
     mDurationMs = 0;
     mDelayMs = 0;
     mInterpolator = null;
+    mSuccessCallback = null;
+    mErrorCallback = null;
   }
 
-  public void initializeFromConfig(ReadableMap data, int globalDuration) {
+  public void initializeFromConfig(ReadableMap data, int globalDuration, Callback onSuccess, Callback onError) {
     mAnimatedProperty = data.hasKey("property") ?
         AnimatedPropertyType.fromString(data.getString("property")) : null;
     mDurationMs = data.hasKey("duration") ? data.getInt("duration") : globalDuration;
@@ -64,11 +71,14 @@ import com.facebook.react.uimanager.IllegalViewOperationException;
     if (!data.hasKey("type")) {
       throw new IllegalArgumentException("Missing interpolation type.");
     }
-    mInterpolator = getInterpolator(InterpolatorType.fromString(data.getString("type")));
+    mInterpolator = getInterpolator(InterpolatorType.fromString(data.getString("type")), data);
 
     if (!isValid()) {
       throw new IllegalViewOperationException("Invalid layout animation : " + data);
     }
+
+    mSuccessCallback = onSuccess;
+    mErrorCallback = onError;
   }
 
   /**
@@ -100,7 +110,22 @@ import com.facebook.react.uimanager.IllegalViewOperationException;
     return animation;
   }
 
-  private static Interpolator getInterpolator(InterpolatorType type) {
+  Callback getSuccessCallback() {
+    return mSuccessCallback;
+  }
+
+  Callback getErrorCallback() {
+    return mErrorCallback;
+  }
+
+  private static Interpolator getInterpolator(InterpolatorType type, ReadableMap data) {
+    // <Even>
+    if (InterpolatorType.SPRING.equals(type)) {
+      float factor = data.hasKey("springDamping") ? (float) data.getDouble("springDamping") : 0.5f;
+      return new SimpleSpringInterpolator(factor);
+    }
+    // </Even>
+
     Interpolator interpolator = INTERPOLATOR.get(type);
     if (interpolator == null) {
       throw new IllegalArgumentException("Missing interpolator for type : " + type);

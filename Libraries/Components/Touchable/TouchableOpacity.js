@@ -19,6 +19,7 @@ var React = require('React');
 var TimerMixin = require('react-timer-mixin');
 var Touchable = require('Touchable');
 var TouchableWithoutFeedback = require('TouchableWithoutFeedback');
+var Platform = require('Platform');
 
 var ensurePositiveDelayProps = require('ensurePositiveDelayProps');
 var flattenStyle = require('flattenStyle');
@@ -67,9 +68,15 @@ var TouchableOpacity = React.createClass({
   },
 
   getInitialState: function() {
+    // <Even>
+    var anim = new Animated.Value(1);
+    if (Platform.supportsNativeAnimations) {
+      anim.__makeNative();
+    }
+    // </Even>
     return {
       ...this.touchableGetInitialState(),
-      anim: new Animated.Value(1),
+      anim: anim,
     };
   },
 
@@ -87,7 +94,11 @@ var TouchableOpacity = React.createClass({
   setOpacityTo: function(value: number) {
     Animated.timing(
       this.state.anim,
-      {toValue: value, duration: 150}
+      {
+        useNativeDriver: Platform.supportsNativeAnimations, // <Even />
+        toValue: value,
+        duration: 150,
+      }
     ).start();
   },
 

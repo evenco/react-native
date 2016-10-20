@@ -65,11 +65,6 @@ public class ReactHorizontalScrollViewManager
     view.setSnapToInterval(interval);
   }
 
-  @ReactProp(name = "pagingEnabled")
-  public void setPagingEnabled(ReactHorizontalScrollView view, boolean pagingEnabled) {
-    view.setPagingEnabled(pagingEnabled);
-  }
-
   @ReactProp(name = ReactClippingViewGroupHelper.PROP_REMOVE_CLIPPED_SUBVIEWS)
   public void setRemoveClippedSubviews(ReactHorizontalScrollView view, boolean removeClippedSubviews) {
     view.setRemoveClippedSubviews(removeClippedSubviews);

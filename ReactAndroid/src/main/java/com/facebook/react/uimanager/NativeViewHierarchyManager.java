@@ -111,6 +111,16 @@ public class NativeViewHierarchyManager {
   public void updateProperties(int tag, ReactStylesDiffMap props) {
     UiThreadUtil.assertOnUiThread();
 
+    // <Even>
+    // This is a very bad hack. KitKat devices fairly frequently attempt to
+    // run native animations before sending the view over the bridge.
+    // This is a very aggressive solution that should be removed as soon as
+    // the problem is better understood.
+    if (mTagsToViewManagers.get(tag) == null) {
+      return;
+    }
+    // </Even>
+
     ViewManager viewManager = resolveViewManager(tag);
     View viewToUpdate = resolveView(tag);
     viewManager.updateProperties(viewToUpdate, props);
@@ -169,17 +179,25 @@ public class NativeViewHierarchyManager {
         }
         if (parentViewGroupManager != null
             && !parentViewGroupManager.needsCustomLayoutForChildren()) {
-          updateLayout(viewToUpdate, x, y, width, height);
+          updateLayout(viewToUpdate, tag, x, y, width, height);
         }
       } else {
-        updateLayout(viewToUpdate, x, y, width, height);
+        updateLayout(viewToUpdate, tag, x, y, width, height);
       }
     } finally {
       Systrace.endSection(Systrace.TRACE_TAG_REACT_VIEW);
     }
   }
 
-  private void updateLayout(View viewToUpdate, int x, int y, int width, int height) {
+  private void updateLayout(View viewToUpdate, int viewTag, int x, int y, int width, int height) {
+    // <Even>
+    ViewManager viewManager = mTagsToViewManagers.get(viewTag);
+    if (viewManager instanceof ViewGroupManager &&
+        ((ViewGroupManager) viewManager).needsCustomLayout()) {
+      return;
+    }
+    // </Even>
+
     if (mLayoutAnimationEnabled &&
         mLayoutAnimator.shouldAnimateLayout(viewToUpdate)) {
       mLayoutAnimator.applyLayoutUpdate(viewToUpdate, x, y, width, height);
@@ -629,8 +647,8 @@ public class NativeViewHierarchyManager {
     mJSResponderHandler.clearJSResponder();
   }
 
-  void configureLayoutAnimation(final ReadableMap config) {
-    mLayoutAnimator.initializeFromConfig(config);
+  void configureLayoutAnimation(final ReadableMap config, final Callback onSuccess, final Callback onError) { // <Even>
+    mLayoutAnimator.initializeFromConfig(config, onSuccess, onError);
   }
 
   void clearLayoutAnimation() {

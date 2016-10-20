@@ -26,8 +26,13 @@ var stringifySafe = require('stringifySafe');
  * interface to native code.
  */
 function processTransform(transform: Object): Object {
-  var result = MatrixMath.createIdentityMatrix();
+  // <Even>
+  if (Platform.OS === 'android') {
+    return transform;
+  }
+  // </Even>
 
+  var result = MatrixMath.createIdentityMatrix();
   transform.forEach(transformation => {
     var key = Object.keys(transformation)[0];
     var value = transformation[key];

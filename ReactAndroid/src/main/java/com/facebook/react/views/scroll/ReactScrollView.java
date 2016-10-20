@@ -20,6 +20,8 @@ import android.view.View;
 import android.widget.ScrollView;
 
 import com.facebook.infer.annotation.Assertions;
+import com.facebook.react.animated.NativeAnimatedModule;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.MeasureSpecAssertions;
 import com.facebook.react.uimanager.events.NativeGestureUtil;
 import com.facebook.react.views.view.ReactClippingViewGroup;
@@ -37,6 +39,7 @@ import javax.annotation.Nullable;
 public class ReactScrollView extends ScrollView implements ReactClippingViewGroup {
 
   private final OnScrollDispatchHelper mOnScrollDispatchHelper = new OnScrollDispatchHelper();
+  private final NativeAnimatedModule mAnimatedModule;
 
   private @Nullable Rect mClippingRect;
   private boolean mDoneFlinging;
@@ -45,6 +48,8 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   private boolean mRemoveClippedSubviews;
   private boolean mScrollEnabled = true;
   private boolean mSendMomentumEvents;
+  private int mContentOffsetXAnimatedNodeTag;
+  private int mContentOffsetYAnimatedNodeTag;
   private @Nullable FpsListener mFpsListener = null;
   private @Nullable String mScrollPerfTag;
   private @Nullable Drawable mEndBackground;
@@ -57,6 +62,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   public ReactScrollView(Context context, @Nullable FpsListener fpsListener) {
     super(context);
     mFpsListener = fpsListener;
+    mAnimatedModule = ((ReactContext) context).getNativeModule(NativeAnimatedModule.class);
   }
 
   public void setSendMomentumEvents(boolean sendMomentumEvents) {
@@ -70,6 +76,16 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   public void setScrollEnabled(boolean scrollEnabled) {
     mScrollEnabled = scrollEnabled;
   }
+
+  // <Even>
+  public void setContentOffsetXAnimatedNodeTag(int tag) {
+    mContentOffsetXAnimatedNodeTag = tag;
+  }
+
+  public void setContentOffsetYAnimatedNodeTag(int tag) {
+    mContentOffsetYAnimatedNodeTag = tag;
+  }
+  // </Even>
 
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -112,6 +128,15 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
 
       ReactScrollViewHelper.emitScrollEvent(this);
     }
+
+    // <Even>
+    if (mContentOffsetXAnimatedNodeTag != 0) {
+      mAnimatedModule.setAnimatedNodeValue(mContentOffsetXAnimatedNodeTag, x);
+    }
+    if (mContentOffsetYAnimatedNodeTag != 0) {
+      mAnimatedModule.setAnimatedNodeValue(mContentOffsetYAnimatedNodeTag, y);
+    }
+    // </Even>
   }
 
   @Override

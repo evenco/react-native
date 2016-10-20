@@ -404,11 +404,17 @@ var ListView = React.createClass({
               this.state.highlightedRow.rowID === rowID ||
               this.state.highlightedRow.rowID === rowIDs[rowIdx + 1]
             );
-          var separator = this.props.renderSeparator(
-            sectionID,
-            rowID,
-            adjacentRowHighlighted
-          );
+          var separator = 
+            <StaticRenderer
+              key={'s_' + comboID}
+              shouldUpdate={!!shouldUpdateRow}
+              render={this.props.renderSeparator.bind(
+                null,
+                sectionID,
+                rowID,
+                adjacentRowHighlighted
+              )}
+            />;
           addElementToCollection(bodyComponents, separator);
           totalIndex++;
         }
@@ -424,32 +430,38 @@ var ListView = React.createClass({
     }.bind(this));
 
     var {
+      contentContainerStyle,
+      dataSource,
+      initialListSize,
+      inverted,
+      onEndReachedThreshold,
+      onEndReached,
+      onKeyboardWillShow,
+      onKeyboardWillHide,
+      onKeyboardDidShow,
+      onKeyboardDidHide,
+      pageSize,
+      removeClippedSubviews,
+      renderRow,
+      renderHeader,
+      renderFooter,
       renderScrollComponent,
+      renderSeparator,
+      scrollEventThrottle,
+      scrollRenderAheadDistance,
       ...props,
     } = this.props;
-    if (!props.scrollEventThrottle) {
-      props.scrollEventThrottle = DEFAULT_SCROLL_CALLBACK_THROTTLE;
-    }
-    if (props.removeClippedSubviews === undefined) {
-      props.removeClippedSubviews = true;
-    }
+
     Object.assign(props, {
       onScroll: this._onScroll,
       stickyHeaderIndices: sectionHeaderIndices,
-
-      // Do not pass these events downstream to ScrollView since they will be
-      // registered in ListView's own ScrollResponder.Mixin
-      onKeyboardWillShow: undefined,
-      onKeyboardWillHide: undefined,
-      onKeyboardDidShow: undefined,
-      onKeyboardDidHide: undefined,
     });
 
     // TODO(ide): Use function refs so we can compose with the scroll
     // component's original ref instead of clobbering it
     return React.cloneElement(renderScrollComponent(props), {
       ref: SCROLLVIEW_REF,
-      inverted: this.props.inverted,
+      inverted: inverted,
       onLayout: this._onLayout,
     }, header, bodyComponents, footer);
   },

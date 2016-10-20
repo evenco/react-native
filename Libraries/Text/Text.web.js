@@ -4,11 +4,20 @@
 'use strict';
 
 var React = require('React');
+var { StyleSheet } = require('react-native');
 var StyleSheetPropType = require('StyleSheetPropType');
 var TextStylePropTypes = require('TextStylePropTypes');
 var webifyStyle = require('webifyStyle');
 
 var stylePropType = StyleSheetPropType(TextStylePropTypes);
+
+var styles = StyleSheet.create({
+
+    containerSpan: {
+        wordBreak: 'break-word',
+    },
+
+});
 
 var Text = React.createClass({
 
@@ -36,19 +45,18 @@ var Text = React.createClass({
                 }
                 innerElements = textPartsIncludingNewlines.map(this._renderInnerText);
             } else {
-                innerElements = this._renderChild(innerElements);
+                innerElements = [this._renderChild(innerElements)];
             }
         } else if (innerElements instanceof Array) {
             innerElements = innerElements.map(this._renderChild);
         } else if (innerElements) {
-            innerElements = this._renderChild(innerElements);
+            innerElements = [this._renderChild(innerElements)];
         }
         return (
             <span
                 {...this.props}
-                isChild={true}
-                style={webifyStyle(this.props.style)}
-                children={innerElements}
+                style={webifyStyle([this.props.style, styles.containerSpan])}
+                children={React.Children.toArray(innerElements)}
                 />
         );
     },
@@ -62,9 +70,7 @@ var Text = React.createClass({
 
     _renderChild: function(child) {
         if (React.isValidElement(child)) {
-            return React.cloneElement(child, {
-                isChild: true,
-            });
+            return child;
         }
         if (child instanceof Array) {
             return child.map(this._renderChild);

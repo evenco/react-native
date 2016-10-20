@@ -76,16 +76,16 @@ const ActivityIndicator = React.createClass({
         break;
     }
     return (
-      <View
-        onLayout={onLayout}
-        style={[styles.container, style]}>
-        <RCTActivityIndicator
-          {...props}
-          style={sizeStyle}
-          styleAttr="Normal"
-          indeterminate
-        />
-      </View>
+       <View
+         onLayout={onLayout}
+         style={[styles.container, style]}>
+         <RCTActivityIndicator
+           {...props}
+           style={sizeStyle}
+           styleAttr="Normal"
+           indeterminate
+         />
+       </View>
     );
   }
 });

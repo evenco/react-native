@@ -17,10 +17,12 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.util.TypedValue;
+import android.util.Log;
 
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.SoftAssertions;
+import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.ViewProps;
 
 /**
@@ -84,7 +86,32 @@ public class ReactDrawableHelper {
       ColorStateList colorStateList = new ColorStateList(
           new int[][] {new int[]{}},
           new int[] {color});
-      return new RippleDrawable(colorStateList, null, mask);
+
+      // <Even> expose more ripple controls
+
+      RippleDrawable ripple = new RippleDrawable(colorStateList, null, mask);
+
+      if (Build.VERSION.SDK_INT >= 23 &&
+          drawableDescriptionDict.hasKey("radius") &&
+          !drawableDescriptionDict.isNull("radius")) {
+        ripple.setRadius((int) PixelUtil.toPixelFromDIP(
+          drawableDescriptionDict.getDouble("radius")));
+      }
+
+      if (drawableDescriptionDict.hasKey("bounds") &&
+          !drawableDescriptionDict.isNull("bounds")) {
+        ReadableMap bounds = drawableDescriptionDict.getMap("bounds");
+        ripple.setHotspotBounds(
+          (int) PixelUtil.toPixelFromDIP(bounds.getDouble("left")),
+          (int) PixelUtil.toPixelFromDIP(bounds.getDouble("top")),
+          (int) PixelUtil.toPixelFromDIP(bounds.getDouble("right")),
+          (int) PixelUtil.toPixelFromDIP(bounds.getDouble("bottom"))
+        );
+      }
+
+      // </Even>
+
+      return ripple;
     } else {
       throw new JSApplicationIllegalArgumentException(
           "Invalid type for android drawable: " + type);

@@ -28,6 +28,13 @@ import android.view.animation.Transformation;
         mLayerTypeChanged = true;
         mView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
       }
+
+      // <Even>
+      OpacityAnimation o = (OpacityAnimation) animation;
+      if (o.mListener != null) {
+        o.mListener.onAnimationStart(animation);
+      }
+      // </Even>
     }
 
     @Override
@@ -35,23 +42,41 @@ import android.view.animation.Transformation;
       if (mLayerTypeChanged) {
         mView.setLayerType(View.LAYER_TYPE_NONE, null);
       }
+
+      // <Even>
+      OpacityAnimation o = (OpacityAnimation) animation;
+      if (o.mListener != null) {
+        o.mListener.onAnimationEnd(animation);
+      }
+      // </Even>
     }
 
     @Override
     public void onAnimationRepeat(Animation animation) {
       // do nothing
+
+      // <Even>
+      OpacityAnimation o = (OpacityAnimation) animation;
+      if (o.mListener != null) {
+        o.mListener.onAnimationRepeat(animation);
+      }
+      // </Even>
     }
   }
 
   private final View mView;
   private final float mStartOpacity, mDeltaOpacity;
 
+  // <Even>
+  private AnimationListener mListener;
+  // </Even>
+
   public OpacityAnimation(View view, float startOpacity, float endOpacity) {
     mView = view;
     mStartOpacity = startOpacity;
     mDeltaOpacity = endOpacity - startOpacity;
 
-    setAnimationListener(new OpacityAnimationListener(view));
+    super.setAnimationListener(new OpacityAnimationListener(view));
   }
 
   @Override
@@ -63,4 +88,11 @@ import android.view.animation.Transformation;
   public boolean willChangeBounds() {
     return false;
   }
+
+  // <Even>
+  @Override
+  public void setAnimationListener(AnimationListener listener) {
+    mListener = listener;
+  }
+  // </Even>
 }

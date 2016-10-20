@@ -127,7 +127,10 @@ var styleKeyMap = {
     },
 
     transform: function(value) {
-        var transformMatrix = processTransform(value);
+        if (!value) {
+            return {};
+        }
+        var transformMatrix = processTransform(value); // TODO how are nulls getting here
         var cssValue = `matrix3d(${transformMatrix})`;
         return {
             transform: cssValue,

@@ -194,10 +194,12 @@ public class WebSocketModule extends ReactContextBaseJavaModule {
       client.close(code, reason);
       mWebSocketConnections.remove(id);
     } catch (Exception e) {
-      FLog.e(
-        ReactConstants.TAG,
-        "Could not close WebSocket connection for id " + id,
-        e);
+      // <Even>
+      // FLog.e(
+      //   ReactConstants.TAG,
+      //   "Could not close WebSocket connection for id " + id,
+      //   e);
+      // </Even>
     }
   }
 

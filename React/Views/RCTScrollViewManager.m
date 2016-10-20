@@ -80,10 +80,12 @@ RCT_EXPORT_VIEW_PROPERTY(onMomentumScrollEnd, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onScrollAnimationEnd, RCTDirectEventBlock)
 
 // <Even>
-
+RCT_EXPORT_VIEW_PROPERTY(snapToFirstInterval, CGFloat)
+RCT_EXPORT_VIEW_PROPERTY(contentOffsetXAnimatedNodeTag, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(contentOffsetYAnimatedNodeTag, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(minContentSize, CGSize)
 RCT_EXPORT_VIEW_PROPERTY(disableTopPull, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(disableBottomPull, BOOL)
-
 // </Even>
 
 RCT_EXPORT_METHOD(getContentSize:(nonnull NSNumber *)reactTag

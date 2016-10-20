@@ -18,6 +18,7 @@ var Set = require('Set');
 var SpringConfig = require('SpringConfig');
 var ViewStylePropTypes = require('ViewStylePropTypes');
 var NativeAnimatedHelper = require('NativeAnimatedHelper');
+var Platform = require('Platform');
 
 var findNodeHandle = require('findNodeHandle');
 var flattenStyle = require('flattenStyle');
@@ -249,15 +250,16 @@ class TimingAnimation extends Animation {
     this._duration = config.duration !== undefined ? config.duration : 500;
     this._delay = config.delay !== undefined ? config.delay : 0;
     this.__isInteraction = config.isInteraction !== undefined ? config.isInteraction : true;
-    this._useNativeDriver = config.useNativeDriver !== undefined ? config.useNativeDriver : false;
+    this._useNativeDriver = config.useNativeDriver !== undefined ? config.useNativeDriver && Platform.supportsNativeAnimations : false;
   }
 
   _getNativeAnimationConfig(): any {
     var frameDuration = 1000.0 / 60.0;
     var frames = [];
-    for (var dt = 0.0; dt <= this._duration; dt += frameDuration) {
+    for (var dt = 0.0; dt < this._duration; dt += frameDuration) {
       frames.push(this._easing(dt / this._duration));
     }
+    frames.push(this._easing(1));
     return {
       type: 'frames',
       frames,
@@ -326,7 +328,7 @@ class TimingAnimation extends Animation {
     super.stop();
     this.__active = false;
     clearTimeout(this._timeout);
-    window.cancelAnimationFrame(this._animationFrame);
+    global.cancelAnimationFrame(this._animationFrame);
     this.__debouncedOnEnd({finished: false});
   }
 }
@@ -396,7 +398,7 @@ class DecayAnimation extends Animation {
   stop(): void {
     super.stop();
     this.__active = false;
-    window.cancelAnimationFrame(this._animationFrame);
+    global.cancelAnimationFrame(this._animationFrame);
     this.__debouncedOnEnd({finished: false});
   }
 }
@@ -447,6 +449,7 @@ class SpringAnimation extends Animation {
   _lastTime: number;
   _onUpdate: (value: number) => void;
   _animationFrame: any;
+  _useNativeDriver: bool;
 
   constructor(
     config: SpringAnimationConfigSingle,
@@ -460,6 +463,7 @@ class SpringAnimation extends Animation {
     this._lastVelocity = withDefault(config.velocity, 0);
     this._toValue = config.toValue;
     this.__isInteraction = config.isInteraction !== undefined ? config.isInteraction : true;
+    this._useNativeDriver = config.useNativeDriver !== undefined ? config.useNativeDriver && Platform.supportsNativeAnimations : false;
 
     var springConfig;
     if (config.bounciness !== undefined || config.speed !== undefined) {
@@ -481,11 +485,25 @@ class SpringAnimation extends Animation {
     this._friction = springConfig.friction;
   }
 
+  _getNativeAnimationConfig(): any {
+    return {
+      type: 'spring',
+      overshootClamping: this._overshootClamping,
+      restDisplacementThreshold: this._restDisplacementThreshold,
+      restSpeedThreshold: this._restSpeedThreshold,
+      tension: this._tension,
+      friction: this._friction,
+      initialVelocity: withDefault(this._initialVelocity, this._lastVelocity),
+      toValue: this._toValue,
+    };
+  }
+
   start(
     fromValue: number,
     onUpdate: (value: number) => void,
     onEnd: ?EndCallback,
     previousAnimation: ?Animation,
+    animatedValue: AnimatedValue
   ): void {
     this.__active = true;
     this._startPosition = fromValue;
@@ -505,7 +523,12 @@ class SpringAnimation extends Animation {
         this._initialVelocity !== null) {
       this._lastVelocity = this._initialVelocity;
     }
-    this.onUpdate();
+
+    if (this._useNativeDriver) {
+      this.__startNativeAnimation(animatedValue);
+    } else {
+      this.onUpdate();
+    }
   }
 
   getInternalState(): Object {
@@ -611,7 +634,7 @@ class SpringAnimation extends Animation {
   stop(): void {
     super.stop();
     this.__active = false;
-    window.cancelAnimationFrame(this._animationFrame);
+    global.cancelAnimationFrame(this._animationFrame);
     this.__debouncedOnEnd({finished: false});
   }
 }
@@ -644,7 +667,8 @@ class AnimatedValue extends AnimatedWithChildren {
 
   __detach() {
     this.stopAnimation();
-    super.__detach();
+    // <Even> what if we want to keep it around after driving it???
+    // super.__detach();
   }
 
   __getValue(): number {
@@ -672,7 +696,11 @@ class AnimatedValue extends AnimatedWithChildren {
    * things like the start of a pan gesture.
    */
   setOffset(offset: number): void {
-    this._offset = offset;
+    if (this.__isNative) {
+      NativeAnimatedAPI.setAnimatedNodeOffset(this.__getNativeTag(), offset);
+    } else {
+      this._offset = offset;
+    }
   }
 
   /**
@@ -680,8 +708,25 @@ class AnimatedValue extends AnimatedWithChildren {
    * The final output of the value is unchanged.
    */
   flattenOffset(): void {
-    this._value += this._offset;
-    this._offset = 0;
+    if (this.__isNative) {
+      NativeAnimatedAPI.flattenAnimatedNodeOffset(this.__getNativeTag());
+    } else {
+      this._value += this._offset;
+      this._offset = 0;
+    }
+  }
+
+  /**
+   * Sets the offset value to the base value, and resets the base value to zero.
+   * The final output of the value is unchanged.
+   */
+  extractOffset(): void {
+    if (this.__isNative) {
+      NativeAnimatedAPI.extractAnimatedNodeOffset(this.__getNativeTag());
+    } else {
+      this._offset += this._value;
+      this._value = 0;
+    }
   }
 
   /**
@@ -963,13 +1008,38 @@ class AnimatedInterpolation extends AnimatedWithChildren {
     super.__detach();
   }
 
+  // <Even> // backported from https://github.com/facebook/react-native/pull/9366
+  __transformDataType(range) {
+    // Change the string array type to number array
+    // So we can reuse the same logic in iOS and Android platform
+    return range.map(function (value) {
+      if (typeof value !== 'string') {
+        return value;
+      }
+      if (/deg$/.test(value)) {
+        const degrees = parseFloat(value, 10) || 0;
+        const radians = degrees * Math.PI / 180.0;
+        return radians;
+      } else {
+        // Assume radians
+        return parseFloat(value, 10) || 0;
+      }
+    });
+  }
+
   __getNativeConfig(): any {
-    NativeAnimatedHelper.validateInterpolation(this._config);
+    if (__DEV__) {
+      NativeAnimatedHelper.validateInterpolation(this._config);
+    }
     return {
-      ...this._config,
+      inputRange: this._config.inputRange,
+      outputRange: this.__transformDataType(this._config.outputRange),
+      extrapolateLeft: this._config.extrapolateLeft || this._config.extrapolate || 'extend',
+      extrapolateRight: this._config.extrapolateRight || this._config.extrapolate || 'extend',
       type: 'interpolation',
     };
   }
+  // </Even>
 }
 
 class AnimatedAddition extends AnimatedWithChildren {
@@ -1068,6 +1138,11 @@ class AnimatedModulo extends AnimatedWithChildren {
     this._modulus = modulus;
   }
 
+  __makeNative() {
+    super.__makeNative();
+    this._a.__makeNative();
+  }
+
   __getValue(): number {
     return (this._a.__getValue() % this._modulus + this._modulus) % this._modulus;
   }
@@ -1082,6 +1157,14 @@ class AnimatedModulo extends AnimatedWithChildren {
 
   __detach(): void {
     this._a.__removeChild(this);
+  }
+
+  __getNativeConfig(): any {
+    return {
+      type: 'modulus',
+      input: this._a.__getNativeTag(),
+      modulus: this._modulus,
+    };
   }
 }
 
@@ -1159,21 +1242,28 @@ class AnimatedTransform extends AnimatedWithChildren {
   }
 
   __getNativeConfig(): any {
-    var transConfig = {};
+    var transConfigs = [];
 
     this._transforms.forEach(transform => {
       for (var key in transform) {
         var value = transform[key];
         if (value instanceof Animated) {
-          transConfig[key] = value.__getNativeTag();
+          transConfigs.push({
+            property: key,
+            nodeTag: value.__getNativeTag(),
+          });
+        } else {
+          transConfigs.push({
+            property: key,
+            static: value,
+          });
         }
       }
     });
 
-    NativeAnimatedHelper.validateTransform(transConfig);
     return {
       type: 'transform',
-      transform: transConfig,
+      transforms: transConfigs,
     };
   }
 }
@@ -1292,7 +1382,7 @@ class AnimatedProps extends Animated {
     for (var key in this._props) {
       var value = this._props[key];
       if (value instanceof Animated) {
-        if (!value.__isNative) {
+        if (value instanceof AnimatedStyle || !value.__isNative) {
           // We cannot use value of natively driven nodes this way as the value we have access from JS
           // may not be up to date
           props[key] = value.__getValue();
@@ -1386,7 +1476,6 @@ class AnimatedProps extends Animated {
         propsConfig[propKey] = value.__getNativeTag();
       }
     }
-    NativeAnimatedHelper.validateProps(propsConfig);
     return {
       type: 'props',
       props: propsConfig,
@@ -1468,10 +1557,11 @@ function createAnimatedComponent(Component: any): any {
 
     render() {
       return (
-        <Component
-          {...this._propsAnimated.__getValue()}
-          ref={refName}
-        />
+          <Component
+            {...this._propsAnimated.__getValue()}
+            collapsable={false}
+            ref={refName}
+          />
       );
     }
   }

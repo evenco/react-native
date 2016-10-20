@@ -362,14 +362,22 @@ public class UIViewOperationQueue {
 
   private class ConfigureLayoutAnimationOperation implements UIOperation {
     private final ReadableMap mConfig;
+    // <Even>
+    private final Callback mOnSuccess;
+    private final Callback mOnError;
+    // </Even>
 
-    private ConfigureLayoutAnimationOperation(final ReadableMap config) {
+    private ConfigureLayoutAnimationOperation(final ReadableMap config, final Callback onSuccess, final Callback onError) {
       mConfig = config;
+      // <Even>
+      mOnSuccess = onSuccess;
+      mOnError = onError;
+      // </Even>
     }
 
     @Override
     public void execute() {
-      mNativeViewHierarchyManager.configureLayoutAnimation(mConfig);
+      mNativeViewHierarchyManager.configureLayoutAnimation(mConfig, mOnSuccess, mOnError);
     }
   }
 
@@ -690,7 +698,7 @@ public class UIViewOperationQueue {
       final ReadableMap config,
       final Callback onSuccess,
       final Callback onError) {
-    mOperations.add(new ConfigureLayoutAnimationOperation(config));
+    mOperations.add(new ConfigureLayoutAnimationOperation(config, onSuccess, onError));
   }
 
   public void enqueueMeasure(

@@ -42,11 +42,11 @@ var View = React.createClass({
     },
 
     setNativeProps: function(props: Object) {
-        if (!this.refs.div) {
+        if (!this._div) {
             return;
         }
         if (props.opacity) {
-            this.refs.div.style.opacity = props.opacity;
+            this._div.style.opacity = props.opacity;
         }
         if (props.style) {
             var style = webifyStyle(props.style);
@@ -55,21 +55,86 @@ var View = React.createClass({
                 if (pixelKeys[key]) {
                     value = value + 'px';
                 }
-                this.refs.div.style[key] = value;
+                this._div.style[key] = value;
             }
         }
     },
 
     measure: function(callback?: Function): Object {
-        var m = this.refs.div.getBoundingClientRect();
+        var m = this._div.getBoundingClientRect();
         if (callback) {
             callback(m.left, m.top, m.width, m.height, m.left, m.top);
         }
         return m;
     },
 
+    childrenWithPointerEvents: function(children, value) {
+        if (!children) {
+            return children;
+        }
+        if (Array.isArray(children)) {
+            return children.map((child) => {
+                return this.childrenWithPointerEvents(child, value);
+            });
+        }
+        return React.cloneElement(children, {
+            pointerEvents: value,
+        });
+    },
+
     render: function(): ReactElement {
-        var style = webifyStyle(this.props.style);
+        var {
+            accessible,
+            accessibilityLabel,
+            accessibilityComponentType,
+            accessibilityTraits,
+            collapsable,
+            onPress,
+            onLayout,
+            hitSlop,
+            onStartShouldSetResponder,
+            onResponderTerminationRequest,
+            onResponderGrant,
+            onResponderMove,
+            onResponderRelease,
+            onResponderTerminate,
+            pointerEvents,
+            style,
+            testID,
+            children,
+            ...props,
+        } = this.props;
+
+        // pointer events
+
+        var childPointerEvents;
+        if (pointerEvents) {
+            switch (pointerEvents) {
+                case 'auto':
+                    pointerEvents = 'auto';
+                    break;
+                case 'none':
+                    pointerEvents = 'none';
+                    break;
+                case 'box-only':
+                    childPointerEvents = 'none';
+                    break;
+                case 'box-none':
+                    pointerEvents = 'none';
+                    childPointerEvents = 'auto';
+                    break;
+            }
+        }
+
+        style = webifyStyle([style, {
+            pointerEvents: pointerEvents,
+        }]);
+
+        if (childPointerEvents) {
+            children = this.childrenWithPointerEvents(children, childPointerEvents);
+        }
+
+        // layout
 
         // I don't like this at all but
         // componentDidUpdate is not being fired reliably
@@ -78,9 +143,10 @@ var View = React.createClass({
 
         return (
             <div
-                {...this.props}
-                ref="div"
+                {...props}
+                ref={(ref) => this._div = ref}
                 style={style}
+                children={children}
             />
         );
     },
@@ -90,7 +156,7 @@ var View = React.createClass({
     },
 
     _onLayout: function() {
-        if (!this.props.onLayout || !this.refs.div) {
+        if (!this.props.onLayout || !this._div) {
             return;
         }
         var measure = this.measure();

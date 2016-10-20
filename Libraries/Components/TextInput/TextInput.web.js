@@ -7,6 +7,8 @@ var React = require('React');
 var PropTypes = React.PropTypes;
 var webifyStyle = require('webifyStyle');
 
+import TextareaAutosize from 'TextareaAutosize';
+
 var ENTER_KEY = '13';
 
 var TextInput = React.createClass({
@@ -86,15 +88,23 @@ var TextInput = React.createClass({
         defaultValue: PropTypes.string,
 
         /*
+        * If true, the text input will not be editable until after it is rendered.
+        * Set this for legacy Android devices that have weird focus behavior.
+        */
+        delayEditability: PropTypes.bool,
+
+        /*
+        * <Even>
         * If true, the text field will not be editable
         */
         manualInput: PropTypes.bool,
 
         /*
-        * If true, the text input will not be editable until after it is rendered.
-        * Set this for legacy Android devices that have weird focus behavior.
+        * <Even>
+        * If true, the text field will auto resize (web only)
         */
-        delayEditability: PropTypes.bool,
+        autoResize: PropTypes.bool,
+        maxNumberOfLines: PropTypes.number,
     },
 
     getDefaultProps: function() {
@@ -119,15 +129,56 @@ var TextInput = React.createClass({
     },
 
     render: function() {
+        var {
+            multiline,
+            autoResize,
+            maxNumberOfLines,
+            clearButtonMode,
+            editable,
+            keyboardType,
+            manualInput,
+            onChangeText,
+            onSubmitEditing,
+            password,
+            underlineColorAndroid,
+            value,
+            style,
+            ...props,
+        } = this.props;
+
+        var commonProps = {
+            ...props,
+            ref: 'input',
+            value: value || '',
+            onChange: this._onChange,
+            onKeyDown: this._onKeyDown,
+            disabled: !this._canFocus || this._isDisabled(),
+            style: webifyStyle(style),
+        };
+
+        if (autoResize) {
+            return (
+                <TextareaAutosize
+                    {...commonProps}
+                    maxRows={maxNumberOfLines}
+                />
+            );
+        }
+
+        if (multiline) {
+            return (
+                <textarea
+                    {...commonProps}
+                />
+            );
+        }
+
         return (
             <input
                 ref="input"
-                {...this.props}
-                onChange={this._onChange}
-                onKeyDown={this._onKeyDown}
-                disabled={!this._canFocus || this._isDisabled()}
-                type={this.props.password ? "password" : "text"}
-                style={webifyStyle(this.props.style)}
+                {...commonProps}
+                value={value}
+                type={password ? 'password' : 'text'}
             />
         );
     },
@@ -143,6 +194,7 @@ var TextInput = React.createClass({
     _onKeyDown: function(e) {
         if (e.which == ENTER_KEY) {
             if (this.props.onSubmitEditing) {
+                e.preventDefault();
                 this.props.onSubmitEditing();
             }
         }

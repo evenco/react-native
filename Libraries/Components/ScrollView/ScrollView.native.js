@@ -32,6 +32,7 @@ const requireNativeComponent = require('requireNativeComponent');
 
 // Even
 var findNodeHandle = require('findNodeHandle');
+var Animations = require('Animations');
 
 /**
  * Component that wraps platform ScrollView while providing
@@ -331,10 +332,17 @@ const ScrollView = React.createClass({
     scrollPerfTag: PropTypes.string,
 
     // <Even>
-
+    snapToFirstInterval: PropTypes.number,
+    animatedScrollX: PropTypes.object,
+    animatedScrollY: PropTypes.object,
+    contentOffsetXAnimatedNodeTag: PropTypes.number,
+    contentOffsetYAnimatedNodeTag: PropTypes.number,
+    minContentSize: PropTypes.shape({
+        width: PropTypes.number,
+        height: PropTypes.number,
+    }),
     disableTopPull: PropTypes.bool,
     disableBottomPull: PropTypes.bool,
-
     // </Even>
   },
 
@@ -433,6 +441,20 @@ const ScrollView = React.createClass({
     this._innerViewRef = ref;
   },
 
+  // <Even>
+  componentWillMount() {
+    this._configAnimations();
+  },
+  _configAnimations() {
+    if (this.props.animatedScrollX) {
+        Animations.makeNative(this.props.animatedScrollX);
+    }
+    if (this.props.animatedScrollY) {
+        Animations.makeNative(this.props.animatedScrollY);
+    }
+  },
+  // </Even>
+
   render: function() {
     const contentContainerStyle = [
       this.props.horizontal && styles.contentContainerHorizontal,
@@ -477,6 +499,17 @@ const ScrollView = React.createClass({
         this.props.alwaysBounceVertical :
         !this.props.horizontal;
 
+    // <Even>
+    var contentOffsetXAnimatedNodeTag;
+    if (this.props.animatedScrollX && this.props.animatedScrollX.__isNative) {
+        contentOffsetXAnimatedNodeTag = this.props.animatedScrollX.__getNativeTag();
+    }
+    var contentOffsetYAnimatedNodeTag;
+    if (this.props.animatedScrollY && this.props.animatedScrollY.__isNative) {
+        contentOffsetYAnimatedNodeTag = this.props.animatedScrollY.__getNativeTag();
+    }
+    // </Even>
+
     const baseStyle = this.props.horizontal ? styles.baseHorizontal : styles.baseVertical;
     const props = {
       ...this.props,
@@ -500,6 +533,13 @@ const ScrollView = React.createClass({
       onResponderRelease: this.scrollResponderHandleResponderRelease,
       onResponderReject: this.scrollResponderHandleResponderReject,
       sendMomentumEvents: (this.props.onMomentumScrollBegin || this.props.onMomentumScrollEnd) ? true : false,
+
+      // <Even>
+      animatedScrollX: undefined,
+      animatedScrollY: undefined,
+      contentOffsetXAnimatedNodeTag,
+      contentOffsetYAnimatedNodeTag,
+      // </Even>
     };
 
     const { decelerationRate } = this.props;

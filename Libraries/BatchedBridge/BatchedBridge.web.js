@@ -106,6 +106,14 @@ var BatchedBridge = {
 
     },
 
+    NetInfo: {
+
+      getCurrentConnectivity: function() {
+        return Promise.resolve({
+          network_info: {},
+        });
+      },
+    },
   },
 
 };

@@ -448,6 +448,13 @@ const View = React.createClass({
     renderToHardwareTextureAndroid: PropTypes.bool,
 
     /**
+     * <Even>
+     * Hide the damn view.
+     * @platform android
+     */
+    hidden: PropTypes.bool,
+
+    /**
      * Whether this `View` should be rendered as a bitmap before compositing.
      *
      * On iOS, this is useful for animations and interactions that do not
@@ -502,7 +509,14 @@ const View = React.createClass({
     // replace wrapper component View with generated native wrapper RCTView. Avoid
     // adding functionality this component that you'd want to be available in both
     // dev and prod modes.
-    return <RCTView {...this.props} />;
+
+    // <Even>
+    // make iOS behave like android
+    var style = this.props.style;
+    style = [{overflow: 'hidden'}, style];
+    // </Even>
+
+    return <RCTView {...this.props} style={style} />;
   },
 });
 

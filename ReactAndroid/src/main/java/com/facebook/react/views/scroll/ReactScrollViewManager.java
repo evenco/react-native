@@ -109,6 +109,18 @@ public class ReactScrollViewManager
     view.setEndFillColor(color);
   }
 
+  // <Even>
+  @ReactProp(name = "contentOffsetXAnimatedNodeTag")
+  public void setContentOffsetXAnimatedNodeTag(ReactScrollView view, int tag) {
+    view.setContentOffsetXAnimatedNodeTag(tag);
+  }
+
+  @ReactProp(name = "contentOffsetYAnimatedNodeTag")
+  public void setContentOffsetYAnimatedNodeTag(ReactScrollView view, int tag) {
+    view.setContentOffsetYAnimatedNodeTag(tag);
+  }
+  // </Even>
+
   @Override
   public @Nullable Map<String, Integer> getCommandsMap() {
     return ReactScrollViewCommandHelper.getCommandsMap();

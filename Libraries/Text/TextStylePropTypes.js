@@ -72,6 +72,9 @@ var TextStylePropTypes = Object.assign(Object.create(ViewStylePropTypes), {
   writingDirection: ReactPropTypes.oneOf(
     ['auto' /*default*/, 'ltr', 'rtl']
   ),
+
+  // web
+  wordBreak: ReactPropTypes.oneOf(['auto', 'break-word', 'break-all']),
 });
 
 module.exports = TextStylePropTypes;

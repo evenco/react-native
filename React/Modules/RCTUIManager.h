@@ -85,6 +85,11 @@ RCT_EXTERN NSString *const RCTUIManagerRootViewKey;
 - (void)setBackgroundColor:(UIColor *)color forView:(UIView *)view;
 
 /**
+ * Update view's props Main thread only.
+ */
+- (void)setProps:(NSDictionary *)props forView:(NSNumber *)reactTag;
+
+/**
  * Schedule a block to be executed on the UI thread. Useful if you need to execute
  * view logic after all currently queued view updates have completed.
  */

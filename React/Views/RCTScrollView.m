@@ -20,6 +20,10 @@
 #import "UIView+Private.h"
 #import "UIView+React.h"
 
+// <Even>
+#import "RCTNativeAnimatedModule.h"
+// </Even>
+
 CGFloat const ZINDEX_DEFAULT = 0;
 CGFloat const ZINDEX_STICKY_HEADER = 50;
 
@@ -143,13 +147,15 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
 @property (nonatomic, strong) RCTRefreshControl *rctRefreshControl;
 
 // <Even>
-
+@property (nonatomic, assign) CGFloat snapToFirstInterval;
+@property (nonatomic, strong) NSNumber *contentOffsetXAnimatedNodeTag;
+@property (nonatomic, strong) NSNumber *contentOffsetYAnimatedNodeTag;
+@property (nonatomic, assign) CGSize minContentSize;
 @property (nonatomic, assign) BOOL disableTopPull;
 @property (nonatomic, assign) BOOL disableBottomPull;
 @property (nonatomic, assign) CGPoint firstDragPoint;
 @property (nonatomic, assign) CGPoint lastDragPoint;
 @property (nonatomic, assign) CGPoint lastTouchPoint;
-
 // </Even>
 
 @end
@@ -560,6 +566,10 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   if (refreshControl && refreshControl.refreshing) {
     refreshControl.frame = (CGRect){_scrollView.contentOffset, {_scrollView.frame.size.width, refreshControl.frame.size.height}};
   }
+  
+  // <Even> seems noisy
+  [self updateScrollAnimatedValue];
+  // </Even>
 
   [self updateClippedSubviews];
 }
@@ -611,6 +621,10 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
 - (void)scrollToOffset:(CGPoint)offset animated:(BOOL)animated
 {
+  // <Even>
+  offset.y = MIN(offset.y, MAX(_scrollView.contentSize.height - _scrollView.bounds.size.height + _scrollView.contentInset.bottom, 0));
+  // </Even>
+
   if (!CGPointEqualToPoint(_scrollView.contentOffset, offset)) {
     // Ensure at least one scroll event will fire
     _allowNextScrollNoMatterWhat = YES;
@@ -708,7 +722,23 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
     _allowNextScrollNoMatterWhat = NO;
   }
   RCT_FORWARD_SCROLL_EVENT(scrollViewDidScroll:scrollView);
+  
+  // <Even>
+  [self updateScrollAnimatedValue];
+  // </Even>
 }
+
+// <Even>
+- (void)updateScrollAnimatedValue {
+  RCTNativeAnimatedModule *module = [RCTNativeAnimatedModule new];
+  if (_scrollView.contentOffsetXAnimatedNodeTag) {
+    [module setAnimatedNodeValue:_scrollView.contentOffsetXAnimatedNodeTag value:@(_scrollView.contentOffset.x)];
+  }
+  if (_scrollView.contentOffsetYAnimatedNodeTag) {
+    [module setAnimatedNodeValue:_scrollView.contentOffsetYAnimatedNodeTag value:@(_scrollView.contentOffset.y)];
+  }
+}
+// </Even>
 
 - (NSArray<NSDictionary *> *)calculateChildFramesData
 {
@@ -782,7 +812,7 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
     NSInteger snapIndex = floor((targetContentOffsetAlongAxis + alignmentOffset) / snapToIntervalF);
     snapIndex = (translationAlongAxis < 0) ? snapIndex + 1 : snapIndex;
     CGFloat newTargetContentOffset = ( snapIndex * snapToIntervalF ) - alignmentOffset;
-
+    
     // Set new targetContentOffset
     if (isHorizontal) {
       targetContentOffset->x = newTargetContentOffset;
@@ -790,6 +820,27 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
       targetContentOffset->y = newTargetContentOffset;
     }
   }
+  
+  // <Even>
+  if (_scrollView.snapToFirstInterval) {
+    CGFloat targetContentOffsetY = targetContentOffset->y;
+    
+    NSInteger snapIndex;
+
+    if (velocity.y > 0) {
+      snapIndex = ceilf((targetContentOffsetY) / _scrollView.snapToFirstInterval);
+
+    } else {
+      snapIndex = floorf((targetContentOffsetY) / _scrollView.snapToFirstInterval);
+    }
+
+    CGFloat newTargetContentOffset = (snapIndex * _scrollView.snapToFirstInterval);
+    
+    if (snapIndex <= 1) {
+      targetContentOffset->y = newTargetContentOffset;
+    }
+  }
+  // </Even>
 
   NSDictionary *userData = @{
     @"velocity": @{
@@ -928,8 +979,10 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
     CGSize singleSubviewSize = _contentView.frame.size;
     CGPoint singleSubviewPosition = _contentView.frame.origin;
     return (CGSize){
-      singleSubviewSize.width + singleSubviewPosition.x,
-      singleSubviewSize.height + singleSubviewPosition.y
+      // <Even> MAX
+      MAX(singleSubviewSize.width + singleSubviewPosition.x, _scrollView.minContentSize.width),
+      MAX(singleSubviewSize.height + singleSubviewPosition.y, _scrollView.minContentSize.height),
+      // </Even>
     };
   }
 }
@@ -1005,10 +1058,12 @@ RCT_SET_AND_PRESERVE_OFFSET(setZoomScale, zoomScale, CGFloat);
 RCT_SET_AND_PRESERVE_OFFSET(setScrollIndicatorInsets, scrollIndicatorInsets, UIEdgeInsets);
 
 // <Even>
-
+RCT_SET_AND_PRESERVE_OFFSET(setSnapToFirstInterval, snapToFirstInterval, CGFloat);
+RCT_SET_AND_PRESERVE_OFFSET(setContentOffsetXAnimatedNodeTag, contentOffsetXAnimatedNodeTag, NSNumber *);
+RCT_SET_AND_PRESERVE_OFFSET(setContentOffsetYAnimatedNodeTag, contentOffsetYAnimatedNodeTag, NSNumber *);
+RCT_SET_AND_PRESERVE_OFFSET(setMinContentSize, minContentSize, CGSize);
 RCT_SET_AND_PRESERVE_OFFSET(setDisableTopPull, disableTopPull, BOOL);
 RCT_SET_AND_PRESERVE_OFFSET(setDisableBottomPull, disableBottomPull, BOOL);
-
 // </Even>
 
 - (void)sendScrollEventWithName:(NSString *)eventName

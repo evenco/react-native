@@ -114,9 +114,17 @@ var TouchableNativeFeedback = React.createClass({
      *
      * @param color The ripple color
      * @param borderless If the ripple can render outside it's bounds
+     * @param radius The ripple's radius (Android SDK 23+ only)
+     * @param bounds Ripple's bounds
      */
-    Ripple: function(color: string, borderless: boolean) {
-      return {type: 'RippleAndroid', color: processColor(color), borderless: borderless};
+    Ripple: function(color: string, borderless: boolean, radius?: number, bounds?: Object) {
+      return {
+        type: 'RippleAndroid',
+        color: processColor(color),
+        borderless: borderless,
+        radius: radius,
+        bounds: bounds,
+      };
     },
   },
 
@@ -138,6 +146,10 @@ var TouchableNativeFeedback = React.createClass({
 
   componentWillReceiveProps: function(nextProps) {
     ensurePositiveDelayProps(nextProps);
+  },
+
+  setNativeProps: function(props) {
+    this._ref && this._ref.setNativeProps(props);
   },
 
   /**
@@ -216,6 +228,7 @@ var TouchableNativeFeedback = React.createClass({
     }
     var childProps = {
       ...child.props,
+      ref: (ref) => { this._ref = ref },
       nativeBackgroundAndroid: this.props.background,
       accessible: this.props.accessible !== false,
       accessibilityLabel: this.props.accessibilityLabel,

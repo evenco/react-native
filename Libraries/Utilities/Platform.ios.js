@@ -15,7 +15,7 @@
 var Platform = {
   OS: 'ios',
   select: (obj: Object) => obj.ios,
-  isFast: true,
+  supportsNativeAnimations: true,
 };
 
 module.exports = Platform;

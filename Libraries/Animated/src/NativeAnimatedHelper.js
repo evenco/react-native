@@ -50,6 +50,18 @@ var API = {
     assertNativeAnimatedModule();
     NativeAnimatedModule.setAnimatedNodeValue(nodeTag, value);
   },
+  setAnimatedNodeOffset: function(nodeTag: number, offset: number): void {
+    assertNativeAnimatedModule();
+    NativeAnimatedModule.setAnimatedNodeOffset(nodeTag, offset);
+  },
+  flattenAnimatedNodeOffset: function(nodeTag: number): void {
+    assertNativeAnimatedModule();
+    NativeAnimatedModule.flattenAnimatedNodeOffset(nodeTag);
+  },
+  extractAnimatedNodeOffset: function(nodeTag: number): void {
+    assertNativeAnimatedModule();
+    NativeAnimatedModule.extractAnimatedNodeOffset(nodeTag);
+  },
   connectAnimatedNodeToView: function(nodeTag: number, viewTag: number): void {
     assertNativeAnimatedModule();
     NativeAnimatedModule.connectAnimatedNodeToView(nodeTag, viewTag);
@@ -64,50 +76,37 @@ var API = {
   },
 };
 
-/**
- * Properties allowed by the native animated implementation.
- *
- * In general native animated implementation should support any numeric property that doesn't need
- * to be updated through the shadow view hierarchy (all non-layout properties). This list is limited
- * to the properties that will perform best when animated off the JS thread.
- */
-var PROPS_WHITELIST = {
-  style: {
-    opacity: true,
-    transform: true,
-    /* legacy android transform properties */
-    scaleX: true,
-    scaleY: true,
-    translateX: true,
-    translateY: true,
-  },
+var STYLES_WHITELIST = {
+  opacity: true,
+  transform: true,
+  /* legacy android transform properties */
+  scaleX: true,
+  scaleY: true,
+  translateX: true,
+  translateY: true,
 };
 
 var TRANSFORM_WHITELIST = {
   translateX: true,
   translateY: true,
   scale: true,
+  scaleX: true,
+  scaleY: true,
   rotate: true,
+  rotateX: true,
+  rotateY: true,
+  perspective: true,
 };
 
-function validateProps(params: Object): void {
-  for (var key in params) {
-    if (!PROPS_WHITELIST.hasOwnProperty(key)) {
-      throw new Error(`Property '${key}' is not supported by native animated module`);
+function validateTransform(configs: Array<Object>): void {
+  configs.forEach((config) => {
+    if (!TRANSFORM_WHITELIST.hasOwnProperty(config.property)) {
+      throw new Error(`Property '${config.property}' is not supported by native animated module`);
     }
-  }
-}
-
-function validateTransform(config: Object): void {
-  for (var key in config) {
-    if (!TRANSFORM_WHITELIST.hasOwnProperty(key)) {
-      throw new Error(`Property '${key}' is not supported by native animated module`);
-    }
-  }
+  });
 }
 
 function validateStyles(styles: Object): void {
-  var STYLES_WHITELIST = PROPS_WHITELIST.style || {};
   for (var key in styles) {
     if (!STYLES_WHITELIST.hasOwnProperty(key)) {
       throw new Error(`Style property '${key}' is not supported by native animated module`);
@@ -119,6 +118,9 @@ function validateInterpolation(config: Object): void {
   var SUPPORTED_INTERPOLATION_PARAMS = {
     inputRange: true,
     outputRange: true,
+    extrapolate: true,
+    extrapolateLeft: true,
+    extrapolateRight: true,
   };
   for (var key in config) {
     if (!SUPPORTED_INTERPOLATION_PARAMS.hasOwnProperty(key)) {
@@ -141,7 +143,6 @@ function assertNativeAnimatedModule(): void {
 
 module.exports = {
   API,
-  validateProps,
   validateStyles,
   validateTransform,
   validateInterpolation,

@@ -72,6 +72,8 @@ if (Platform.OS === 'ios') {
     ): bool {
     return connectionType !== 'NONE' && connectionType !== 'UNKNOWN';
   };
+} else if (Platform.OS === 'web') {
+  _isConnected = () => { return true };
 }
 
 const _isConnectedSubscriptions = new Map();

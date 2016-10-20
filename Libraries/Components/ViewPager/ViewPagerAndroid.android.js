@@ -132,6 +132,12 @@ var ViewPagerAndroid = React.createClass({
     scrollEnabled: ReactPropTypes.bool,
   },
 
+  // <Even>
+  setNativeProps: function(props: Object) {
+    this.refs[VIEWPAGER_REF].setNativeProps(props);
+  },
+  // </Even>
+
   componentDidMount: function() {
     if (this.props.initialPage) {
       this.setPageWithoutAnimation(this.props.initialPage);

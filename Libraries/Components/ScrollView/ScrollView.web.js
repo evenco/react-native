@@ -116,11 +116,26 @@ var ScrollView = React.createClass({
             (this.props.horizontal ? styles.horizontalContainer : null),
         ];
 
+        const {
+            automaticallyAdjustContentInsets,
+            contentContainerStyle,
+            inverted,
+            onMomentumScrollBegin,
+            onMomentumScrollEnd,
+            onScrollBeginDrag,
+            onScrollEndDrag,
+            scrollEnabled,
+            scrollEventThrottle,
+            stickyHeaderIndices,
+            children,
+            ...props,
+        } = this.props;
+
         return (
-            <View {...this.props}>
+            <View {...props}>
                 <View ref="scrollView" style={scrollStyle} onScroll={this._onScroll}>
                     <View ref="containerView" style={containerStyle}>
-                        {this.props.children}
+                        {children}
                     </View>
                 </View>
             </View>
