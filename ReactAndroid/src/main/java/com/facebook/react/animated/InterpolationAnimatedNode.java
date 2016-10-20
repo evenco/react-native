@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
  */
 /*package*/ class InterpolationAnimatedNode extends ValueAnimatedNode {
 
+<<<<<<< HEAD
   // <Even>
   public static final String EXTRAPOLATE_TYPE_IDENTITY = "identity";
   public static final String EXTRAPOLATE_TYPE_CLAMP = "clamp";
@@ -30,6 +31,13 @@ import javax.annotation.Nullable;
   // </Even>
 
   private static double[] fromArray(ReadableArray ary) {
+=======
+  public static final String EXTRAPOLATE_TYPE_IDENTITY = "identity";
+  public static final String EXTRAPOLATE_TYPE_CLAMP = "clamp";
+  public static final String EXTRAPOLATE_TYPE_EXTEND = "extend";
+
+  private static double[] fromDoubleArray(ReadableArray ary) {
+>>>>>>> upstream/0.36-stable
     double[] res = new double[ary.size()];
     for (int i = 0; i < res.length; i++) {
       ReadableType type = ary.getType(i);
@@ -54,7 +62,10 @@ import javax.annotation.Nullable;
       double outputMax,
       String extrapolateLeft,
       String extrapolateRight) {
+<<<<<<< HEAD
     // <Even> // backported from https://github.com/facebook/react-native/pull/9366
+=======
+>>>>>>> upstream/0.36-stable
     double result = value;
 
     // Extrapolate
@@ -87,7 +98,10 @@ import javax.annotation.Nullable;
             "Invalid extrapolation type " + extrapolateRight + "for right extrapolation");
       }
     }
+<<<<<<< HEAD
     // </Even>
+=======
+>>>>>>> upstream/0.36-stable
 
     return outputMin + (outputMax - outputMin) *
       (result - inputMin) / (inputMax - inputMin);
@@ -98,7 +112,12 @@ import javax.annotation.Nullable;
       double[] inputRange,
       double[] outputRange,
       String extrapolateLeft,
+<<<<<<< HEAD
       String extrapolateRight) {
+=======
+      String extrapolateRight
+  ) {
+>>>>>>> upstream/0.36-stable
     int rangeIndex = findRangeIndex(value, inputRange);
     return interpolate(
       value,
@@ -127,8 +146,13 @@ import javax.annotation.Nullable;
   private @Nullable ValueAnimatedNode mParent;
 
   public InterpolationAnimatedNode(ReadableMap config) {
+<<<<<<< HEAD
     mInputRange = fromArray(config.getArray("inputRange"));
     mOutputRange = fromArray(config.getArray("outputRange"));
+=======
+    mInputRange = fromDoubleArray(config.getArray("inputRange"));
+    mOutputRange = fromDoubleArray(config.getArray("outputRange"));
+>>>>>>> upstream/0.36-stable
     mExtrapolateLeft = config.getString("extrapolateLeft");
     mExtrapolateRight = config.getString("extrapolateRight");
   }

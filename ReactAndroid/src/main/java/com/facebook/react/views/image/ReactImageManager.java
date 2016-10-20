@@ -19,6 +19,7 @@ import android.graphics.PorterDuff.Mode;
 import com.facebook.csslayout.CSSConstants;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.AbstractDraweeControllerBuilder;
+import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.PixelUtil;
@@ -39,7 +40,6 @@ public class ReactImageManager extends SimpleViewManager<ReactImageView> {
     return REACT_CLASS;
   }
 
-  private ResourceDrawableIdHelper mResourceDrawableIdHelper;
   private @Nullable AbstractDraweeControllerBuilder mDraweeControllerBuilder;
   private final @Nullable Object mCallerContext;
 
@@ -48,14 +48,12 @@ public class ReactImageManager extends SimpleViewManager<ReactImageView> {
       Object callerContext) {
     mDraweeControllerBuilder = draweeControllerBuilder;
     mCallerContext = callerContext;
-    mResourceDrawableIdHelper = new ResourceDrawableIdHelper();
   }
 
   public ReactImageManager() {
     // Lazily initialize as FrescoModule have not been initialized yet
     mDraweeControllerBuilder = null;
     mCallerContext = null;
-    mResourceDrawableIdHelper = new ResourceDrawableIdHelper();
   }
 
   public AbstractDraweeControllerBuilder getDraweeControllerBuilder() {
@@ -74,8 +72,7 @@ public class ReactImageManager extends SimpleViewManager<ReactImageView> {
     return new ReactImageView(
         context,
         getDraweeControllerBuilder(),
-        getCallerContext(),
-        mResourceDrawableIdHelper);
+        getCallerContext());
   }
 
   // In JS this is Image.props.source
@@ -137,6 +134,19 @@ public class ReactImageManager extends SimpleViewManager<ReactImageView> {
     view.setScaleType(ImageResizeMode.toScaleType(resizeMode));
   }
 
+  @ReactProp(name = ViewProps.RESIZE_METHOD)
+  public void setResizeMethod(ReactImageView view, @Nullable String resizeMethod) {
+    if (resizeMethod == null || "auto".equals(resizeMethod)) {
+      view.setResizeMethod(ImageResizeMethod.AUTO);
+    } else if ("resize".equals(resizeMethod)) {
+      view.setResizeMethod(ImageResizeMethod.RESIZE);
+    } else if ("scale".equals(resizeMethod)) {
+      view.setResizeMethod(ImageResizeMethod.SCALE);
+    } else {
+      throw new JSApplicationIllegalArgumentException("Invalid resize method: '" + resizeMethod+ "'");
+    }
+  }
+
   @ReactProp(name = "tintColor", customType = "Color")
   public void setTintColor(ReactImageView view, @Nullable Integer tintColor) {
     if (tintColor == null) {
@@ -169,8 +179,7 @@ public class ReactImageManager extends SimpleViewManager<ReactImageView> {
       ImageLoadEvent.eventNameForType(ImageLoadEvent.ON_LOAD),
         MapBuilder.of("registrationName", "onLoad"),
       ImageLoadEvent.eventNameForType(ImageLoadEvent.ON_LOAD_END),
-        MapBuilder.of("registrationName", "onLoadEnd")
-    );
+        MapBuilder.of("registrationName", "onLoadEnd"));
   }
 
   @Override

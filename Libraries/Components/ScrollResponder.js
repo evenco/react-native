@@ -14,6 +14,7 @@
 var Dimensions = require('Dimensions');
 var Platform = require('Platform');
 var Keyboard = require('Keyboard');
+var ReactNative = require('react/lib/ReactNative');
 var Subscribable = require('Subscribable');
 var TextInputState = require('TextInputState');
 var UIManager = require('UIManager');
@@ -21,7 +22,6 @@ var UIManager = require('UIManager');
 var { ScrollViewManager } = require('NativeModules');
 
 var invariant = require('fbjs/lib/invariant');
-var findNodeHandle = require('findNodeHandle');
 
 /**
  * Mixin that can be integrated in order to handle scrolling that plays well
@@ -104,11 +104,11 @@ var findNodeHandle = require('findNodeHandle');
 var IS_ANIMATING_TOUCH_START_THRESHOLD_MS = 16;
 
 type State = {
-    isTouching: boolean;
-    lastMomentumScrollBeginTime: number;
-    lastMomentumScrollEndTime: number;
-    observedScrollSinceBecomingResponder: boolean;
-    becameResponderWhileAnimating: boolean;
+    isTouching: boolean,
+    lastMomentumScrollBeginTime: number,
+    lastMomentumScrollEndTime: number,
+    observedScrollSinceBecomingResponder: boolean,
+    becameResponderWhileAnimating: boolean,
 };
 type Event = Object;
 
@@ -351,7 +351,7 @@ var ScrollResponderMixin = {
   scrollResponderGetScrollableNode: function(): any {
     return this.getScrollableNode ?
       this.getScrollableNode() :
-      findNodeHandle(this);
+      ReactNative.findNodeHandle(this);
   },
 
   /**
@@ -366,7 +366,7 @@ var ScrollResponderMixin = {
    * This is deprecated due to ambiguity (y before x), and SHOULD NOT BE USED.
    */
   scrollResponderScrollTo: function(
-    x?: number | { x?: number; y?: number; animated?: boolean },
+    x?: number | { x?: number, y?: number, animated?: boolean },
     y?: number,
     animated?: boolean
   ) {
@@ -397,7 +397,7 @@ var ScrollResponderMixin = {
    * @platform ios
    */
   scrollResponderZoomTo: function(
-    rect: { x: number; y: number; width: number; height: number; animated?: boolean },
+    rect: { x: number, y: number, width: number, height: number, animated?: boolean },
     animated?: boolean // deprecated, put this inside the rect argument instead
   ) {
     if (Platform.OS === 'android') {
@@ -427,7 +427,7 @@ var ScrollResponderMixin = {
     this.preventNegativeScrollOffset = !!preventNegativeScrollOffset;
     UIManager.measureLayout(
       nodeHandle,
-      findNodeHandle(this.getInnerViewNode()),
+      ReactNative.findNodeHandle(this.getInnerViewNode()),
       this.scrollResponderTextInputFocusError,
       this.scrollResponderInputMeasureAndScrollToKeyboard
     );

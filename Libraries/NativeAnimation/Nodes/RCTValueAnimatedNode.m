@@ -17,6 +17,8 @@
 
 @implementation RCTValueAnimatedNode
 
+@synthesize value = _value;
+
 - (instancetype)initWithTag:(NSNumber *)tag
                      config:(NSDictionary<NSString *, id> *)config
 {
@@ -27,18 +29,30 @@
   return self;
 }
 
-- (void)flattenOffset {
+- (void)flattenOffset
+{
   _value += _offset;
   _offset = 0;
 }
 
-- (void)extractOffset {
+- (void)extractOffset
+{
   _offset += _value;
   _value = 0;
 }
 
-- (CGFloat)value {
+- (CGFloat)value
+{
   return _value + _offset;
+}
+
+- (void)setValue:(CGFloat)value
+{
+  _value = value;
+
+  if (_valueObserver) {
+    [_valueObserver animatedNode:self didUpdateValue:_value];
+  }
 }
 
 @end

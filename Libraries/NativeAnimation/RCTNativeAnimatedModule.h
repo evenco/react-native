@@ -7,8 +7,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 #import "RCTBridgeModule.h"
+#import "RCTValueAnimatedNode.h"
+#import "RCTEventEmitter.h"
 
-@interface RCTNativeAnimatedModule : NSObject <RCTBridgeModule>
+@interface RCTNativeAnimatedModule : RCTEventEmitter <RCTBridgeModule, RCTValueAnimatedNodeObserver>
 
 - (void)setAnimatedNodeValue:(nonnull NSNumber *)nodeTag value:(nonnull NSNumber *)value;
 

@@ -12,8 +12,8 @@
 'use strict';
 
 const EdgeInsetsPropType = require('EdgeInsetsPropType');
-const NativeMethodsMixin = require('NativeMethodsMixin');
-const PropTypes = require('ReactPropTypes');
+const NativeMethodsMixin = require('react/lib/NativeMethodsMixin');
+const PropTypes = require('react/lib/ReactPropTypes');
 const React = require('React');
 const ReactNativeStyleAttributes = require('ReactNativeStyleAttributes');
 const ReactNativeViewAttributes = require('ReactNativeViewAttributes');
@@ -97,7 +97,7 @@ const statics = {
  *
  * ### Synthetic Touch Events
  *
- * For `View` repsonder props (e.g., `onResponderMove`), the synthetic touch event passed to them
+ * For `View` responder props (e.g., `onResponderMove`), the synthetic touch event passed to them
  * are of the following form:
  *
  * - `nativeEvent`
@@ -143,7 +143,7 @@ const View = React.createClass({
      * with the element. By default, the label is constructed by traversing all the
      * children and accumulating all the `Text` nodes separated by space.
      */
-    accessibilityLabel: PropTypes.string,
+    accessibilityLabel: PropTypes.node,
 
     /**
      * Indicates to accessibility services to treat UI component like a
@@ -194,7 +194,7 @@ const View = React.createClass({
      *  - `'no-hide-descendants'` - The view is not important for accessibility,
      *    nor are any of its descendant views.
      *
-     * See the [Android `importantForAccessibility` docs]( [http://developer.android.com/reference/android/R.attr.html#importantForAccessibility)
+     * See the [Android `importantForAccessibility` docs](http://developer.android.com/reference/android/R.attr.html#importantForAccessibility)
      * for reference.
      *
      * @platform android
@@ -390,10 +390,10 @@ const View = React.createClass({
      *     in CSS:
      * ```
      * .box-none {
-     * 		pointer-events: none;
+     *      pointer-events: none;
      * }
      * .box-none * {
-     * 		pointer-events: all;
+     *      pointer-events: all;
      * }
      * ```
      *   - `'box-only'`: The view can be the target of touch events but it's
@@ -401,10 +401,10 @@ const View = React.createClass({
      *     in CSS:
      * ```
      * .box-only {
-     * 		pointer-events: all;
+     *      pointer-events: all;
      * }
      * .box-only * {
-     * 		pointer-events: none;
+     *      pointer-events: none;
      * }
      * ```
      * > Since `pointerEvents` does not affect layout/appearance, and we are
@@ -446,13 +446,6 @@ const View = React.createClass({
      * @platform android
      */
     renderToHardwareTextureAndroid: PropTypes.bool,
-
-    /**
-     * <Even>
-     * Hide the damn view.
-     * @platform android
-     */
-    hidden: PropTypes.bool,
 
     /**
      * Whether this `View` should be rendered as a bitmap before compositing.
@@ -502,6 +495,13 @@ const View = React.createClass({
      * @platform android
      */
     needsOffscreenAlphaCompositing: PropTypes.bool,
+
+    /**
+     * <Even>
+     * Hide the damn view.
+     * @platform android
+     */
+    hidden: PropTypes.bool,
   },
 
   render: function() {
@@ -516,13 +516,14 @@ const View = React.createClass({
     style = [{overflow: 'hidden'}, style];
     // </Even>
 
-    return <RCTView {...this.props} style={style} />;
+    return <RCTView {...this.props} />;
   },
 });
 
 const RCTView = requireNativeComponent('RCTView', View, {
   nativeOnly: {
     nativeBackgroundAndroid: true,
+    nativeForegroundAndroid: true,
   }
 });
 

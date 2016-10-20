@@ -3,6 +3,7 @@ package com.facebook.react.uimanager;
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+<<<<<<< HEAD
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 
@@ -14,12 +15,26 @@ public class TransformHelper {
 
   private static final ThreadLocal<double[]> HELPER_MATRIX = new ThreadLocal<double[]>() {
     @Override protected double[] initialValue() {
+=======
+import com.facebook.react.bridge.ReadableType;
+
+/**
+ * Class providing helper methods for converting transformation list (as accepted by 'transform'
+ * view property) into a transformation matrix.
+ */
+public class TransformHelper {
+
+  private static ThreadLocal<double[]> sHelperMatrix = new ThreadLocal<double[]>() {
+    @Override
+    protected double[] initialValue() {
+>>>>>>> upstream/0.36-stable
       return new double[16];
     }
   };
 
   private static double convertToRadians(ReadableMap transformMap, String key) {
     double value;
+<<<<<<< HEAD
     boolean inRadians = false;
     if (transformMap.getType(key) == ReadableType.String) {
       String stringValue = transformMap.getString(key);
@@ -27,6 +42,15 @@ public class TransformHelper {
         inRadians = true;
         stringValue = stringValue.substring(0, stringValue.length() - 3);
       } else if (stringValue.endsWith("deg")) {
+=======
+    boolean inRadians = true;
+    if (transformMap.getType(key) == ReadableType.String) {
+      String stringValue = transformMap.getString(key);
+      if (stringValue.endsWith("rad")) {
+        stringValue = stringValue.substring(0, stringValue.length() - 3);
+      } else if (stringValue.endsWith("deg")) {
+        inRadians = false;
+>>>>>>> upstream/0.36-stable
         stringValue = stringValue.substring(0, stringValue.length() - 3);
       }
       value = Float.parseFloat(stringValue);
@@ -37,6 +61,7 @@ public class TransformHelper {
   }
 
   public static void processTransform(ReadableArray transforms, double[] result) {
+<<<<<<< HEAD
     double[] helperMatrix = HELPER_MATRIX.get();
     MatrixMathHelper.resetIdentityMatrix(result);
 
@@ -57,6 +82,14 @@ public class TransformHelper {
       }
       // </Even>
       String transformType = iterator.nextKey();
+=======
+    double[] helperMatrix = sHelperMatrix.get();
+    MatrixMathHelper.resetIdentityMatrix(result);
+
+    for (int transformIdx = 0, size = transforms.size(); transformIdx < size; transformIdx++) {
+      ReadableMap transform = transforms.getMap(transformIdx);
+      String transformType = transform.keySetIterator().nextKey();
+>>>>>>> upstream/0.36-stable
 
       MatrixMathHelper.resetIdentityMatrix(helperMatrix);
       if ("matrix".equals(transformType)) {
@@ -79,7 +112,13 @@ public class TransformHelper {
           helperMatrix,
           convertToRadians(transform, transformType));
       } else if ("scale".equals(transformType)) {
+<<<<<<< HEAD
         MatrixMathHelper.applyScaleZ(helperMatrix, transform.getDouble(transformType));
+=======
+        double scale = transform.getDouble(transformType);
+        MatrixMathHelper.applyScaleX(helperMatrix, scale);
+        MatrixMathHelper.applyScaleY(helperMatrix, scale);
+>>>>>>> upstream/0.36-stable
       } else if ("scaleX".equals(transformType)) {
         MatrixMathHelper.applyScaleX(helperMatrix, transform.getDouble(transformType));
       } else if ("scaleY".equals(transformType)) {
@@ -110,4 +149,8 @@ public class TransformHelper {
       MatrixMathHelper.multiplyInto(result, result, helperMatrix);
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> upstream/0.36-stable

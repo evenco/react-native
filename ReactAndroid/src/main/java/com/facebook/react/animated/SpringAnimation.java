@@ -2,8 +2,11 @@ package com.facebook.react.animated;
 
 import com.facebook.react.bridge.ReadableMap;
 
+<<<<<<< HEAD
 // <Even>
 
+=======
+>>>>>>> upstream/0.36-stable
 /**
  * Implementation of {@link AnimationDriver} providing support for spring animations. The
  * implementation has been copied from android implementation of Rebound library (see
@@ -217,4 +220,8 @@ import com.facebook.react.bridge.ReadableMap;
       mCurrentState.velocity = 0;
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> upstream/0.36-stable

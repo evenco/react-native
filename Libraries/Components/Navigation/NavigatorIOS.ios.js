@@ -16,16 +16,16 @@ var Image = require('Image');
 var NavigationContext = require('NavigationContext');
 var RCTNavigatorManager = require('NativeModules').NavigatorManager;
 var React = require('React');
-var ReactNative = require('ReactNative');
+var ReactNative = require('react/lib/ReactNative');
 var StaticContainer = require('StaticContainer.react');
 var StyleSheet = require('StyleSheet');
 var View = require('View');
 
-var findNodeHandle = require('findNodeHandle');
 var invariant = require('fbjs/lib/invariant');
 var logError = require('logError');
 var requireNativeComponent = require('requireNativeComponent');
-var resolveAssetSource = require('resolveAssetSource');
+
+const keyMirror = require('fbjs/lib/keyMirror');
 
 var TRANSITIONER_REF = 'transitionerRef';
 
@@ -36,47 +36,78 @@ function getuid() {
   return __uid++;
 }
 
-var NavigatorTransitionerIOS = React.createClass({
-  requestSchedulingNavigation: function(cb) {
+class NavigatorTransitionerIOS extends React.Component {
+  requestSchedulingNavigation = (cb) => {
     RCTNavigatorManager.requestSchedulingJavaScriptNavigation(
-      findNodeHandle(this),
+      ReactNative.findNodeHandle(this),
       logError,
       cb
     );
-  },
+  };
 
-  render: function() {
+  render() {
     return (
       <RCTNavigator {...this.props}/>
     );
-  },
-});
+  }
+}
+
+const SystemIconLabels = {
+  done: true,
+  cancel: true,
+  edit: true,
+  save: true,
+  add: true,
+  compose: true,
+  reply: true,
+  action: true,
+  organize: true,
+  bookmarks: true,
+  search: true,
+  refresh: true,
+  stop: true,
+  camera: true,
+  trash: true,
+  play: true,
+  pause: true,
+  rewind: true,
+  'fast-forward': true,
+  undo: true,
+  redo: true,
+  'page-curl': true,
+};
+const SystemIcons = keyMirror(SystemIconLabels);
+
+type SystemButtonType = $Enum<typeof SystemIconLabels>;
 
 type Route = {
-  component: Function;
-  title: string;
-  passProps?: Object;
-  backButtonTitle?: string;
-  backButtonIcon?: Object;
-  leftButtonTitle?: string;
-  leftButtonIcon?: Object;
-  onLeftButtonPress?: Function;
-  rightButtonTitle?: string;
-  rightButtonIcon?: Object;
-  onRightButtonPress?: Function;
-  wrapperStyle?: any;
+  component: Function,
+  title: string,
+  titleImage?: Object,
+  passProps?: Object,
+  backButtonTitle?: string,
+  backButtonIcon?: Object,
+  leftButtonTitle?: string,
+  leftButtonIcon?: Object,
+  leftButtonSystemIcon?: SystemButtonType;
+  onLeftButtonPress?: Function,
+  rightButtonTitle?: string,
+  rightButtonIcon?: Object,
+  rightButtonSystemIcon?: SystemButtonType;
+  onRightButtonPress?: Function,
+  wrapperStyle?: any,
 };
 
 type State = {
-  idStack: Array<number>;
-  routeStack: Array<Route>;
-  requestedTopOfStack: number;
-  observedTopOfStack: number;
-  progress: number;
-  fromIndex: number;
-  toIndex: number;
-  makingNavigatorRequest: boolean;
-  updatingAllIndicesAtOrBeyond: ?number;
+  idStack: Array<number>,
+  routeStack: Array<Route>,
+  requestedTopOfStack: number,
+  observedTopOfStack: number,
+  progress: number,
+  fromIndex: number,
+  toIndex: number,
+  makingNavigatorRequest: boolean,
+  updatingAllIndicesAtOrBeyond: ?number,
 }
 
 type Event = Object;
@@ -101,7 +132,7 @@ type Event = Object;
  * animations and behavior from UIKIt.
  *
  * As the name implies, it is only available on iOS. Take a look at
- * [`Navigator`](/docs/navigator.html) for a similar solution for your
+ * [`Navigator`](/react-native/docs/navigator.html) for a similar solution for your
  * cross-platform needs, or check out
  * [react-native-navigation](https://github.com/wix/react-native-navigation), a
  * component that aims to provide native navigation on both iOS and Android.
@@ -111,7 +142,7 @@ type Event = Object;
  * navigates to. `initialRoute` represents the first route in your navigator.
  *
  * ```
- * import React, { Component } from 'react';
+ * import React, { Component, PropTypes } from 'react';
  * import { NavigatorIOS, Text } from 'react-native';
  *
  * export default class NavigatorIOSApp extends Component {
@@ -338,6 +369,16 @@ var NavigatorIOS = React.createClass({
       leftButtonTitle: PropTypes.string,
 
       /**
+       * If set, the left header button will appear with this system icon
+       *
+       * Supported icons are `done`, `cancel`, `edit`, `save`, `add`,
+       * `compose`, `reply`, `action`, `organize`, `bookmarks`, `search`,
+       * `refresh`, `stop`, `camera`, `trash`, `play`, `pause`, `rewind`,
+       * `fast-forward`, `undo`, `redo`, and `page-curl`
+       */
+      leftButtonSystemIcon: PropTypes.oneOf(Object.keys(SystemIcons)),
+
+      /**
        * This function will be invoked when the left navigation bar item is
        * pressed.
        */
@@ -353,6 +394,13 @@ var NavigatorIOS = React.createClass({
        * If set, the right navigation button will display this text.
        */
       rightButtonTitle: PropTypes.string,
+
+      /**
+       * If set, the right header button will appear with this system icon
+       *
+       * See leftButtonSystemIcon for supported icons
+       */
+      rightButtonSystemIcon: PropTypes.oneOf(Object.keys(SystemIcons)),
 
       /**
        * This function will be invoked when the right navigation bar item is
@@ -538,8 +586,8 @@ var NavigatorIOS = React.createClass({
   },
 
   getChildContext: function(): {
-    onFocusRequested: Function;
-    focusEmitter: EventEmitter;
+    onFocusRequested: Function,
+    focusEmitter: EventEmitter,
   } {
     return {
       onFocusRequested: this._handleFocusRequest,

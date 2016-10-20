@@ -20,6 +20,9 @@
 #import "RCTConvert.h"
 #import "RCTInterpolationAnimatedNode.h"
 #import "RCTLog.h"
+#import "RCTDiffClampAnimatedNode.h"
+#import "RCTDivisionAnimatedNode.h"
+#import "RCTModuloAnimatedNode.h"
 #import "RCTMultiplicationAnimatedNode.h"
 #import "RCTModuloAnimatedNode.h"
 #import "RCTPropsAnimatedNode.h"
@@ -39,8 +42,6 @@
   CADisplayLink *_displayLink;
 }
 
-@synthesize bridge = _bridge;
-
 RCT_EXPORT_MODULE()
 
 // <Even>
@@ -57,7 +58,8 @@ RCT_EXPORT_MODULE()
 
 - (void)setBridge:(RCTBridge *)bridge
 {
-  _bridge = bridge;
+  [super setBridge:bridge];
+
   _animationNodes = [NSMutableDictionary new];
   _animationDrivers = [NSMutableDictionary new];
   _animationDriversByNode = [NSMutableDictionary new];
@@ -72,6 +74,11 @@ RCT_EXPORT_MODULE()
   return dispatch_get_main_queue();
 }
 
+- (NSArray<NSString *> *)supportedEvents
+{
+  return @[@"onAnimatedValueUpdate"];
+}
+
 RCT_EXPORT_METHOD(createAnimatedNode:(nonnull NSNumber *)tag
                   config:(NSDictionary<NSString *, id> *)config)
 {
@@ -83,9 +90,11 @@ RCT_EXPORT_METHOD(createAnimatedNode:(nonnull NSNumber *)tag
             @"props" : [RCTPropsAnimatedNode class],
             @"interpolation" : [RCTInterpolationAnimatedNode class],
             @"addition" : [RCTAdditionAnimatedNode class],
+            @"diffclamp": [RCTDiffClampAnimatedNode class],
+            @"division" : [RCTDivisionAnimatedNode class],
             @"multiplication" : [RCTMultiplicationAnimatedNode class],
-            @"transform" : [RCTTransformAnimatedNode class],
-            @"modulus" : [RCTModuloAnimatedNode class]};
+            @"modulus" : [RCTModuloAnimatedNode class],
+            @"transform" : [RCTTransformAnimatedNode class]};
   });
 
   NSString *nodeType = [RCTConvert NSString:config[@"type"]];
@@ -281,6 +290,28 @@ RCT_EXPORT_METHOD(dropAnimatedNode:(nonnull NSNumber *)tag)
   for (RCTPropsAnimatedNode *propsNode in _propAnimationNodes) {
     [propsNode updateNodeIfNecessary];
   }
+}
+
+RCT_EXPORT_METHOD(startListeningToAnimatedNodeValue:(nonnull NSNumber *)tag)
+{
+  RCTAnimatedNode *node = _animationNodes[tag];
+  if (node && [node isKindOfClass:[RCTValueAnimatedNode class]]) {
+    ((RCTValueAnimatedNode *)node).valueObserver = self;
+  }
+}
+
+RCT_EXPORT_METHOD(stopListeningToAnimatedNodeValue:(nonnull NSNumber *)tag)
+{
+  RCTAnimatedNode *node = _animationNodes[tag];
+  if (node && [node isKindOfClass:[RCTValueAnimatedNode class]]) {
+    ((RCTValueAnimatedNode *)node).valueObserver = nil;
+  }
+}
+
+- (void)animatedNode:(RCTValueAnimatedNode *)node didUpdateValue:(CGFloat)value
+{
+  [self sendEventWithName:@"onAnimatedValueUpdate"
+                     body:@{@"tag": node.nodeTag, @"value": @(value)}];
 }
 
 #pragma mark -- Animation Loop

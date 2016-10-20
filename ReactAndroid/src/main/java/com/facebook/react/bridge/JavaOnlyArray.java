@@ -90,7 +90,10 @@ public class JavaOnlyArray implements ReadableArray, WritableArray {
 
   @Override
   public ReadableType getType(int index) {
+<<<<<<< HEAD
     // <Even>
+=======
+>>>>>>> upstream/0.36-stable
     Object object = mBackingList.get(index);
 
     if (object == null) {
@@ -108,7 +111,10 @@ public class JavaOnlyArray implements ReadableArray, WritableArray {
     } else if (object instanceof ReadableMap) {
       return ReadableType.Map;
     }
+<<<<<<< HEAD
     // </Even>
+=======
+>>>>>>> upstream/0.36-stable
     return null;
   }
 

@@ -14,7 +14,7 @@
 const ColorPropType = require('ColorPropType');
 const EdgeInsetsPropType = require('EdgeInsetsPropType');
 const Image = require('Image');
-const NativeMethodsMixin = require('NativeMethodsMixin');
+const NativeMethodsMixin = require('react/lib/NativeMethodsMixin');
 const Platform = require('Platform');
 const React = require('React');
 const StyleSheet = require('StyleSheet');
@@ -34,23 +34,23 @@ export type AnnotationDragState = $Enum<{
   /**
    * Annotation is not being touched.
    */
-  idle: string;
+  idle: string,
   /**
    * Annotation dragging has began.
    */
-  starting: string;
+  starting: string,
   /**
    * Annotation is being dragged.
    */
-  dragging: string;
+  dragging: string,
   /**
    * Annotation dragging is being canceled.
    */
-  canceling: string;
+  canceling: string,
   /**
    * Annotation dragging has ended.
    */
-  ending: string;
+  ending: string,
 }>;
 
 /**
@@ -60,8 +60,8 @@ export type AnnotationDragState = $Enum<{
  * `MKMapView`.
  *
  * For a cross-platform solution, check out
- * [react-native-maps](https://github.com/lelandrichardson/react-native-maps)
- * by Leland Richardson.
+ * [react-native-maps](https://github.com/airbnb/react-native-maps)
+ * by Airbnb.
  *
  * ```
  * import React, { Component } from 'react';
@@ -128,21 +128,21 @@ const MapView = React.createClass({
 
     /**
      * When this property is set to `true` and a valid camera is associated with
-     * the map, the camera’s heading angle is used to rotate the plane of the
+     * the map, the camera's heading angle is used to rotate the plane of the
      * map around its center point.
      *
      * When this property is set to `false`, the
-     * camera’s heading angle is ignored and the map is always oriented so
+     * camera's heading angle is ignored and the map is always oriented so
      * that true north is situated at the top of the map view
      */
     rotateEnabled: React.PropTypes.bool,
 
     /**
      * When this property is set to `true` and a valid camera is associated
-     * with the map, the camera’s pitch angle is used to tilt the plane
+     * with the map, the camera's pitch angle is used to tilt the plane
      * of the map.
      *
-     * When this property is set to `false`, the camera’s pitch
+     * When this property is set to `false`, the camera's pitch
      * angle is ignored and the map is always displayed as if the user
      * is looking straight down onto it.
      */
@@ -376,10 +376,9 @@ const MapView = React.createClass({
 
       if (!view && image && tintColor) {
         view = <Image
-          // [Even] avoid flow issue hackily
-          // style={{
-          //   tintColor: processColor(tintColor),
-          // }}
+          style={{
+            tintColor: processColor(tintColor),
+          }}
           source={image}
         />;
         image = undefined;
@@ -390,6 +389,7 @@ const MapView = React.createClass({
         }
         var viewIndex = children.length;
         children.push(React.cloneElement(view, {
+          // $FlowFixMe - An array of styles should be fine
           style: [styles.annotationView, view.props.style || {}]
         }));
       }
@@ -412,7 +412,7 @@ const MapView = React.createClass({
         }));
       }
 
-      let result = {
+      const result = {
         ...annotation,
         tintColor: tintColor && processColor(tintColor),
         image,
@@ -430,8 +430,8 @@ const MapView = React.createClass({
       return result;
     });
     overlays = overlays && overlays.map((overlay: Object) => {
-      let {id, fillColor, strokeColor} = overlay;
-      let result = {
+      const {id, fillColor, strokeColor} = overlay;
+      const result = {
         ...overlay,
         strokeColor: strokeColor && processColor(strokeColor),
         fillColor: fillColor && processColor(fillColor),

@@ -2,8 +2,11 @@ package com.facebook.react.uimanager;
 
 import com.facebook.infer.annotation.Assertions;
 
+<<<<<<< HEAD
 // <Even> like WOAH
 
+=======
+>>>>>>> upstream/0.36-stable
 /**
  * Provides helper methods for converting transform operations into a matrix and then into a list
  * of translate, scale and rotate commands.
@@ -384,6 +387,7 @@ public class MatrixMathHelper {
     return Math.round(n * 1000d) * 0.001;
   }
 
+<<<<<<< HEAD
   public static double[] createIdentity() {
    return new double[] {
      1, 0, 0, 0,
@@ -453,6 +457,8 @@ public class MatrixMathHelper {
    return out;
  }
 
+=======
+>>>>>>> upstream/0.36-stable
   public static double[] createIdentityMatrix() {
     double[] res = new double[16];
     resetIdentityMatrix(res);
@@ -527,4 +533,8 @@ public class MatrixMathHelper {
     m[4] = -Math.sin(radians);
     m[5] = Math.cos(radians);
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> upstream/0.36-stable

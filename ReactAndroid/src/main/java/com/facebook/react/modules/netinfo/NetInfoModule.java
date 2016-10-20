@@ -24,13 +24,18 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+<<<<<<< HEAD
 import com.facebook.react.common.ReactConstants;
+=======
+import com.facebook.react.module.annotations.ReactModule;
+>>>>>>> upstream/0.36-stable
 
 import static com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 
 /**
  * Module that monitors and provides information about the connectivity state of the device.
  */
+@ReactModule(name = "NetInfo")
 public class NetInfoModule extends ReactContextBaseJavaModule
     implements LifecycleEventListener {
 

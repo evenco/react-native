@@ -12,9 +12,9 @@
 #import <UIKit/UIKit.h>
 
 #import "RCTBridge.h"
+#import "RCTConvert.h"
 #import "RCTUIManager.h"
 #import "RCTNativeAnimatedModule.h"
-#import "RCTTransformAnimatedNode.h"
 
 @interface RCTViewPropertyMapper ()
 
@@ -25,60 +25,52 @@
 @implementation RCTViewPropertyMapper
 {
   RCTNativeAnimatedModule *_animationModule;
-  CATransform3D _lastTransform;
-  CGFloat _lastOpacity;
 }
 
 - (instancetype)initWithViewTag:(NSNumber *)viewTag
                 animationModule:(RCTNativeAnimatedModule *)animationModule
 {
   if ((self = [super init])) {
+    _animationModule = animationModule;
     _viewTag = viewTag;
     _animationModule = animationModule;
-    _lastTransform = CATransform3DIdentity;
-    _lastOpacity = 1.0;
   }
   return self;
 }
 
 RCT_NOT_IMPLEMENTED(- (instancetype)init)
 
-- (void)updateViewWithProps:(NSDictionary<NSString *,NSNumber *> *)props
-                     styles:(NSDictionary<NSString *,NSNumber *> *)styles
-                  transform:(CATransform3D)transform
+- (void)updateViewWithDictionary:(NSDictionary<NSString *, NSObject *> *)updates
 {
   // <Even> we cache the view for perf reasons (avoid constant lookups)
-  _view = _view ?: [_animationModule.bridge.uiManager viewForReactTag:_viewTag];
-  if (!_view) {
+  UIView *view = _view = _view ?: [_animationModule.bridge.uiManager viewForReactTag:_viewTag];
+  if (!view) {
     return;
   }
 
-  if (props.count) {
-    NSNumber *progress = props[@"progress"];
-    if (progress) {
-      [(id)_view performSelector:@selector(setProgressValue:) withObject:progress];
-    }
-    // <Even>
-    // TODO find a way to make something generic, like this, performant
-    // [_animationModule.bridge.uiManager setProps:props forView:_viewTag];
+  if (!updates.count) {
+    return;
   }
 
-  if (styles.count) {
-    NSNumber *opacityUpdate = styles[@"opacity"];
-    if (opacityUpdate) {
-      CGFloat opacity = opacityUpdate.floatValue;
-      if (opacity != _lastOpacity) {
-        _view.alpha = opacity;
-        _lastOpacity = opacity;
-      }
-    }
+  NSNumber *opacity = [RCTConvert NSNumber:updates[@"opacity"]];
+  if (opacity) {
+    view.alpha = opacity.floatValue;
   }
 
-  if (!CATransform3DEqualToTransform(transform, _lastTransform)) {
-    _view.layer.allowsEdgeAntialiasing = YES;
-    _view.layer.transform = transform;
-    _lastTransform = transform;
+  NSObject *transform = updates[@"transform"];
+  if ([transform isKindOfClass:[NSValue class]]) {
+    view.layer.allowsEdgeAntialiasing = YES;
+    view.layer.transform = ((NSValue *)transform).CATransform3DValue;
   }
+
+  // <Even>
+//  NSNumber *progress = (NSNumber *)updates[@"progress"];
+//  if (progress) {
+//    [(id)_view performSelector:@selector(setProgressValue:) withObject:progress];
+//  }
+  // TODO find a way to make something generic, like this, performant
+  // [_animationModule.bridge.uiManager setProps:props forView:_viewTag];
+  // </Even>
 }
 
 @end
