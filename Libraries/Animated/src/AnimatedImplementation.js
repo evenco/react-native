@@ -1106,7 +1106,6 @@ class AnimatedInterpolation extends AnimatedWithChildren {
       type: 'interpolation',
     };
   }
-  // </Even>
 }
 
 class AnimatedAddition extends AnimatedWithChildren {
@@ -1647,6 +1646,7 @@ class AnimatedProps extends Animated {
         propsConfig[propKey] = value.__getNativeTag();
       }
     }
+    NativeAnimatedHelper.validateProps(propsConfig);
     return {
       type: 'props',
       props: propsConfig,

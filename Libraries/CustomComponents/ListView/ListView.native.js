@@ -34,7 +34,7 @@
 
 var ListViewDataSource = require('ListViewDataSource');
 var React = require('React');
-var ReactNative = require('ReactNative');
+var ReactNative = require('react/lib/ReactNative');
 var RCTScrollViewManager = require('NativeModules').ScrollViewManager;
 var ScrollView = require('ScrollView');
 var ScrollResponder = require('ScrollResponder');
@@ -433,17 +433,11 @@ var ListView = React.createClass({
               this.state.highlightedRow.rowID === rowID ||
               this.state.highlightedRow.rowID === rowIDs[rowIdx + 1]
             );
-          var separator = 
-            <StaticRenderer
-              key={'s_' + comboID}
-              shouldUpdate={!!shouldUpdateRow}
-              render={this.props.renderSeparator.bind(
-                null,
-                sectionID,
-                rowID,
-                adjacentRowHighlighted
-              )}
-            />;
+          var separator = this.props.renderSeparator(
+            sectionID,
+            rowID,
+            adjacentRowHighlighted
+          );
           if (separator) {
             bodyComponents.push(separator);
             totalIndex++;

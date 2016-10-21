@@ -12,6 +12,5 @@
 'use strict';
 
 const NativeEventEmitter = require('NativeEventEmitter');
-const StatusBarManager = require('NativeModules').StatusBarManager;
 
-module.exports = new NativeEventEmitter(StatusBarManager);
+module.exports = new NativeEventEmitter('StatusBarManager');
