@@ -494,15 +494,6 @@ dispatch_queue_t RCTGetUIManagerQueue(void)
   });
 }
 
-- (void)setProps:(NSDictionary *)props forView:(NSNumber *)reactTag
-{
-  RCTShadowView *shadowView = _shadowViewRegistry[reactTag];
-  RCTComponentData *componentData = _componentDataByName[shadowView.viewName];
-  [componentData setProps:props forShadowView:shadowView];
-  UIView *view = _viewRegistry[reactTag];
-  [componentData setProps:props forView:view];
-}
-
 /**
  * Unregisters views from registries
  */

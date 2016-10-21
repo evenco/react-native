@@ -247,13 +247,11 @@ RCT_EXPORT_MODULE()
     scheme = @"http";
   }
 
-  NSString *baseURL = [NSString stringWithFormat:@"%@://%@%", scheme, host];
-
   NSNumber *port = [_bridge.bundleURL port];
-  if (port) {
-    baseURL = [NSString stringWithFormat:@"%@:%@", baseURL, port];
+  if (!port) {
+    port = @8081; // Packager default port
   }
-  return [NSURL URLWithString:[NSString stringWithFormat:@"%@/message?role=shell", baseURL]];
+  return [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@:%@/message?role=shell", scheme, host, port]];
 }
 
 // TODO: Move non-UI logic into separate RCTDevSettings module
@@ -388,7 +386,7 @@ RCT_EXPORT_MODULE()
     }
   } else if (!sourceCodeModule.scriptURL.fileURL) {
     // Live reloading is disabled when running from bundled JS file
-    _liveReloadURL = [[NSURL alloc] initWithString:@"onchange" relativeToURL:sourceCodeModule.scriptURL.baseURL];
+    _liveReloadURL = [[NSURL alloc] initWithString:@"/onchange" relativeToURL:sourceCodeModule.scriptURL];
   }
 
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -515,9 +513,12 @@ RCT_EXPORT_METHOD(show)
   }
 
   NSString *title = [NSString stringWithFormat:@"React Native: Development (%@)", [_bridge class]];
+  // On larger devices we don't have an anchor point for the action sheet
+  UIAlertControllerStyle style = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone ? UIAlertControllerStyleActionSheet : UIAlertControllerStyleAlert;
   _actionSheet = [UIAlertController alertControllerWithTitle:title
                                                      message:@""
-                                              preferredStyle:UIAlertControllerStyleActionSheet];
+                                              preferredStyle:style];
+
   NSArray<RCTDevMenuItem *> *items = [self menuItems];
   for (RCTDevMenuItem *item in items) {
     switch (item.type) {
