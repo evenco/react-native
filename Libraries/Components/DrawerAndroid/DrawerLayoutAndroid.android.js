@@ -14,8 +14,7 @@ var ColorPropType = require('ColorPropType');
 var NativeMethodsMixin = require('react/lib/NativeMethodsMixin');
 var Platform = require('Platform');
 var React = require('React');
-var ReactNative = require('react/lib/ReactNative');
-var ReactPropTypes = require('react/lib/ReactPropTypes');
+var ReactNative = require('ReactNative');
 var StatusBar = require('StatusBar');
 var StyleSheet = require('StyleSheet');
 var UIManager = require('UIManager');
@@ -23,9 +22,10 @@ var View = require('View');
 
 var DrawerConsts = UIManager.AndroidDrawerLayout.Constants;
 
-var findNodeHandle = require('findNodeHandle');
 var dismissKeyboard = require('dismissKeyboard');
 var requireNativeComponent = require('requireNativeComponent');
+
+var ReactPropTypes = React.PropTypes;
 
 var RK_DRAWER_REF = 'drawerlayout';
 var INNERVIEW_REF = 'innerView';
@@ -270,7 +270,7 @@ var DrawerLayoutAndroid = React.createClass({
   },
 
   _getDrawerLayoutHandle: function() {
-    return findNodeHandle(this.refs[RK_DRAWER_REF]);
+    return ReactNative.findNodeHandle(this.refs[RK_DRAWER_REF]);
   },
 
   // Update the StatusBar component background color one frame after creating the

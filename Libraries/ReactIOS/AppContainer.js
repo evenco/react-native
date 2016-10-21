@@ -18,7 +18,6 @@ var ReactNative = require('react/lib/ReactNative');
 var Subscribable = require('Subscribable');
 var StyleSheet = require('StyleSheet');
 var View = require('View');
-var findNodeHandle = require('findNodeHandle');
 
 var Inspector = __DEV__ ? require('Inspector') : null;
 var YellowBox = __DEV__ ? require('YellowBox') : null;
@@ -34,11 +33,11 @@ var AppContainer = React.createClass({
     var inspector = !__DEV__ || this.state.inspector
       ? null
       : <Inspector
-          inspectedViewTag={findNodeHandle(this.refs.main)}
+          inspectedViewTag={ReactNative.findNodeHandle(this.refs.main)}
           onRequestRerenderApp={(updateInspectedViewTag) => {
             this.setState(
               (s) => ({mainKey: s.mainKey + 1}),
-              () => updateInspectedViewTag(findNodeHandle(this.refs.main))
+              () => updateInspectedViewTag(ReactNative.findNodeHandle(this.refs.main))
             );
           }}
         />;

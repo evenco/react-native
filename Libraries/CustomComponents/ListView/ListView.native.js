@@ -34,7 +34,7 @@
 
 var ListViewDataSource = require('ListViewDataSource');
 var React = require('React');
-var ReactNative = require('react/lib/ReactNative');
+var ReactNative = require('ReactNative');
 var RCTScrollViewManager = require('NativeModules').ScrollViewManager;
 var ScrollView = require('ScrollView');
 var ScrollResponder = require('ScrollResponder');
@@ -44,8 +44,6 @@ var TimerMixin = require('react-timer-mixin');
 var cloneReferencedElement = require('react-clone-referenced-element');
 var isEmpty = require('isEmpty');
 var merge = require('merge');
-
-var findNodeHandle = require('findNodeHandle');
 
 var PropTypes = React.PropTypes;
 
@@ -503,7 +501,7 @@ var ListView = React.createClass({
     // every platform
     RCTScrollViewManager && RCTScrollViewManager.calculateChildFrames &&
       RCTScrollViewManager.calculateChildFrames(
-        findNodeHandle(scrollComponent),
+        ReactNative.findNodeHandle(scrollComponent),
         this._updateVisibleRows,
       );
   },

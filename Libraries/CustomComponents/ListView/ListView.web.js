@@ -28,6 +28,7 @@
 
 var ListViewDataSource = require('ListViewDataSource');
 var React = require('React');
+var ReactNative = require('ReactNative');
 var RCTUIManager = require('NativeModules').UIManager;
 var RCTScrollViewManager = require('NativeModules').ScrollViewManager;
 var ScrollView = require('ScrollView');
@@ -39,7 +40,6 @@ var Platform = require('Platform');
 var isEmpty = require('isEmpty');
 var logError = require('logError');
 var merge = require('merge');
-var findNodeHandle = require('findNodeHandle');
 
 var PropTypes = React.PropTypes;
 
@@ -502,7 +502,7 @@ var ListView = React.createClass({
       return;
     }
 
-    var scrollNode = Platform.OS == 'web' ? scrollComponent : findNodeHandle(scrollComponent);
+    var scrollNode = Platform.OS == 'web' ? scrollComponent : ReactNative.findNodeHandle(scrollComponent);
     RCTUIManager.measureLayout(
       scrollComponent.getInnerViewNode(),
       scrollNode,

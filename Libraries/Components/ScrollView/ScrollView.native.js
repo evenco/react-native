@@ -31,7 +31,6 @@ const PropTypes = React.PropTypes;
 const requireNativeComponent = require('requireNativeComponent');
 
 // Even
-var findNodeHandle = require('findNodeHandle');
 var Animations = require('Animations');
 
 /**
@@ -369,11 +368,11 @@ const ScrollView = React.createClass({
   },
 
   getScrollableNode: function(): any {
-    return findNodeHandle(this._scrollViewRef);
+    return ReactNative.findNodeHandle(this._scrollViewRef);
   },
 
   getInnerViewNode: function(): any {
-    return findNodeHandle(this._innerViewRef);
+    return ReactNative.findNodeHandle(this._innerViewRef);
   },
 
   /**

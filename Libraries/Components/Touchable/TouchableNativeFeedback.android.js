@@ -13,12 +13,11 @@
 var Platform = require('Platform');
 var PropTypes = require('react/lib/ReactPropTypes');
 var React = require('React');
-var ReactNative = require('react/lib/ReactNative');
+ReactNative = require('ReactNative');
 var Touchable = require('Touchable');
 var TouchableWithoutFeedback = require('TouchableWithoutFeedback');
 var UIManager = require('UIManager');
 
-var findNodeHandle = require('findNodeHandle');
 var ensurePositiveDelayProps = require('ensurePositiveDelayProps');
 var onlyChild = require('react/lib/onlyChild');
 var processColor = require('processColor');
@@ -220,7 +219,7 @@ var TouchableNativeFeedback = React.createClass({
 
   _dispatchHotspotUpdate: function(destX, destY) {
     UIManager.dispatchViewManagerCommand(
-      findNodeHandle(this),
+      ReactNative.findNodeHandle(this),
       UIManager.RCTView.Commands.hotspotUpdate,
       [destX || 0, destY || 0]
     );
@@ -228,7 +227,7 @@ var TouchableNativeFeedback = React.createClass({
 
   _dispatchPressedStateChange: function(pressed) {
     UIManager.dispatchViewManagerCommand(
-      findNodeHandle(this),
+      ReactNative.findNodeHandle(this),
       UIManager.RCTView.Commands.setPressed,
       [pressed]
     );
