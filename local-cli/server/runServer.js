@@ -27,17 +27,11 @@ const heapCaptureMiddleware = require('./middleware/heapCaptureMiddleware.js');
 const webSocketProxy = require('./util/webSocketProxy.js');
 const defaultAssetExts = require('../../packager/defaultAssetExts');
 
-function cors(req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  next();
-}
-
 function runServer(args, config, readyCallback) {
   var wsProxy = null;
   var ms = null;
   const packagerServer = getPackagerServer(args, config);
   const app = connect()
-    .use(cors)
     .use(loadRawBodyMiddleware)
     .use(connect.compress())
     .use(getDevToolsMiddleware(args, () => wsProxy && wsProxy.isChromeConnected()))
@@ -88,7 +82,7 @@ function getPackagerServer(args, config) {
   return ReactPackager.createServer({
     nonPersistent: args.nonPersistent,
     projectRoots: args.projectRoots,
-    blacklistRE: config.getBlacklistRE(args.platform),
+    blacklistRE: config.getBlacklistRE(),
     cacheVersion: '3',
     getTransformOptionsModulePath: config.getTransformOptionsModulePath,
     transformModulePath: transformModulePath,

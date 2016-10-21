@@ -14,25 +14,6 @@
 #import "RCTViewPropertyMapper.h"
 
 @implementation RCTPropsAnimatedNode
-{
-  RCTStyleAnimatedNode *_parentNode;
-}
-
-- (void)onAttachedToNode:(RCTAnimatedNode *)parent
-{
-  [super onAttachedToNode:parent];
-  if ([parent isKindOfClass:[RCTStyleAnimatedNode class]]) {
-    _parentNode = (RCTStyleAnimatedNode *)parent;
-  }
-}
-
-- (void)onDetachedFromNode:(RCTAnimatedNode *)parent
-{
-  [super onDetachedFromNode:parent];
-  if (_parentNode == parent) {
-    _parentNode = nil;
-  }
-}
 
 - (void)connectToView:(NSNumber *)viewTag animatedModule:(RCTNativeAnimatedModule *)animationModule
 {
@@ -50,9 +31,34 @@
   [self performViewUpdatesIfNecessary];
 }
 
+- (NSString *)propertyNameForParentTag:(NSNumber *)parentTag
+{
+  __block NSString *propertyName;
+  [self.config[@"props"] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull property, NSNumber * _Nonnull tag, BOOL * _Nonnull stop) {
+    if ([tag isEqualToNumber:parentTag]) {
+      propertyName = property;
+      *stop = YES;
+    }
+  }];
+  return propertyName;
+}
+
 - (void)performViewUpdatesIfNecessary
 {
-  NSDictionary *updates = [_parentNode updatedPropsDictionary];
+  NSMutableDictionary *updates = [NSMutableDictionary dictionary];
+  [self.parentNodes enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull parentTag, RCTAnimatedNode * _Nonnull parentNode, BOOL * _Nonnull stop) {
+
+    if ([parentNode isKindOfClass:[RCTStyleAnimatedNode class]]) {
+      [updates addEntriesFromDictionary:[(RCTStyleAnimatedNode *)parentNode updatedPropsDictionary]];
+
+    } else if ([parentNode isKindOfClass:[RCTValueAnimatedNode class]]) {
+      NSString *property = [self propertyNameForParentTag:parentTag];
+      CGFloat value = [(RCTValueAnimatedNode *)parentNode value];
+      [updates setObject:@(value) forKey:property];
+    }
+
+  }];
+
   if (updates.count) {
     [_propertyMapper updateViewWithDictionary:updates];
   }

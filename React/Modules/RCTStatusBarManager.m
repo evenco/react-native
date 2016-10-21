@@ -13,7 +13,6 @@
 #import "RCTLog.h"
 #import "RCTUtils.h"
 
-#if !TARGET_OS_TV
 @implementation RCTConvert (UIStatusBar)
 
 RCT_ENUM_CONVERTER(UIStatusBarStyle, (@{
@@ -29,7 +28,6 @@ RCT_ENUM_CONVERTER(UIStatusBarAnimation, (@{
 }), UIStatusBarAnimationNone, integerValue);
 
 @end
-#endif
 
 @implementation RCTStatusBarManager
 
@@ -52,8 +50,6 @@ RCT_EXPORT_MODULE()
   return @[@"statusBarFrameDidChange",
            @"statusBarFrameWillChange"];
 }
-
-#if !TARGET_OS_TV
 
 - (void)startObserving
 {
@@ -131,7 +127,5 @@ RCT_EXPORT_METHOD(setNetworkActivityIndicatorVisible:(BOOL)visible)
 {
   RCTSharedApplication().networkActivityIndicatorVisible = visible;
 }
-
-#endif //TARGET_OS_TV
 
 @end

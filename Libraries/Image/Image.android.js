@@ -30,7 +30,7 @@ var requireNativeComponent = require('requireNativeComponent');
 var resolveAssetSource = require('resolveAssetSource');
 var Set = require('Set');
 var filterObject = require('fbjs/lib/filterObject');
-var createReactNativeComponentClass = require('createReactNativeComponentClass');
+var createReactNativeComponentClass = require('react/lib/createReactNativeComponentClass');
 
 var {
   ImageLoader,

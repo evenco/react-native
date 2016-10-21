@@ -14,7 +14,6 @@
 
 var Platform = {
   OS: 'android',
-  // $FlowFixMe
   get Version() { return require('NativeModules').AndroidConstants.Version; },
   select: (obj: Object) => obj.android,
   supportsNativeAnimations: true,

@@ -14,10 +14,8 @@
 
 @interface RCTConvert (UIStatusBar)
 
-#if !TARGET_OS_TV
 + (UIStatusBarStyle)UIStatusBarStyle:(id)json;
 + (UIStatusBarAnimation)UIStatusBarAnimation:(id)json;
-#endif
 
 @end
 

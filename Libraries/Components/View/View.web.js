@@ -176,4 +176,40 @@ var View = React.createClass({
 
 });
 
+// <Even>
+// DUPED!
+
+const AccessibilityTraits = [
+  'none',
+  'button',
+  'link',
+  'header',
+  'search',
+  'image',
+  'selected',
+  'plays',
+  'key',
+  'text',
+  'summary',
+  'disabled',
+  'frequentUpdates',
+  'startsMedia',
+  'adjustable',
+  'allowsDirectInteraction',
+  'pageTurn',
+];
+
+const AccessibilityComponentType = [
+  'none',
+  'button',
+  'radiobutton_checked',
+  'radiobutton_unchecked',
+];
+
+View.AccessibilityTraits = AccessibilityTraits;
+View.AccessibilityComponentType = AccessibilityComponentType;
+View.forceTouchAvailable = false;
+
+// </Even>
+
 module.exports = View;

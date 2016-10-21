@@ -502,7 +502,8 @@ var ListView = React.createClass({
       return;
     }
 
-    var scrollNode = Platform.OS == 'web' ? scrollComponent : ReactNative.findNodeHandle(scrollComponent);
+    var scrollNode = scrollComponent;
+
     RCTUIManager.measureLayout(
       scrollComponent.getInnerViewNode(),
       scrollNode,

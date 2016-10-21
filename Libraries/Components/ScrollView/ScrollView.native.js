@@ -16,7 +16,7 @@ const EdgeInsetsPropType = require('EdgeInsetsPropType');
 const Platform = require('Platform');
 const PointPropType = require('PointPropType');
 const React = require('React');
-const ReactNative = require('react/lib/ReactNative');
+const ReactNative = require('ReactNative');
 const ScrollResponder = require('ScrollResponder');
 const StyleSheet = require('StyleSheet');
 const StyleSheetPropType = require('StyleSheetPropType');
@@ -29,9 +29,6 @@ const invariant = require('fbjs/lib/invariant');
 const processDecelerationRate = require('processDecelerationRate');
 const PropTypes = React.PropTypes;
 const requireNativeComponent = require('requireNativeComponent');
-
-// Even
-var Animations = require('Animations');
 
 /**
  * Component that wraps platform ScrollView while providing
@@ -448,10 +445,10 @@ const ScrollView = React.createClass({
   },
   _configAnimations() {
     if (this.props.animatedScrollX) {
-        Animations.makeNative(this.props.animatedScrollX);
+        this.props.animatedScrollX.__makeNative();
     }
     if (this.props.animatedScrollY) {
-        Animations.makeNative(this.props.animatedScrollY);
+        this.props.animatedScrollY.__makeNative();
     }
   },
   // </Even>

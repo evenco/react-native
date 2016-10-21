@@ -23,7 +23,7 @@
 #import "UIView+React.h"
 
 // <Even> figure it out
-//#import <RCTAnimation/RCTNativeAnimatedModule.h>
+#import "RCTNativeAnimatedModule.h"
 // </Even>
 
 CGFloat const ZINDEX_DEFAULT = 0;
@@ -735,13 +735,13 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
 
 // <Even> figure it out
 - (void)updateScrollAnimatedValue {
-//  RCTNativeAnimatedModule *module = [RCTNativeAnimatedModule new];
-//  if (_scrollView.contentOffsetXAnimatedNodeTag) {
-//    [module setAnimatedNodeValue:_scrollView.contentOffsetXAnimatedNodeTag value:@(_scrollView.contentOffset.x)];
-//  }
-//  if (_scrollView.contentOffsetYAnimatedNodeTag) {
-//    [module setAnimatedNodeValue:_scrollView.contentOffsetYAnimatedNodeTag value:@(_scrollView.contentOffset.y)];
-//  }
+  RCTNativeAnimatedModule *module = [RCTNativeAnimatedModule new];
+  if (_scrollView.contentOffsetXAnimatedNodeTag) {
+    [module setAnimatedNodeValue:_scrollView.contentOffsetXAnimatedNodeTag value:@(_scrollView.contentOffset.x)];
+  }
+  if (_scrollView.contentOffsetYAnimatedNodeTag) {
+    [module setAnimatedNodeValue:_scrollView.contentOffsetYAnimatedNodeTag value:@(_scrollView.contentOffset.y)];
+  }
 }
 // </Even>
 
@@ -824,7 +824,7 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
       _lastNonZeroTranslationAlongAxis = translationAlongAxis;
     }
     CGFloat newTargetContentOffset = ( snapIndex * snapToIntervalF ) - alignmentOffset;
-    
+
     // Set new targetContentOffset
     if (isHorizontal) {
       targetContentOffset->x = newTargetContentOffset;

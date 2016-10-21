@@ -284,7 +284,8 @@ RCT_EXPORT_METHOD(dropAnimatedNode:(nonnull NSNumber *)tag)
 
 #pragma mark -- Value updates
 
-- (void)valueNodeUpdated:(RCTValueAnimatedNode *)valueNode {
+- (void)valueNodeUpdated:(RCTValueAnimatedNode *)valueNode
+{
   [_updatedValueNodes addObject:valueNode];
   [valueNode setNeedsUpdate];
   for (RCTPropsAnimatedNode *propsNode in _propAnimationNodes) {
@@ -313,6 +314,7 @@ RCT_EXPORT_METHOD(stopListeningToAnimatedNodeValue:(nonnull NSNumber *)tag)
   [self sendEventWithName:@"onAnimatedValueUpdate"
                      body:@{@"tag": node.nodeTag, @"value": @(value)}];
 }
+
 
 #pragma mark -- Animation Loop
 

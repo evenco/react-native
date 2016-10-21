@@ -63,11 +63,11 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
     view.layer.transform = ((NSValue *)transform).CATransform3DValue;
   }
 
-  // <Even>
-//  NSNumber *progress = (NSNumber *)updates[@"progress"];
-//  if (progress) {
-//    [(id)_view performSelector:@selector(setProgressValue:) withObject:progress];
-//  }
+  // <Even> figure it out
+  NSNumber *progress = (NSNumber *)updates[@"progress"];
+  if (progress) {
+    [(id)_view performSelector:@selector(setProgressValue:) withObject:progress];
+  }
   // TODO find a way to make something generic, like this, performant
   // [_animationModule.bridge.uiManager setProps:props forView:_viewTag];
   // </Even>

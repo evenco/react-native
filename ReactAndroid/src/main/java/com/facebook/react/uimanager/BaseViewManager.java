@@ -8,10 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.facebook.react.bridge.ReadableArray;
-<<<<<<< HEAD
 import com.facebook.react.bridge.ReadableType;
-=======
->>>>>>> upstream/0.36-stable
 import com.facebook.react.uimanager.annotations.ReactProp;
 
 /**
@@ -47,11 +44,6 @@ public abstract class BaseViewManager<T extends View, C extends LayoutShadowNode
    */
   public static final String PROP_TEST_ID = "testID";
 
-<<<<<<< HEAD
-  // <Even>
-
-=======
->>>>>>> upstream/0.36-stable
   private static MatrixMathHelper.MatrixDecompositionContext sMatrixDecompositionContext =
       new MatrixMathHelper.MatrixDecompositionContext();
   private static double[] sTransformDecompositionArray = new double[16];
@@ -61,11 +53,6 @@ public abstract class BaseViewManager<T extends View, C extends LayoutShadowNode
     view.setBackgroundColor(backgroundColor);
   }
 
-<<<<<<< HEAD
-  // <Even>
-
-=======
->>>>>>> upstream/0.36-stable
   @ReactProp(name = PROP_TRANSFORM)
   public void setTransform(T view, ReadableArray matrix) {
     if (matrix == null) {
@@ -95,22 +82,12 @@ public abstract class BaseViewManager<T extends View, C extends LayoutShadowNode
     // Do nothing on API < 21
   }
 
-<<<<<<< HEAD
-  // <Even> // backported from https://github.com/facebook/react-native/commit/3d3b067f6fc831b6b23726087fe39cf39ef86f00
-
-=======
->>>>>>> upstream/0.36-stable
   @ReactProp(name = PROP_Z_INDEX)
   public void setZIndex(T view, float zIndex) {
     int integerZIndex = Math.round(zIndex);
     ViewGroupManager.setViewZIndex(view, integerZIndex);
   }
 
-<<<<<<< HEAD
-  // </Even>
-
-=======
->>>>>>> upstream/0.36-stable
   @ReactProp(name = PROP_RENDER_TO_HARDWARE_TEXTURE)
   public void setRenderToHardwareTexture(T view, boolean useHWTexture) {
     view.setLayerType(useHWTexture ? View.LAYER_TYPE_HARDWARE : View.LAYER_TYPE_NONE, null);
@@ -187,25 +164,8 @@ public abstract class BaseViewManager<T extends View, C extends LayoutShadowNode
     }
   }
 
-<<<<<<< HEAD
-  // <Even>
-
-  private static void setTransformProperty(View view, ReadableArray transforms) {
-    if (transforms.size() > 0) {
-      // TODO remove once we figure out where these matrices are coming from
-      if (ReadableType.Number.equals(transforms.getType(0))) {
-        for (int i = 0; i < 16; i++) {
-          sTransformDecompositionArray[i] = transforms.getDouble(i);
-        }
-      } else {
-        TransformHelper.processTransform(transforms, sTransformDecompositionArray);
-      }
-    }
-
-=======
   private static void setTransformProperty(View view, ReadableArray transforms) {
     TransformHelper.processTransform(transforms, sTransformDecompositionArray);
->>>>>>> upstream/0.36-stable
     MatrixMathHelper.decomposeMatrix(sTransformDecompositionArray, sMatrixDecompositionContext);
     view.setTranslationX(
         PixelUtil.toPixelFromDIP((float) sMatrixDecompositionContext.translation[0]));
@@ -227,6 +187,4 @@ public abstract class BaseViewManager<T extends View, C extends LayoutShadowNode
     view.setScaleX(1);
     view.setScaleY(1);
   }
-
-  // </Even>
 }

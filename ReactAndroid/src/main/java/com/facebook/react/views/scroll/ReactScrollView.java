@@ -9,14 +9,10 @@
 
 package com.facebook.react.views.scroll;
 
-<<<<<<< HEAD
-import android.content.Context;
-=======
 import javax.annotation.Nullable;
 
 import java.lang.reflect.Field;
 
->>>>>>> upstream/0.36-stable
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -28,25 +24,14 @@ import android.view.View;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
 
-<<<<<<< HEAD
-import com.facebook.infer.annotation.Assertions;
-import com.facebook.react.animated.NativeAnimatedModule;
-import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.uimanager.MeasureSpecAssertions;
-import com.facebook.react.uimanager.events.NativeGestureUtil;
-import com.facebook.react.views.view.ReactClippingViewGroup;
-import com.facebook.react.views.view.ReactClippingViewGroupHelper;
-
-import javax.annotation.Nullable;
-=======
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.common.ReactConstants;
+import com.facebook.react.animated.NativeAnimatedModule;
 import com.facebook.react.uimanager.MeasureSpecAssertions;
 import com.facebook.react.uimanager.events.NativeGestureUtil;
 import com.facebook.react.uimanager.ReactClippingViewGroup;
 import com.facebook.react.uimanager.ReactClippingViewGroupHelper;
 import com.facebook.infer.annotation.Assertions;
->>>>>>> upstream/0.36-stable
 
 /**
  * A simple subclass of ScrollView that doesn't dispatch measure and layout to its children and has
@@ -61,11 +46,8 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   private static boolean sTriedToGetScrollerField = false;
 
   private final OnScrollDispatchHelper mOnScrollDispatchHelper = new OnScrollDispatchHelper();
-<<<<<<< HEAD
   private final NativeAnimatedModule mAnimatedModule;
-=======
   private final OverScroller mScroller;
->>>>>>> upstream/0.36-stable
 
   private @Nullable Rect mClippingRect;
   private boolean mDoneFlinging;
@@ -88,9 +70,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   public ReactScrollView(ReactContext context, @Nullable FpsListener fpsListener) {
     super(context);
     mFpsListener = fpsListener;
-<<<<<<< HEAD
     mAnimatedModule = ((ReactContext) context).getNativeModule(NativeAnimatedModule.class);
-=======
 
     if (!sTriedToGetScrollerField) {
       sTriedToGetScrollerField = true;
@@ -123,7 +103,6 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
     } else {
       mScroller = null;
     }
->>>>>>> upstream/0.36-stable
   }
 
   public void setSendMomentumEvents(boolean sendMomentumEvents) {

@@ -29,8 +29,6 @@ import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.annotations.ReactPropGroup;
 
-import javax.annotation.Nullable;
-
 public class ReactImageManager extends SimpleViewManager<ReactImageView> {
 
   public static final String REACT_CLASS = "RCTImageView";

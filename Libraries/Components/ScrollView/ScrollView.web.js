@@ -4,7 +4,7 @@
 'use strict';
 
 var React = require('React');
-var ReactDOM = require('react-dom');
+var ReactDOM = require('react/lib/ReactDOM');
 var StyleSheet = require('StyleSheet');
 var View = require('View');
 

@@ -51,7 +51,7 @@ let ScrollableMixin = {
 };
 
 type DefaultProps = {
-  renderScrollComponent: (props: Object) => ReactElement;
+  renderScrollComponent: (props: Object) => React.Element<any>;
 };
 
 let InvertibleScrollView = React.createClass({
@@ -71,7 +71,7 @@ let InvertibleScrollView = React.createClass({
     };
   },
 
-  getScrollResponder(): ReactComponent {
+  getScrollResponder(): React.Component<any, any, any> {
     return this._scrollComponent.getScrollResponder();
   },
 

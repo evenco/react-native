@@ -513,12 +513,9 @@ RCT_EXPORT_METHOD(show)
   }
 
   NSString *title = [NSString stringWithFormat:@"React Native: Development (%@)", [_bridge class]];
-  // On larger devices we don't have an anchor point for the action sheet
-  UIAlertControllerStyle style = [[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone ? UIAlertControllerStyleActionSheet : UIAlertControllerStyleAlert;
   _actionSheet = [UIAlertController alertControllerWithTitle:title
                                                      message:@""
-                                              preferredStyle:style];
-
+                                              preferredStyle:UIAlertControllerStyleActionSheet];
   NSArray<RCTDevMenuItem *> *items = [self menuItems];
   for (RCTDevMenuItem *item in items) {
     switch (item.type) {

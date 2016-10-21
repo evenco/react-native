@@ -137,6 +137,12 @@ function validateStyles(styles: Object): void {
   }
 }
 
+function validateProps(props: Object): void {
+  if (props.style) {
+    validateStyles(props.style);
+  }
+}
+
 function validateInterpolation(config: Object): void {
   var SUPPORTED_INTERPOLATION_PARAMS = {
     inputRange: true,
@@ -166,6 +172,7 @@ function assertNativeAnimatedModule(): void {
 
 module.exports = {
   API,
+  validateProps,
   validateStyles,
   validateTransform,
   validateInterpolation,

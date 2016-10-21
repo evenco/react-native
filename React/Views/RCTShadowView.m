@@ -219,8 +219,8 @@ DEFINE_PROCESS_META_PROPS(Border);
       properties[RCTBackgroundColorProp] = _backgroundColor;
     }
     return properties;
- }
- return parentProperties;
+  }
+  return parentProperties;
 }
 
 - (void)collectUpdatedProperties:(NSMutableSet<RCTApplierBlock> *)applierBlocks

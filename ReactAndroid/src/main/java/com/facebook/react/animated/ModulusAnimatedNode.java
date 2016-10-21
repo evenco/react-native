@@ -4,8 +4,6 @@ import com.facebook.react.bridge.JSApplicationCausedNativeException;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 
-// <Even>
-
 /*package*/ class ModulusAnimatedNode extends ValueAnimatedNode {
 
   private final NativeAnimatedNodesManager mNativeAnimatedNodesManager;

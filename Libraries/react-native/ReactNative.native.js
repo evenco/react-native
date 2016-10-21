@@ -10,4 +10,7 @@
  * @providesModule ReactNative
  */
  'use strict';
- module.exports = require('react/lib/ReactNative');
+ 
+var ReactNative = require('react/lib/ReactNative');
+
+module.exports = ReactNative;

@@ -22,9 +22,7 @@ var styles = StyleSheet.create({
 var Text = React.createClass({
 
     propTypes: {
-
         style: stylePropType,
-
     },
 
     setNativeProps: function(props) {
@@ -32,10 +30,16 @@ var Text = React.createClass({
     },
 
     render: function() {
-        var innerElements = this.props.children;
-        if (typeof innerElements == 'string') {
-            if (innerElements.indexOf('\n') >= 0) {
-                var textParts = innerElements.split('\n');
+        var {
+            style,
+            children,
+            allowFontScaling,
+            ...props,
+        } = this.props;
+
+        if (typeof children == 'string') {
+            if (children.indexOf('\n') >= 0) {
+                var textParts = children.split('\n');
                 var textPartsIncludingNewlines = [];
                 for (var i in textParts) {
                     if (i > 0) {
@@ -43,20 +47,21 @@ var Text = React.createClass({
                     }
                     textPartsIncludingNewlines.push(textParts[i]);
                 }
-                innerElements = textPartsIncludingNewlines.map(this._renderInnerText);
+                children = textPartsIncludingNewlines.map(this._renderInnerText);
             } else {
-                innerElements = [this._renderChild(innerElements)];
+                children = [this._renderChild(children)];
             }
-        } else if (innerElements instanceof Array) {
-            innerElements = innerElements.map(this._renderChild);
-        } else if (innerElements) {
-            innerElements = [this._renderChild(innerElements)];
+        } else if (children instanceof Array) {
+            children = children.map(this._renderChild);
+        } else if (children) {
+            children = [this._renderChild(children)];
         }
+
         return (
             <span
-                {...this.props}
-                style={webifyStyle([this.props.style, styles.containerSpan])}
-                children={React.Children.toArray(innerElements)}
+                {...props}
+                style={webifyStyle([style, styles.containerSpan])}
+                children={React.Children.toArray(children)}
                 />
         );
     },

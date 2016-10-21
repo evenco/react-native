@@ -72,7 +72,6 @@
 
   UITextRange *_previousSelectionRange;
   NSUInteger _previousTextLength;
-  NSString *_previousText;
   CGFloat _previousContentHeight;
   NSString *_predictedText;
 

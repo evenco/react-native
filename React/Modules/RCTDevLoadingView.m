@@ -142,16 +142,6 @@ RCT_EXPORT_METHOD(hide)
     backgroundColor:backgroundColor];
 }
 
-- (void)updateProgress:(RCTLoadingProgress *)progress
-{
-  if (!progress) {
-    return;
-  }
-  dispatch_async(dispatch_get_main_queue(), ^{
-    self->_label.text = [progress description];
-  });
-}
-
 @end
 
 #else
@@ -160,7 +150,6 @@ RCT_EXPORT_METHOD(hide)
 
 + (NSString *)moduleName { return nil; }
 + (void)setEnabled:(BOOL)enabled { }
-- (void)updateProgress:(RCTLoadingProgress *)progress {}
 
 @end
 

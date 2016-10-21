@@ -15,13 +15,6 @@
 #import "RCTTextSelection.h"
 #import "UIView+React.h"
 
-@interface RCTTextField ()
-
-@property (nonatomic, strong) RCTEventDispatcher *eventDispatcher;
-@property (nonatomic, assign) NSInteger nativeEventCount;
-
-@end
-
 @implementation RCTTextField
 {
   RCTEventDispatcher *_eventDispatcher;

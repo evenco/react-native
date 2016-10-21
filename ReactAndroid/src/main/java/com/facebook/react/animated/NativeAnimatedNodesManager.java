@@ -93,17 +93,12 @@ import javax.annotation.Nullable;
       node = new DivisionAnimatedNode(config, this);
     } else if ("multiplication".equals(type)) {
       node = new MultiplicationAnimatedNode(config, this);
-<<<<<<< HEAD
-    } else if ("transform".equals(type)) { // <Even>
-      node = new TransformAnimatedNode(config, this);
-    } else if ("modulus".equals(type)) { // <Even>
+    } else if ("modulus".equals(type)) {
       node = new ModulusAnimatedNode(config, this);
-=======
     } else if ("diffclamp".equals(type)) {
       node = new DiffClampAnimatedNode(config, this);
     } else if ("transform".equals(type)) {
       node = new TransformAnimatedNode(config, this);
->>>>>>> upstream/0.36-stable
     } else {
       throw new JSApplicationIllegalArgumentException("Unsupported node type: " + type);
     }
@@ -161,15 +156,10 @@ import javax.annotation.Nullable;
     final AnimationDriver animation;
     if ("frames".equals(type)) {
       animation = new FrameBasedAnimationDriver(animationConfig);
-<<<<<<< HEAD
-    } else if ("spring".equals(type)) { // <Even>
-      animation = new SpringAnimation(animationConfig);
-=======
     } else if ("spring".equals(type)) {
       animation = new SpringAnimation(animationConfig);
     } else if ("decay".equals(type)) {
       animation = new DecayAnimation(animationConfig);
->>>>>>> upstream/0.36-stable
     } else {
       throw new JSApplicationIllegalArgumentException("Unsupported animation type: " + type);
     }
