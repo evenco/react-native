@@ -192,9 +192,4 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   [_valueNode setNeedsUpdate];
 }
 
-- (void)cleanupAnimationUpdate
-{
-  [_valueNode cleanupAnimationUpdate];
-}
-
 @end
