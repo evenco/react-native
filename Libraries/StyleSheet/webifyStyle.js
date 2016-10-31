@@ -6,7 +6,6 @@
 var merge = require('merge');
 var flattenStyle = require('flattenStyle');
 var processTransform = require('processTransform');
-var warning = require('warning');
 
 var styleKeyMap = {
 

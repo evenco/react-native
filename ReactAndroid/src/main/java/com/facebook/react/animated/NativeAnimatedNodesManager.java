@@ -82,7 +82,6 @@ import javax.annotation.Nullable;
       node = new StyleAnimatedNode(config, this);
     } else if ("value".equals(type)) {
       node = new ValueAnimatedNode(config);
-      mUpdatedNodes.add(node);
     } else if ("props".equals(type)) {
       node = new PropsAnimatedNode(config, this);
     } else if ("interpolation".equals(type)) {
@@ -104,6 +103,7 @@ import javax.annotation.Nullable;
     }
     node.mTag = tag;
     mAnimatedNodes.put(tag, node);
+    mUpdatedNodes.add(node);
   }
 
   public void dropAnimatedNode(int tag) {
