@@ -99,7 +99,13 @@ const API = {
   }
 };
 
-var STYLES_WHITELIST = {
+/**
+ * Styles allowed by the native animated implementation.
+ *
+ * In general native animated implementation should support any numeric property that doesn't need
+ * to be updated through the shadow view hierarchy (all non-layout properties).
+ */
+const STYLES_WHITELIST = {
   opacity: true,
   transform: true,
   /* legacy android transform properties */
@@ -172,7 +178,6 @@ function assertNativeAnimatedModule(): void {
 
 module.exports = {
   API,
-  validateProps,
   validateStyles,
   validateTransform,
   validateInterpolation,
