@@ -19,7 +19,6 @@ var Set = require('Set');
 var SpringConfig = require('SpringConfig');
 var ViewStylePropTypes = require('ViewStylePropTypes');
 var NativeAnimatedHelper = require('NativeAnimatedHelper');
-var Platform = require('Platform');
 
 var findNodeHandle = require('react/lib/findNodeHandle');
 var flattenStyle = require('flattenStyle');
@@ -252,7 +251,7 @@ class TimingAnimation extends Animation {
     this._duration = config.duration !== undefined ? config.duration : 500;
     this._delay = config.delay !== undefined ? config.delay : 0;
     this.__isInteraction = config.isInteraction !== undefined ? config.isInteraction : true;
-    this._useNativeDriver = config.useNativeDriver !== undefined ? config.useNativeDriver && Platform.supportsNativeAnimations : false;
+    this._useNativeDriver = config.useNativeDriver !== undefined ? config.useNativeDriver : false;
   }
 
   __getNativeAnimationConfig(): any {
@@ -482,7 +481,6 @@ class SpringAnimation extends Animation {
     this._toValue = config.toValue;
     this._useNativeDriver = config.useNativeDriver !== undefined ? config.useNativeDriver : false;
     this.__isInteraction = config.isInteraction !== undefined ? config.isInteraction : true;
-    this._useNativeDriver = config.useNativeDriver !== undefined ? config.useNativeDriver && Platform.supportsNativeAnimations : false;
 
     var springConfig;
     if (config.bounciness !== undefined || config.speed !== undefined) {
