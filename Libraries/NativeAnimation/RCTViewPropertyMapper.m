@@ -14,56 +14,59 @@
 #import "RCTBridge.h"
 #import "RCTConvert.h"
 #import "RCTUIManager.h"
+#import "RCTNativeAnimatedModule.h"
 
 @interface RCTViewPropertyMapper ()
 
-@property (nonatomic, weak) UIView *cachedView;
-@property (nonatomic, weak) RCTUIManager *uiManager;
+@property (nonatomic, weak) UIView *view;
 
 @end
 
 @implementation RCTViewPropertyMapper
+{
+  RCTNativeAnimatedModule *_animationModule;
+}
 
 - (instancetype)initWithViewTag:(NSNumber *)viewTag
-                      uiManager:(RCTUIManager *)uiManager
+                animationModule:(RCTNativeAnimatedModule *)animationModule
 {
   if ((self = [super init])) {
-    _uiManager = uiManager;
+    _animationModule = animationModule;
     _viewTag = viewTag;
+    _animationModule = animationModule;
   }
   return self;
 }
 
 RCT_NOT_IMPLEMENTED(- (instancetype)init)
 
-- (void)updateViewWithDictionary:(NSDictionary<NSString *, NSObject *> *)properties
+- (void)updateViewWithDictionary:(NSDictionary<NSString *, NSObject *> *)updates
 {
-  // cache the view for perf reasons (avoid constant lookups)
-  UIView *view = _cachedView = _cachedView ?: [self.uiManager viewForReactTag:_viewTag];
+  // <Even> we cache the view for perf reasons (avoid constant lookups)
+  UIView *view = _view = _view ?: [_animationModule.bridge.uiManager viewForReactTag:_viewTag];
   if (!view) {
-    RCTLogError(@"No view to update.");
     return;
   }
 
-  if (!properties.count) {
+  if (!updates.count) {
     return;
   }
 
-  NSNumber *opacity = [RCTConvert NSNumber:properties[@"opacity"]];
+  NSNumber *opacity = [RCTConvert NSNumber:updates[@"opacity"]];
   if (opacity) {
     view.alpha = opacity.floatValue;
   }
 
-  NSObject *transform = properties[@"transform"];
+  NSObject *transform = updates[@"transform"];
   if ([transform isKindOfClass:[NSValue class]]) {
     view.layer.allowsEdgeAntialiasing = YES;
     view.layer.transform = ((NSValue *)transform).CATransform3DValue;
   }
 
   // <Even> figure it out
-  NSNumber *progress = (NSNumber *)properties[@"progress"];
+  NSNumber *progress = (NSNumber *)updates[@"progress"];
   if (progress) {
-    [(id)view performSelector:@selector(setProgressValue:) withObject:progress];
+    [(id)_view performSelector:@selector(setProgressValue:) withObject:progress];
   }
   // TODO find a way to make something generic, like this, performant
   // [_animationModule.bridge.uiManager setProps:props forView:_viewTag];

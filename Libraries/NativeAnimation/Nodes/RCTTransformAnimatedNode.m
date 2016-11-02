@@ -12,21 +12,21 @@
 
 @implementation RCTTransformAnimatedNode
 {
-  NSMutableDictionary<NSString *, NSObject *> *_propsDictionary;
+  NSMutableDictionary<NSString *, NSObject *> *_updatedPropsDictionary;
 }
 
 - (instancetype)initWithTag:(NSNumber *)tag
                      config:(NSDictionary<NSString *, id> *)config;
 {
   if ((self = [super initWithTag:tag config:config])) {
-    _propsDictionary = [NSMutableDictionary new];
+    _updatedPropsDictionary = [NSMutableDictionary new];
   }
   return self;
 }
 
-- (NSDictionary *)propsDictionary
+- (NSDictionary *)updatedPropsDictionary
 {
-  return _propsDictionary;
+  return _updatedPropsDictionary;
 }
 
 - (void)performUpdate
@@ -82,7 +82,13 @@
     }
   }
 
-  _propsDictionary[@"transform"] = [NSValue valueWithCATransform3D:transform];
+  _updatedPropsDictionary[@"transform"] = [NSValue valueWithCATransform3D:transform];
+}
+
+- (void)cleanupAnimationUpdate
+{
+  [super cleanupAnimationUpdate];
+  [_updatedPropsDictionary removeAllObjects];
 }
 
 @end

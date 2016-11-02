@@ -9,14 +9,14 @@
 
 #import <Foundation/Foundation.h>
 
-@class RCTUIManager;
+@class RCTNativeAnimatedModule;
 
 @interface RCTViewPropertyMapper : NSObject
 
 @property (nonatomic, readonly) NSNumber *viewTag;
 
 - (instancetype)initWithViewTag:(NSNumber *)viewTag
-                      uiManager:(RCTUIManager *)uiManager NS_DESIGNATED_INITIALIZER;
+                animationModule:(RCTNativeAnimatedModule *)animationModule NS_DESIGNATED_INITIALIZER;
 
 - (void)updateViewWithDictionary:(NSDictionary<NSString *, NSObject *> *)updates;
 

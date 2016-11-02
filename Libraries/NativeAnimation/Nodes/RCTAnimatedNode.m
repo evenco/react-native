@@ -69,6 +69,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   if (parent) {
     _parentNodes[parent.nodeTag] = parent;
   }
+  [self setNeedsUpdate];
 }
 
 - (void)onDetachedFromNode:(RCTAnimatedNode *)parent
@@ -79,6 +80,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   if (parent) {
     [_parentNodes removeObjectForKey:parent.nodeTag];
   }
+  [self setNeedsUpdate];
 }
 
 - (void)detachNode
@@ -96,6 +98,15 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   _needsUpdate = YES;
   for (RCTAnimatedNode *child in _childNodes.allValues) {
     [child setNeedsUpdate];
+  }
+}
+
+- (void)cleanupAnimationUpdate
+{
+  if (!_needsUpdate) {
+    for (RCTAnimatedNode *child in _childNodes.allValues) {
+      [child cleanupAnimationUpdate];
+    }
   }
 }
 

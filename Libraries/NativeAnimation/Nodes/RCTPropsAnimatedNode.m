@@ -8,17 +8,16 @@
  */
 
 #import "RCTPropsAnimatedNode.h"
-
 #import "RCTAnimationUtils.h"
+#import "RCTNativeAnimatedModule.h"
 #import "RCTStyleAnimatedNode.h"
-#import "RCTValueAnimatedNode.h"
 #import "RCTViewPropertyMapper.h"
 
 @implementation RCTPropsAnimatedNode
 
-- (void)connectToView:(NSNumber *)viewTag uiManager:(RCTUIManager *)uiManager
+- (void)connectToView:(NSNumber *)viewTag animatedModule:(RCTNativeAnimatedModule *)animationModule
 {
-  _propertyMapper = [[RCTViewPropertyMapper alloc] initWithViewTag:viewTag uiManager:uiManager];
+  _propertyMapper = [[RCTViewPropertyMapper alloc] initWithViewTag:viewTag animationModule:animationModule];
 }
 
 - (void)disconnectFromView:(NSNumber *)viewTag
@@ -46,22 +45,22 @@
 
 - (void)performViewUpdatesIfNecessary
 {
-  NSMutableDictionary *props = [NSMutableDictionary dictionary];
+  NSMutableDictionary *updates = [NSMutableDictionary dictionary];
   [self.parentNodes enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull parentTag, RCTAnimatedNode * _Nonnull parentNode, BOOL * _Nonnull stop) {
 
     if ([parentNode isKindOfClass:[RCTStyleAnimatedNode class]]) {
-      [props addEntriesFromDictionary:[(RCTStyleAnimatedNode *)parentNode propsDictionary]];
+      [updates addEntriesFromDictionary:[(RCTStyleAnimatedNode *)parentNode updatedPropsDictionary]];
 
     } else if ([parentNode isKindOfClass:[RCTValueAnimatedNode class]]) {
       NSString *property = [self propertyNameForParentTag:parentTag];
       CGFloat value = [(RCTValueAnimatedNode *)parentNode value];
-      [props setObject:@(value) forKey:property];
+      [updates setObject:@(value) forKey:property];
     }
 
   }];
 
-  if (props.count) {
-    [_propertyMapper updateViewWithDictionary:props];
+  if (updates.count) {
+    [_propertyMapper updateViewWithDictionary:updates];
   }
 }
 

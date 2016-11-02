@@ -30,6 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)stopAnimation;
 - (void)stepAnimation;
 - (void)removeAnimation;
+- (void)cleanupAnimationUpdate;
 
 @end
 

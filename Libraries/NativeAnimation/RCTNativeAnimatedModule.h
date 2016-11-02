@@ -7,8 +7,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 #import "RCTBridgeModule.h"
-#import "RCTEventEmitter.h"
 #import "RCTValueAnimatedNode.h"
+#import "RCTEventEmitter.h"
 
 @interface RCTNativeAnimatedModule : RCTEventEmitter <RCTBridgeModule, RCTValueAnimatedNodeObserver>
 

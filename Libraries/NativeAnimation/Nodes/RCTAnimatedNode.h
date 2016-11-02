@@ -37,6 +37,11 @@
  */
 - (void)performUpdate NS_REQUIRES_SUPER;
 
+/**
+ * Cleans up after a round of updates.
+ */
+- (void)cleanupAnimationUpdate NS_REQUIRES_SUPER;
+
 - (void)addChild:(RCTAnimatedNode *)child NS_REQUIRES_SUPER;
 - (void)removeChild:(RCTAnimatedNode *)child NS_REQUIRES_SUPER;
 
