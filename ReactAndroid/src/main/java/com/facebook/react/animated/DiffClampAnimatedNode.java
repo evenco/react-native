@@ -42,12 +42,14 @@ import com.facebook.react.bridge.ReadableMap;
 
   private double getInputNodeValue() {
     AnimatedNode animatedNode = mNativeAnimatedNodesManager.getNodeById(mInputNodeTag);
-    if (animatedNode == null || !(animatedNode instanceof ValueAnimatedNode)) {
-      throw new JSApplicationCausedNativeException("Illegal node ID set as an input for " +
-        "Animated.DiffClamp node");
-
+    if (animatedNode == null) {
+      throw new JSApplicationCausedNativeException("Unknown node set as an input for " +
+        "Animated.diffClamp node");
     }
-
+    if (!(animatedNode instanceof ValueAnimatedNode)) {
+      throw new JSApplicationCausedNativeException("Illegal node ID set as an input for " +
+        "Animated.diffClamp node");
+    }
     return ((ValueAnimatedNode) animatedNode).mValue;
   }
 }

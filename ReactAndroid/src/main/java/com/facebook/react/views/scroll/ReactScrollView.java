@@ -31,6 +31,7 @@ import com.facebook.react.uimanager.MeasureSpecAssertions;
 import com.facebook.react.uimanager.events.NativeGestureUtil;
 import com.facebook.react.uimanager.ReactClippingViewGroup;
 import com.facebook.react.uimanager.ReactClippingViewGroupHelper;
+import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.infer.annotation.Assertions;
 
 /**
@@ -171,10 +172,12 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
 
     // <Even>
     if (mContentOffsetXAnimatedNodeTag != 0) {
-      mAnimatedModule.setAnimatedNodeValue(mContentOffsetXAnimatedNodeTag, x);
+      int value = Math.round(PixelUtil.toDIPFromPixel(x));
+      mAnimatedModule.setAnimatedNodeValue(mContentOffsetXAnimatedNodeTag, value);
     }
     if (mContentOffsetYAnimatedNodeTag != 0) {
-      mAnimatedModule.setAnimatedNodeValue(mContentOffsetYAnimatedNodeTag, y);
+      int value = Math.round(PixelUtil.toDIPFromPixel(y));
+      mAnimatedModule.setAnimatedNodeValue(mContentOffsetYAnimatedNodeTag, value);
     }
     // </Even>
   }

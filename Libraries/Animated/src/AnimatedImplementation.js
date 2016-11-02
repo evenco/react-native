@@ -694,8 +694,7 @@ class AnimatedValue extends AnimatedWithChildren {
 
   __detach() {
     this.stopAnimation();
-    // <Even> what if we want to keep it around after driving it???
-    // super.__detach();
+    super.__detach();
   }
 
   __getValue(): number {
@@ -1737,11 +1736,6 @@ function createAnimatedComponent(Component: any): any {
       var callback = () => {
         if (this._component.setNativeProps) {
           if (!this._propsAnimated.__isNative) {
-            if (this._component.viewConfig == null) {
-              var ctor = this._component.constructor;
-              var componentName = ctor.displayName || ctor.name || '<Unknown Component>';
-              throw new Error(componentName + ' "viewConfig" is not defined.');
-            }
             this._component.setNativeProps(
               this._propsAnimated.__getAnimatedValue()
             );
