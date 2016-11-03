@@ -45,7 +45,7 @@ import com.facebook.react.bridge.ReadableMap;
         throw new JSApplicationCausedNativeException("Illegal node ID set as an input for " +
           "Animated.divide node");
       }
-      double value = ((ValueAnimatedNode) animatedNode).mValue;
+      double value = ((ValueAnimatedNode) animatedNode).getValue();
       if (i == 0) {
         mValue = value;
         continue;
