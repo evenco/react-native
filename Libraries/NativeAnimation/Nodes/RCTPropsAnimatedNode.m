@@ -8,27 +8,33 @@
  */
 
 #import "RCTPropsAnimatedNode.h"
+
+#import "RCTLog.h"
+#import "RCTUIManager.h"
 #import "RCTAnimationUtils.h"
-#import "RCTNativeAnimatedModule.h"
 #import "RCTStyleAnimatedNode.h"
-#import "RCTViewPropertyMapper.h"
+#import "RCTValueAnimatedNode.h"
 
-@implementation RCTPropsAnimatedNode
+@implementation RCTPropsAnimatedNode {
+  NSNumber *_connectedViewTag;
+  NSString *_connectedViewName;
+  RCTUIManager *_uiManager;
+}
 
-- (void)connectToView:(NSNumber *)viewTag animatedModule:(RCTNativeAnimatedModule *)animationModule
+- (void)connectToView:(NSNumber *)viewTag
+             viewName:(NSString *)viewName
+            uiManager:(RCTUIManager *)uiManager
 {
-  _propertyMapper = [[RCTViewPropertyMapper alloc] initWithViewTag:viewTag animationModule:animationModule];
+  _connectedViewTag = viewTag;
+  _connectedViewName = viewName;
+  _uiManager = uiManager;
 }
 
 - (void)disconnectFromView:(NSNumber *)viewTag
 {
-  _propertyMapper = nil;
-}
-
-- (void)performUpdate
-{
-  [super performUpdate];
-  [self performViewUpdatesIfNecessary];
+  _connectedViewTag = nil;
+  _connectedViewName = nil;
+  _uiManager = nil;
 }
 
 - (NSString *)propertyNameForParentTag:(NSNumber *)parentTag
@@ -43,24 +49,33 @@
   return propertyName;
 }
 
-- (void)performViewUpdatesIfNecessary
+- (void)performUpdate
 {
-  NSMutableDictionary *updates = [NSMutableDictionary dictionary];
+  [super performUpdate];
+
+  if (!_connectedViewTag) {
+    RCTLogError(@"Node has not been attached to a view");
+    return;
+  }
+
+  NSMutableDictionary *props = [NSMutableDictionary dictionary];
   [self.parentNodes enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull parentTag, RCTAnimatedNode * _Nonnull parentNode, BOOL * _Nonnull stop) {
 
     if ([parentNode isKindOfClass:[RCTStyleAnimatedNode class]]) {
-      [updates addEntriesFromDictionary:[(RCTStyleAnimatedNode *)parentNode updatedPropsDictionary]];
+      [props addEntriesFromDictionary:[(RCTStyleAnimatedNode *)parentNode propsDictionary]];
 
     } else if ([parentNode isKindOfClass:[RCTValueAnimatedNode class]]) {
       NSString *property = [self propertyNameForParentTag:parentTag];
       CGFloat value = [(RCTValueAnimatedNode *)parentNode value];
-      [updates setObject:@(value) forKey:property];
+      [props setObject:@(value) forKey:property];
     }
 
   }];
 
-  if (updates.count) {
-    [_propertyMapper updateViewWithDictionary:updates];
+  if (props.count) {
+    [_uiManager synchronouslyUpdateViewOnUIThread:_connectedViewTag
+                                         viewName:_connectedViewName
+                                            props:props];
   }
 }
 
