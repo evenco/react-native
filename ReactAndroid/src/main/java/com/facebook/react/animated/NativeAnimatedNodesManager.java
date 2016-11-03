@@ -146,7 +146,7 @@ import javax.annotation.Nullable;
         " does not exists or is not a 'value' node");
     }
     ((ValueAnimatedNode) node).mOffset = offset;
-    mUpdatedNodes.add(node);
+    mUpdatedNodes.put(tag, node);
   }
 
   public void flattenAnimatedNodeOffset(int tag) {

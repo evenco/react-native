@@ -49,6 +49,8 @@
 
 - (void)flattenAnimatedNodeOffset:(nonnull NSNumber *)nodeTag;
 
+- (void)extractAnimatedNodeOffset:(nonnull NSNumber *)nodeTag;
+
 // drivers
 
 - (void)startAnimatingNode:(nonnull NSNumber *)animationId

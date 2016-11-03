@@ -119,14 +119,9 @@ RCT_EXPORT_METHOD(flattenAnimatedNodeOffset:(nonnull NSNumber *)nodeTag)
 
 RCT_EXPORT_METHOD(extractAnimatedNodeOffset:(nonnull NSNumber *)nodeTag)
 {
-  RCTAnimatedNode *node = _animationNodes[nodeTag];
-  if (![node isKindOfClass:[RCTValueAnimatedNode class]]) {
-    RCTLogError(@"Not a value node.");
-    return;
-  }
-
-  RCTValueAnimatedNode *valueNode = (RCTValueAnimatedNode *)node;
-  [valueNode extractOffset];
+  [_operations addObject:^(RCTNativeAnimatedNodesManager *nodesManager) {
+    [nodesManager extractAnimatedNodeOffset:nodeTag];
+  }];
 }
 
 RCT_EXPORT_METHOD(connectAnimatedNodeToView:(nonnull NSNumber *)nodeTag

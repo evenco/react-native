@@ -184,6 +184,18 @@
   [valueNode flattenOffset];
 }
 
+- (void)extractAnimatedNodeOffset:(nonnull NSNumber *)nodeTag
+{
+  RCTAnimatedNode *node = _animationNodes[nodeTag];
+  if (![node isKindOfClass:[RCTValueAnimatedNode class]]) {
+    RCTLogError(@"Not a value node.");
+    return;
+  }
+
+  RCTValueAnimatedNode *valueNode = (RCTValueAnimatedNode *)node;
+  [valueNode extractOffset];
+}
+
 #pragma mark -- Drivers
 
 - (void)startAnimatingNode:(nonnull NSNumber *)animationId
