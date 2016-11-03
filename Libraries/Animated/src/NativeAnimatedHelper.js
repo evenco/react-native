@@ -19,11 +19,11 @@ const invariant = require('fbjs/lib/invariant');
 let __nativeAnimatedNodeTagCount = 1; /* used for animated nodes */
 let __nativeAnimationIdCount = 1; /* used for started animations */
 
-type EndResult = {finished: bool};
+type EndResult = {finished: boolean};
 type EndCallback = (result: EndResult) => void;
 type EventMapping = {
-  nativeEventPath: Array<string>;
-  animatedValueTag: number;
+  nativeEventPath: Array<string>,
+  animatedValueTag: number,
 };
 
 let nativeEventEmitter;
@@ -143,12 +143,6 @@ function validateStyles(styles: Object): void {
   }
 }
 
-function validateProps(props: Object): void {
-  if (props.style) {
-    validateStyles(props.style);
-  }
-}
-
 function validateInterpolation(config: Object): void {
   var SUPPORTED_INTERPOLATION_PARAMS = {
     inputRange: true,
@@ -176,6 +170,10 @@ function assertNativeAnimatedModule(): void {
   invariant(NativeAnimatedModule, 'Native animated module is not available');
 }
 
+function isNativeAnimatedAvailable(): boolean {
+  return !!NativeAnimatedModule;
+}
+
 module.exports = {
   API,
   validateStyles,
@@ -184,6 +182,7 @@ module.exports = {
   generateNewNodeTag,
   generateNewAnimationId,
   assertNativeAnimatedModule,
+  isNativeAnimatedAvailable,
   get nativeEventEmitter() {
     if (!nativeEventEmitter) {
       nativeEventEmitter = new NativeEventEmitter(NativeAnimatedModule);

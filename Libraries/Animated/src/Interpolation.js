@@ -15,7 +15,7 @@
 var invariant = require('fbjs/lib/invariant');
 var normalizeColor = require('normalizeColor');
 
-export type ExtrapolateType = 'extend' | 'identity' | 'clamp';
+type ExtrapolateType = 'extend' | 'identity' | 'clamp';
 
 export type InterpolationConfigType = {
   inputRange: Array<number>,
