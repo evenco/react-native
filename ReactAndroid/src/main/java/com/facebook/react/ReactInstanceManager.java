@@ -79,6 +79,15 @@ public abstract class ReactInstanceManager {
   public abstract void createReactContextInBackground();
 
   /**
+   * Recreate the react application and context. This should be called if configuration has
+   * changed or the developer has requested the app to be reloaded. It should only be called after
+   * an initial call to createReactContextInBackground.
+   *
+   * Called from UI thread.
+   */
+  public abstract void recreateReactContextInBackground();
+
+  /**
    * @return whether createReactContextInBackground has been called. Will return false after
    * onDestroy until a new initial context has been created.
    */

@@ -198,6 +198,16 @@ RCT_EXPORT_METHOD(removeAnimatedEventFromView:(nonnull NSNumber *)viewTag
 
 #pragma mark -- Events
 
+- (void)driveAnimatedNodeValue:(nonnull NSNumber *)nodeTag
+                         value:(nonnull NSNumber *)value
+{
+  RCTAssertMainQueue();
+  [_nodesManager setAnimatedNodeValue:nodeTag value:value];
+  [_nodesManager updateAnimations];
+}
+
+#pragma mark -- Listeners
+
 - (NSArray<NSString *> *)supportedEvents
 {
   return @[@"onAnimatedValueUpdate"];

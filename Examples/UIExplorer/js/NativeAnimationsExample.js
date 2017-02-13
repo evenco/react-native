@@ -218,6 +218,9 @@ const styles = StyleSheet.create({
     height: 50,
     backgroundColor: 'blue',
   },
+  textBlock: {
+    fontSize: 20,
+  },
 });
 
 exports.framework = 'React';
@@ -459,6 +462,87 @@ exports.examples = [
     render: function() {
       return (
         <ValueListenerExample />
+      );
+    },
+  },
+  {
+    title: 'Animated value listener',
+    render: function() {
+      return (
+        <ValueListenerExample />
+      );
+    },
+  },
+  {
+    title: 'Background color interpolation (RGB)',
+    render: function() {
+      return (
+        <Tester
+          type="timing"
+          config={{ duration: 1000 }}>
+          {anim => (
+            <Animated.View
+              style={[
+                styles.block,
+                {
+                  backgroundColor: anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['rgba(0, 0, 255, 1)', 'rgba(255, 0, 0, 1)'],
+                  }),
+                }
+              ]}
+            />
+          )}
+        </Tester>
+      );
+    },
+  },
+  {
+    title: 'Background color interpolation (HSL)',
+    render: function() {
+      return (
+        <Tester
+          type="timing"
+          config={{ duration: 1000 }}>
+          {anim => (
+            <Animated.View
+              style={[
+                styles.block,
+                {
+                  backgroundColor: anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['hsla(240, 100%, 50%, 1)', 'hsla(300, 50%, 50%, 1)'],
+                  }),
+                }
+              ]}
+            />
+          )}
+        </Tester>
+      );
+    },
+  },
+  {
+    title: 'Text color interpolation (RGB)',
+    render: function() {
+      return (
+        <Tester
+          type="timing"
+          config={{ duration: 1000 }}>
+          {anim => (
+            <Animated.Text
+              style={[
+                styles.textBlock,
+                {
+                  color: anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['rgba(0, 0, 255, 1)', 'rgba(255, 0, 0, 1)'],
+                  }),
+                }
+              ]}>
+              I am a block (of text)
+            </Animated.Text>
+          )}
+        </Tester>
       );
     },
   },

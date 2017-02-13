@@ -110,6 +110,13 @@ RCT_EXPORT_MODULE()
 
 // <Even>
 RCT_EXPORT_VIEW_PROPERTY(hidden, BOOL)
+// HACKY: special handler for native text color animations. See RCTText.setColor
+RCT_CUSTOM_VIEW_PROPERTY(color, UIColor, RCTView)
+{
+  if ([view respondsToSelector:@selector(setColor:)]) {
+    [view performSelector:@selector(setColor:) withObject:[RCTConvert UIColor:json]];
+  }
+}
 // </Even>
 
 RCT_EXPORT_VIEW_PROPERTY(accessibilityLabel, NSString)

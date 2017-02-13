@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.VelocityTracker;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
 
@@ -57,12 +58,17 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   private boolean mRemoveClippedSubviews;
   private boolean mScrollEnabled = true;
   private boolean mSendMomentumEvents;
-  private int mContentOffsetXAnimatedNodeTag;
-  private int mContentOffsetYAnimatedNodeTag;
   private @Nullable FpsListener mFpsListener = null;
   private @Nullable String mScrollPerfTag;
   private @Nullable Drawable mEndBackground;
   private int mEndFillColor = Color.TRANSPARENT;
+
+  // <Even>
+  private int mContentOffsetXAnimatedNodeTag;
+  private int mContentOffsetYAnimatedNodeTag;
+  private VelocityTracker mVelocityTracker = VelocityTracker.obtain();
+  private boolean mDisableTopPull;
+  // </Even
 
   public ReactScrollView(ReactContext context) {
     this(context, null);
@@ -126,6 +132,10 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   public void setContentOffsetYAnimatedNodeTag(int tag) {
     mContentOffsetYAnimatedNodeTag = tag;
   }
+
+  public void setDisableTopPull(boolean disableTopPull) {
+    mDisableTopPull = disableTopPull;
+  }
   // </Even>
 
   @Override
@@ -187,6 +197,31 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
     if (!mScrollEnabled) {
       return false;
     }
+
+    // <Even>
+
+    int action = ev.getActionMasked();
+    switch (action) {
+      case MotionEvent.ACTION_DOWN:
+        mVelocityTracker.clear();
+        mVelocityTracker.addMovement(ev);
+        break;
+      case MotionEvent.ACTION_MOVE:
+        mVelocityTracker.addMovement(ev);
+        break;
+      case MotionEvent.ACTION_UP:
+      case MotionEvent.ACTION_CANCEL:
+        break;
+    }
+
+    if (mDisableTopPull && getScrollY() <= 0) {
+      mVelocityTracker.computeCurrentVelocity(1000);
+      if (mVelocityTracker.getYVelocity() > 0) {
+        return false;
+      }
+    }
+
+    // </Even>
 
     if (super.onInterceptTouchEvent(ev)) {
       NativeGestureUtil.notifyNativeGestureStarted(this, ev);

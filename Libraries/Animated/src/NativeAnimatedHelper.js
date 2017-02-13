@@ -108,6 +108,8 @@ const API = {
 const STYLES_WHITELIST = {
   opacity: true,
   transform: true,
+  color: true,
+  backgroundColor: true,
   /* legacy android transform properties */
   scaleX: true,
   scaleY: true,

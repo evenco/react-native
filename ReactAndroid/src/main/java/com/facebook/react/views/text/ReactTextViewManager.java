@@ -134,6 +134,13 @@ public class ReactTextViewManager extends BaseViewManager<ReactTextView, ReactTe
     view.setBorderWidth(SPACING_TYPES[index], width);
   }
 
+  // <Even>
+  @ReactProp(name = "color", customType = "Color")
+  public void setColor(ReactTextView view, int color) {
+    view.setTextColor(color);
+  }
+  // </Even>
+
   @ReactPropGroup(names = {
           "borderColor", "borderLeftColor", "borderRightColor", "borderTopColor", "borderBottomColor"
   }, customType = "Color")

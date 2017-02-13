@@ -14,8 +14,8 @@
 @interface RCTNativeAnimatedModule : RCTEventEmitter <RCTBridgeModule, RCTValueAnimatedNodeObserver, RCTEventDispatcherObserver>
 
 // <Even>
-- (void)setAnimatedNodeValue:(nonnull NSNumber *)nodeTag
-                       value:(nonnull NSNumber *)value;
+- (void)driveAnimatedNodeValue:(nonnull NSNumber *)nodeTag
+                         value:(nonnull NSNumber *)value;
 // </Even>
 
 @end

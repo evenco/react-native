@@ -16,6 +16,7 @@
 
 #import "RCTAdditionAnimatedNode.h"
 #import "RCTInterpolationAnimatedNode.h"
+#import "RCTRGBAInterpolationAnimatedNode.h"
 #import "RCTDiffClampAnimatedNode.h"
 #import "RCTDivisionAnimatedNode.h"
 #import "RCTModuloAnimatedNode.h"
@@ -59,7 +60,8 @@
     map = @{@"style" : [RCTStyleAnimatedNode class],
             @"value" : [RCTValueAnimatedNode class],
             @"props" : [RCTPropsAnimatedNode class],
-            @"interpolation" : [RCTInterpolationAnimatedNode class],
+            @"interpolation" : @{@"default" : [RCTInterpolationAnimatedNode class],
+                                 @"rgba"     : [RCTRGBAInterpolationAnimatedNode class]},
             @"addition" : [RCTAdditionAnimatedNode class],
             @"diffclamp": [RCTDiffClampAnimatedNode class],
             @"division" : [RCTDivisionAnimatedNode class],
@@ -69,8 +71,15 @@
   });
 
   NSString *nodeType = [RCTConvert NSString:config[@"type"]];
+  NSString *nodeOutputType = [RCTConvert NSString:config[@"outputType"]];
+  
+  Class nodeClass;
+  if ([map[nodeType] isKindOfClass:[NSDictionary class]]) {
+    nodeClass = map[nodeType][nodeOutputType];
+  } else {
+    nodeClass = map[nodeType];
+  }
 
-  Class nodeClass = map[nodeType];
   if (!nodeClass) {
     RCTLogError(@"Animated node type %@ not supported natively", nodeType);
     return;
@@ -149,7 +158,8 @@
 {
   RCTAnimatedNode *node = _animationNodes[nodeTag];
   if (![node isKindOfClass:[RCTValueAnimatedNode class]]) {
-    RCTLogError(@"Not a value node.");
+    // <Even> our scroll view hack often sends events before a node is registered
+    // RCTLogError(@"Not a value node.");
     return;
   }
 

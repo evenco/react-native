@@ -49,6 +49,32 @@ CGFloat RCTInterpolateValue(CGFloat value,
   return outputMin + (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin);
 }
 
+/**
+ * Interpolates value by remapping it linearly fromMin->fromMax to toMin[]->toMax[]
+ */
+NSArray<NSNumber *> *RCTCompoundInterpolateValue(CGFloat value,
+                                                 CGFloat inputMin,
+                                                 CGFloat inputMax,
+                                                 NSArray<NSNumber *> *outputMin,
+                                                 NSArray<NSNumber *> *outputMax,
+                                                 NSString *extrapolateLeft,
+                                                 NSString *extrapolateRight)
+{
+  NSMutableArray *result = [NSMutableArray array];
+  for (int i = 0; i < [outputMin count]; i++)
+  {
+    CGFloat resultValue = RCTInterpolateValue(value,
+                                              inputMin,
+                                              inputMax,
+                                              outputMin[i].doubleValue,
+                                              outputMax[i].doubleValue,
+                                              extrapolateLeft,
+                                              extrapolateRight);
+    [result addObject:@(resultValue)];
+  }
+  return result;
+}
+
 CGFloat RCTRadiansToDegrees(CGFloat radians)
 {
   return radians * 180.0 / M_PI;

@@ -18,6 +18,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.graphics.DashPathEffect;
 
 import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
@@ -164,8 +165,7 @@ public class ARTShapeShadowNode extends ARTVirtualNode {
         (int) (mStrokeColor[1] * 255),
         (int) (mStrokeColor[2] * 255));
     if (mStrokeDash != null && mStrokeDash.length > 0) {
-      // TODO(6352067): Support dashes
-      FLog.w(ReactConstants.TAG, "ART: Dashes are not supported yet!");
+      paint.setPathEffect(new DashPathEffect(mStrokeDash, 0));
     }
     return true;
   }
@@ -243,10 +243,10 @@ public class ARTShapeShadowNode extends ARTVirtualNode {
           parseGradientStops(mFillColor, stopsCount, stops, stopsColors);
           paint.setShader(
             new LinearGradient(
-              mFillColor[1] * 2,
-              mFillColor[2] * 2,
-              mFillColor[3] * 2,
-              mFillColor[4] * 2,
+              mFillColor[1] * mScale,
+              mFillColor[2] * mScale,
+              mFillColor[3] * mScale,
+              mFillColor[4] * mScale,
               stopsColors,
               stops,
               Shader.TileMode.CLAMP));

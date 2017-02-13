@@ -45,6 +45,10 @@ import javax.annotation.Nullable;
         throw new IllegalArgumentException("Mapped style node does not exists");
       } else if (node instanceof TransformAnimatedNode) {
         ((TransformAnimatedNode) node).collectViewUpdates(propsMap);
+      // <Even>
+      } else if (node instanceof CompoundInterpolationAnimatedNode) {
+        propsMap.putInt(entry.getKey(), (int)((CompoundInterpolationAnimatedNode) node).getValue());
+      // </Even>
       } else if (node instanceof ValueAnimatedNode) {
         propsMap.putDouble(entry.getKey(), ((ValueAnimatedNode) node).getValue());
       } else {

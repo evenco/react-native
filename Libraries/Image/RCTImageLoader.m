@@ -55,14 +55,6 @@
 
 RCT_EXPORT_MODULE()
 
-- (instancetype)initWithCache:(NSURLCache *)cache {
-  if (self = [super init]) {
-    // <Even> figure it out
-//    _URLCache = cache;
-  }
-  return self;
-}
-
 - (void)setUp
 {
   // Set defaults

@@ -23,7 +23,9 @@
 #import "UIView+React.h"
 
 // <Even> figure it out
+#ifdef EVEN
 #import "RCTNativeAnimatedModule.h"
+#endif
 // </Even>
 
 CGFloat const ZINDEX_DEFAULT = 0;
@@ -735,13 +737,15 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
 
 // <Even> figure it out
 - (void)updateScrollAnimatedValue {
+  #ifdef EVEN
   RCTNativeAnimatedModule *module = [RCTNativeAnimatedModule new];
   if (_scrollView.contentOffsetXAnimatedNodeTag) {
-    [module setAnimatedNodeValue:_scrollView.contentOffsetXAnimatedNodeTag value:@(_scrollView.contentOffset.x)];
+    [module driveAnimatedNodeValue:_scrollView.contentOffsetXAnimatedNodeTag value:@(_scrollView.contentOffset.x)];
   }
   if (_scrollView.contentOffsetYAnimatedNodeTag) {
-    [module setAnimatedNodeValue:_scrollView.contentOffsetYAnimatedNodeTag value:@(_scrollView.contentOffset.y)];
+    [module driveAnimatedNodeValue:_scrollView.contentOffsetYAnimatedNodeTag value:@(_scrollView.contentOffset.y)];
   }
+  #endif
 }
 // </Even>
 

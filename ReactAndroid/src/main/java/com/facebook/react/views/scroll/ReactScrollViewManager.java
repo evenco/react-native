@@ -110,6 +110,11 @@ public class ReactScrollViewManager
   }
 
   // <Even>
+  @ReactProp(name = "disableTopPull")
+  public void setDisableTopPull(ReactScrollView view, boolean disableTopPull) {
+    view.setDisableTopPull(disableTopPull);
+  }
+
   @ReactProp(name = "contentOffsetXAnimatedNodeTag")
   public void setContentOffsetXAnimatedNodeTag(ReactScrollView view, int tag) {
     view.setContentOffsetXAnimatedNodeTag(tag);

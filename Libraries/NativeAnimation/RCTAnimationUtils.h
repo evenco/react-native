@@ -24,5 +24,13 @@ RCT_EXTERN CGFloat RCTInterpolateValue(CGFloat value,
                                        NSString *extrapolateLeft,
                                        NSString *extrapolateRight);
 
+RCT_EXTERN NSArray<NSNumber *> *RCTCompoundInterpolateValue(CGFloat value,
+                                                            CGFloat inputMin,
+                                                            CGFloat inputMax,
+                                                            NSArray<NSNumber *> *outputMin,
+                                                            NSArray<NSNumber *> *outputMax,
+                                                            NSString *extrapolateLeft,
+                                                            NSString *extrapolateRight);
+
 RCT_EXTERN CGFloat RCTRadiansToDegrees(CGFloat radians);
 RCT_EXTERN CGFloat RCTDegreesToRadians(CGFloat degrees);

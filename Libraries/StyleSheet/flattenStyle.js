@@ -38,7 +38,13 @@ function flattenStyle(style: ?StyleObj): ?Object {
     var computedStyle = flattenStyle(style[i]);
     if (computedStyle) {
       for (var key in computedStyle) {
-        result[key] = computedStyle[key];
+        // <Even>
+        if (key == 'transform' && result[key]) {
+          result[key] = result[key].concat(computedStyle[key]);
+        // </Even>
+        } else {
+          result[key] = computedStyle[key];
+        }
       }
     }
   }

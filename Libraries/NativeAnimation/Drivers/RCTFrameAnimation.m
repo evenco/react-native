@@ -32,7 +32,6 @@ const double SINGLE_FRAME_INTERVAL = 1.0 / 60.0;
   NSArray<NSNumber *> *_frames;
   CGFloat _toValue;
   CGFloat _fromValue;
-  NSTimeInterval _delay;
   NSTimeInterval _animationStartTime;
   NSTimeInterval _animationCurrentTime;
   RCTResponseSenderBlock _callback;
@@ -45,14 +44,12 @@ const double SINGLE_FRAME_INTERVAL = 1.0 / 60.0;
 {
   if ((self = [super init])) {
     NSNumber *toValue = [RCTConvert NSNumber:config[@"toValue"]] ?: @1;
-    NSTimeInterval delay = [RCTConvert double:config[@"delay"]];
     NSArray<NSNumber *> *frames = [RCTConvert NSNumberArray:config[@"frames"]];
 
     _animationId = animationId;
     _toValue = toValue.floatValue;
     _fromValue = valueNode.value;
     _valueNode = valueNode;
-    _delay = delay;
     _frames = [frames copy];
     _callback = [callback copy];
   }
@@ -91,16 +88,8 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
     return;
   }
 
-  NSTimeInterval currentTime = CACurrentMediaTime();
-  NSTimeInterval stepInterval = currentTime - _animationCurrentTime;
-  _animationCurrentTime = currentTime;
+  _animationCurrentTime = CACurrentMediaTime();
   NSTimeInterval currentDuration = _animationCurrentTime - _animationStartTime;
-
-  if (_delay > 0) {
-    // Decrement delay
-    _delay -= stepInterval;
-    return;
-  }
 
   // Determine how many frames have passed since last update.
   // Get index of frames that surround the current interval

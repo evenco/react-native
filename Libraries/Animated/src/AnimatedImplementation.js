@@ -20,10 +20,13 @@ var Set = require('Set');
 var SpringConfig = require('SpringConfig');
 var ViewStylePropTypes = require('ViewStylePropTypes');
 
+var degreeDetectRegex = /deg$/;
+
 var findNodeHandle = require('react/lib/findNodeHandle');
 var flattenStyle = require('flattenStyle');
 var invariant = require('fbjs/lib/invariant');
 var requestAnimationFrame = require('fbjs/lib/requestAnimationFrame');
+var normalizeColor = require('normalizeColor');
 
 import type { InterpolationConfigType } from 'Interpolation';
 
@@ -1101,6 +1104,16 @@ class AnimatedInterpolation extends AnimatedWithChildren {
     super.__detach();
   }
 
+  __getOutputType(range) {
+    const value = range[0];
+    if (typeof value === 'string') {
+      if (normalizeColor(value)) {
+        return 'rgba';
+      }
+    }
+    return 'default';
+  }
+
   __transformDataType(range) {
     // Change the string array type to number array
     // So we can reuse the same logic in iOS and Android platform
@@ -1108,14 +1121,22 @@ class AnimatedInterpolation extends AnimatedWithChildren {
       if (typeof value !== 'string') {
         return value;
       }
-      if (/deg$/.test(value)) {
+      if (degreeDetectRegex.test(value)) {
         const degrees = parseFloat(value, 10) || 0;
         const radians = degrees * Math.PI / 180.0;
         return radians;
-      } else {
-        // Assume radians
-        return parseFloat(value, 10) || 0;
       }
+      var color = normalizeColor(value);
+      if (color) {
+        return [
+          (color >> 24) & 0xff,
+          (color >> 16) & 0xff,
+          (color >> 8) & 0xff,
+          (color) & 0xff,
+        ];
+      }
+      // Assume radians
+      return parseFloat(value, 10) || 0;
     });
   }
 
@@ -1131,6 +1152,7 @@ class AnimatedInterpolation extends AnimatedWithChildren {
       extrapolateLeft: this._config.extrapolateLeft || this._config.extrapolate || 'extend',
       extrapolateRight: this._config.extrapolateRight || this._config.extrapolate || 'extend',
       type: 'interpolation',
+      outputType: this.__getOutputType(this._config.outputRange),
     };
   }
 }
@@ -1715,6 +1737,11 @@ function createAnimatedComponent(Component: any): any {
         this._detachNativeEvents(this.props);
       }
 
+      // <Even> HACK null check (https://github.com/facebook/react-native/issues/10635)
+      if (!this._component) {
+        return;
+      }
+
       // Make sure to get the scrollable node for components that implement
       // `ScrollResponder.Mixin`.
       const ref = this._component.getScrollableNode ?
@@ -1730,6 +1757,11 @@ function createAnimatedComponent(Component: any): any {
     }
 
     _detachNativeEvents(props) {
+      // <Even> HACK null check (https://github.com/facebook/react-native/issues/10635)
+      if (!this._component) {
+        return;
+      }
+
       // Make sure to get the scrollable node for components that implement
       // `ScrollResponder.Mixin`.
       const ref = this._component.getScrollableNode ?

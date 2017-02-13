@@ -72,13 +72,6 @@ typedef dispatch_block_t RCTImageLoaderCancellationBlock;
 @property (nonatomic, assign) NSUInteger maxConcurrentDecodingBytes;
 
 /**
- * [Even]
- * An opportunity to override default caching behavior.
- * Initialize an image loader and provide in [RCTBridge initWithBundleURL:...]
- */
-- (instancetype)initWithCache:(NSURLCache *)cache;
-
-/**
  * Loads the specified image at the highest available resolution.
  * Can be called from any thread, will call back on an unspecified thread.
  */

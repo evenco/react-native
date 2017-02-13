@@ -85,7 +85,14 @@ import javax.annotation.Nullable;
     } else if ("props".equals(type)) {
       node = new PropsAnimatedNode(config, this);
     } else if ("interpolation".equals(type)) {
-      node = new InterpolationAnimatedNode(config);
+      // <Even>
+      String outputType = config.getString("outputType");
+      if ("rgba".equals(outputType)) {
+        node = new RGBAInterpolationAnimatedNode(config);
+      } else {
+        node = new InterpolationAnimatedNode(config);
+      }
+      // </Even>
     } else if ("addition".equals(type)) {
       node = new AdditionAnimatedNode(config, this);
     } else if ("division".equals(type)) {

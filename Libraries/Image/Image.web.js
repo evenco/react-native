@@ -48,10 +48,10 @@ var Image = React.createClass({
         var source = props.source;
         if (source.capInsets) {
             var capPercents = {
-                top: source.capInsets.top / source.intrinsicHeight * 100,
-                right: source.capInsets.right / source.intrinsicWidth * 100,
-                bottom: source.capInsets.bottom / source.intrinsicHeight * 100,
-                left: source.capInsets.left / source.intrinsicWidth * 100,
+                top: source.capInsets.top / source.height * 100,
+                right: source.capInsets.right / source.width * 100,
+                bottom: source.capInsets.bottom / source.height * 100,
+                left: source.capInsets.left / source.width * 100,
             };
             Object.assign(style, {
                 borderTopWidth: source.capInsets.top,
@@ -63,11 +63,13 @@ var Image = React.createClass({
         }
         if (props.resizeMode == 'stretch') {
             style.width = '100%';
-        }
-        if (props.resizeMode == 'contain') {
+        } else if (props.resizeMode == 'contain') {
             style.display = 'inline';
             style.maxWidth = '100%';
             style.maxHeight = '100%';
+        } else {
+            style.width = source.width;
+            style.height = source.height;
         }
         return {style: style};
     },

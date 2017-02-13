@@ -11,6 +11,7 @@
 
 @interface RCTText : UIView
 
+@property (nonatomic, strong) UIColor *overrideTextColor;
 @property (nonatomic, assign) UIEdgeInsets contentInset;
 @property (nonatomic, strong) NSTextStorage *textStorage;
 @property (nonatomic, assign) CGRect textFrame;

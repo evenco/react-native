@@ -6,27 +6,42 @@
 var React = require('React');
 var ReactDOM = require('react/lib/ReactDOM');
 
-//
+var async = (method) => {
+  return {
+    type: 'async',
+    method: method,
+  };
+};
+
+var sync = (method) => {
+  return {
+    type: 'sync',
+    method: method,
+  };
+};
+
+var promise = (method) => {
+  return {
+    type: 'promise',
+    method: method,
+  };
+};
 
 var remoteModules = {
 
   UIManager: {
 
-    layoutAnimationDisabled: true,
-    // customBubblingEventTypes: {},
-    // customDirectEventTypes: {},
-    Dimensions: {},
-
-    RCTScrollView: {
-      Constants: {},
+    constants: {
+      layoutAnimationDisabled: true,
+      Dimensions: {},
     },
 
-    measure: function(nodeID, onSuccess) {
-      var rect = document.querySelector(`[data-reactid="${nodeID}"]`).getBoundingClientRect();
+    measure: async((nodeID, onSuccess) => {
+      var rect = ReactDOM.findDOMNode(nodeID).getBoundingClientRect();
       onSuccess(rect.left, rect.top, rect.width, rect.height, rect.left, rect.top);
-    },
+    }),
 
-    measureLayout: function(nodeHandle, relativeToNativeNode, onFail, onSuccess) {
+    measureLayout: async((nodeHandle, relativeToNativeNode, onFail, onSuccess) => {
       var nodeMeasure = ReactDOM.findDOMNode(nodeHandle).getBoundingClientRect();
       var ancestorMeasure = ReactDOM.findDOMNode(relativeToNativeNode).getBoundingClientRect();
       onSuccess(
@@ -35,9 +50,9 @@ var remoteModules = {
         nodeMeasure.width,
         nodeMeasure.height,
       );
-    },
+    }),
 
-    measureLayoutRelativeToParent: function(nodeHandle, onFail, onSuccess) {
+    measureLayoutRelativeToParent: async((nodeHandle, onFail, onSuccess) => {
       var node = ReactDOM.findDOMNode(nodeHandle);
       var nodeMeasure = node.getBoundingClientRect();
 
@@ -52,106 +67,159 @@ var remoteModules = {
         nodeMeasure.width,
         nodeMeasure.height,
       );
-    },
+    }),
 
-    configureNextLayoutAnimation: function(config, onAnimationDidEnd, onError) {
+    configureNextLayoutAnimation: async((config, onAnimationDidEnd, onError) => {
       if (onAnimationDidEnd) {
         onAnimationDidEnd();
       }
-    },
-
-    setChildren: () => {
-      console.log('setChildren');
-    },
+    }),
 
   },
 
   AppState: {
 
-    getCurrentAppState: function(callback) {
+    getCurrentAppState: async((callback) => {
       return callback('active');
-    },
+    }),
 
   },
 
   PushNotificationManager: {
 
-    scheduleLocalNotification: function(details) {},
-    setApplicationIconBadgeNumber: function(number) {},
-    getApplicationIconBadgeNumber: function(callback) {},
-    requestPermissions: function(permissions) {},
-    abandonPermissions: function() {},
+    scheduleLocalNotification: async((details) => {
+      // noop
+    }),
 
-    checkPermissions: function(callback) {
-      window.setTimeout(function() {
-        callback({});
-      }, 0);
-    },
+    setApplicationIconBadgeNumber: async((number) => {
+      // noop
+    }),
+
+    getApplicationIconBadgeNumber: async((callback) => {
+      callback(0);
+    }),
+
+    requestPermissions: promise((permissions) => {
+      return Promise.resolve({});
+    }),
+
+    abandonPermissions: async(() => {
+      // noop
+    }),
+
+    checkPermissions: async((callback) => {
+      callback({});
+    }),
 
   },
 
   StatusBarManager: {
-    HEIGHT: 0,
+
+    constants: {
+      HEIGHT: 0,
+    },
+
   },
 
   ActionSheetManager: {
 
-    showShareActionSheetWithOptions: function(options, failureCallback, successCallback) {
+    showShareActionSheetWithOptions: async((options, failureCallback, successCallback) => {
       console.error('Not supported on this platform');
-    },
+    }),
 
-    showActionSheetWithOptions: function(options, failureCallback, successCallback) {
+    showActionSheetWithOptions: async((options, failureCallback, successCallback) => {
       console.error('Not supported on this platform');
-    },
+    }),
 
   },
 
   NetInfo: {
 
-    getCurrentConnectivity: function() {
+    getCurrentConnectivity: promise(() => {
       return Promise.resolve({
         network_info: {},
       });
-    },
+    }),
+
   },
 
   WebSocketModule: {
 
-    connect: () => {},
-    send: () => {},
-    sendBinary: () => {},
-    close: () => {},
-    ping: () => {},
+    connect: async(() => {
+      // noop
+    }),
+
+    send: async(() => {
+      // noop
+    }),
+
+    sendBinary: async(() => {
+      // noop
+    }),
+
+    close: async(() => {
+      // noop
+    }),
+
+    ping: async(() => {
+      // noop
+    }),
 
   },
 
 };
 
 var remoteModulesConfig = [];
+
 for (var moduleName in remoteModules) {
+  var remoteModule = remoteModules[moduleName];
+
+  var constants = null;
   var methods = [];
-  for (var fieldName in remoteModules[moduleName]) {
+  var promiseMethodIDs = [];
+  var syncMethodIDs = [];
+
+  var i = 0;
+  for (var fieldName in remoteModule) {
+    var fieldDefinition = remoteModule[fieldName];
+
+    if (fieldName == 'constants') {
+      constants = fieldDefinition;
+      continue;
+    }
+
     methods.push(fieldName);
+    switch (fieldDefinition.type) {
+      case 'promise':
+        promiseMethodIDs.push(i);
+        break;
+      case 'sync':
+        syncMethodIDs.push(i);
+        break;
+      default:
+        break;
+    }
+
+    i++;
   }
+
   remoteModulesConfig.push([
-    moduleName, // name
-    null,       // constants
-    methods,    // methods
-    [],         // promise methods
-    [],         // sync methods
+    moduleName,       // name
+    constants,        // constants
+    methods,          // methods
+    promiseMethodIDs, // promise methods
+    syncMethodIDs,    // sync methods
   ]);
 }
-
-//
 
 class BatchedBridge {
 
   createDebugLookup(moduleID: number, name: string, methods: Array<string>) {
-    //
+    // noop
   }
 
   registerCallableModule(name: string, module: Object) {
-    //
+    // noop
   }
 
   enqueueNativeCall(moduleID: number, methodID: number, params: Array<any>, onFail: ?Function, onSucc: ?Function) {
@@ -160,7 +228,7 @@ class BatchedBridge {
     var moduleConfig = remoteModulesConfig[moduleID];
     var methodName = moduleConfig[2][methodID];
     var module = remoteModules[moduleConfig[0]];
-    module[methodName](...params);
+    module[methodName].method(...params);
   }
 
 }

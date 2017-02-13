@@ -94,8 +94,24 @@ static void collectNonTextDescendants(RCTText *view, NSMutableArray *nonTextDesc
   }
 }
 
+- (void)setColor:(UIColor *)color
+{
+  // HACKY: RCTText can have a color that overrides the existing view color. This is used because
+  // RCTShadowText can set the text color during initialization but not afterwards; changes get ignored.
+  // Instead, RCTViewManager intercepts propConfig_color calls and pass them to us.
+  _overrideTextColor = color;
+  [self setNeedsDisplay];
+}
+
 - (void)drawRect:(CGRect)rect
 {
+  if (_overrideTextColor)
+  {
+    [_textStorage addAttribute:NSForegroundColorAttributeName
+                         value:_overrideTextColor
+                         range:NSMakeRange(0, _textStorage.length)];
+  }
+
   NSLayoutManager *layoutManager = [_textStorage.layoutManagers firstObject];
   NSTextContainer *textContainer = [layoutManager.textContainers firstObject];
 

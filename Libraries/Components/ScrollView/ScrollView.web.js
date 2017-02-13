@@ -10,6 +10,10 @@ var View = require('View');
 
 var styles = StyleSheet.create({
 
+    container: {
+        //
+    },
+
     scroll: {
         flex: 1,
         WebkitOverflowScrolling: 'touch',
@@ -127,12 +131,18 @@ var ScrollView = React.createClass({
             scrollEnabled,
             scrollEventThrottle,
             stickyHeaderIndices,
+            onContentSizeChange,
+            keyboardShouldPersistTaps,
+            showsVerticalScrollIndicator,
+            pagingEnabled,
+            disableTopPull,
+            animatedScrollY,
             children,
             ...props,
         } = this.props;
 
         return (
-            <View {...props}>
+            <View {...props} style={[styles.container, props.style]}>
                 <View ref="scrollView" style={scrollStyle} onScroll={this._onScroll}>
                     <View ref="containerView" style={containerStyle}>
                         {children}

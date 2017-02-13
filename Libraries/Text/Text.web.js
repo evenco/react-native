@@ -34,6 +34,7 @@ var Text = React.createClass({
             style,
             children,
             allowFontScaling,
+            numberOfLines,
             ...props,
         } = this.props;
 

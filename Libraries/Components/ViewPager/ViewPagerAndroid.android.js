@@ -70,6 +70,10 @@ export type ViewPagerScrollState = $Enum<{
  * ```
  */
 class ViewPagerAndroid extends React.Component {
+  /*
+  // This conflicts with the expected props for native components; It needs
+  // to be commented out for now, otherwise the Android app won't start, and
+  // it will complain about a missing accessibilityLevel:string prop instead
   props: {
     initialPage?: number,
     onPageScroll?: Function,
@@ -79,6 +83,7 @@ class ViewPagerAndroid extends React.Component {
     keyboardDismissMode?: 'none' | 'on-drag',
     scrollEnabled?: boolean,
   };
+  */
 
   static propTypes = {
     ...View.propTypes,

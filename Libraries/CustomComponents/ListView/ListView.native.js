@@ -433,7 +433,7 @@ var ListView = React.createClass({
               this.state.highlightedRow.rowID === rowID ||
               this.state.highlightedRow.rowID === rowIDs[rowIdx + 1]
             );
-          var separator = 
+          var separator =
             <StaticRenderer
               key={'s_' + comboID}
               shouldUpdate={!!shouldUpdateRow}

@@ -5,10 +5,12 @@
 'use strict';
 
 var React = require('React');
+var ReactDOM = require('react-dom');
 var StyleSheet = require('StyleSheet');
 var StyleSheetPropType = require('StyleSheetPropType');
 var ViewStylePropTypes = require('ViewStylePropTypes');
 var webifyStyle = require('webifyStyle');
+var findNodeHandle = require('react/lib/findNodeHandle');
 
 var stylePropType = StyleSheetPropType(ViewStylePropTypes);
 
@@ -60,26 +62,12 @@ var View = React.createClass({
         }
     },
 
-    measure: function(callback?: Function): Object {
-        var m = this._div.getBoundingClientRect();
+    measure: function(callback?: Function) {
+        var rect = ReactDOM.findDOMNode(findNodeHandle(this)).getBoundingClientRect();
         if (callback) {
-            callback(m.left, m.top, m.width, m.height, m.left, m.top);
+            callback(rect.left, rect.top, rect.width, rect.height, rect.left, rect.top);
         }
-        return m;
-    },
-
-    childrenWithPointerEvents: function(children, value) {
-        if (!children) {
-            return children;
-        }
-        if (Array.isArray(children)) {
-            return children.map((child) => {
-                return this.childrenWithPointerEvents(child, value);
-            });
-        }
-        return React.cloneElement(children, {
-            pointerEvents: value,
-        });
+        return rect;
     },
 
     render: function(): ReactElement {
@@ -107,31 +95,9 @@ var View = React.createClass({
 
         // pointer events
 
-        var childPointerEvents;
+        var className;
         if (pointerEvents) {
-            switch (pointerEvents) {
-                case 'auto':
-                    pointerEvents = 'auto';
-                    break;
-                case 'none':
-                    pointerEvents = 'none';
-                    break;
-                case 'box-only':
-                    childPointerEvents = 'none';
-                    break;
-                case 'box-none':
-                    pointerEvents = 'none';
-                    childPointerEvents = 'auto';
-                    break;
-            }
-        }
-
-        style = webifyStyle([style, {
-            pointerEvents: pointerEvents,
-        }]);
-
-        if (childPointerEvents) {
-            children = this.childrenWithPointerEvents(children, childPointerEvents);
+            className = `rn-pointer-events-${pointerEvents}`;
         }
 
         // layout
@@ -145,7 +111,8 @@ var View = React.createClass({
             <div
                 {...props}
                 ref={(ref) => this._div = ref}
-                style={style}
+                className={className}
+                style={webifyStyle(style)}
                 children={children}
             />
         );
