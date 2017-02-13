@@ -10,7 +10,7 @@ var StyleSheet = require('StyleSheet');
 var StyleSheetPropType = require('StyleSheetPropType');
 var ViewStylePropTypes = require('ViewStylePropTypes');
 var webifyStyle = require('webifyStyle');
-var findNodeHandle = require('react/lib/findNodeHandle');
+var findNodeHandle = require('findNodeHandle');
 
 var stylePropType = StyleSheetPropType(ViewStylePropTypes);
 
@@ -87,6 +87,9 @@ var View = React.createClass({
             onResponderRelease,
             onResponderTerminate,
             pointerEvents,
+            isTVSelectable,
+            tvParallaxProperties,
+            hasTVPreferredFocus,
             style,
             testID,
             children,

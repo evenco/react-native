@@ -28,7 +28,7 @@ import com.facebook.react.bridge.ReadableMap;
     mMin = config.getDouble("min");
     mMax = config.getDouble("max");
 
-    mValue = mLastValue = getInputNodeValue();
+    mValue = mLastValue = 0;
   }
 
   @Override
@@ -50,6 +50,7 @@ import com.facebook.react.bridge.ReadableMap;
       throw new JSApplicationCausedNativeException("Illegal node ID set as an input for " +
         "Animated.diffClamp node");
     }
+
     return ((ValueAnimatedNode) animatedNode).getValue();
   }
 }

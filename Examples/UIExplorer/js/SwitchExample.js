@@ -134,28 +134,25 @@ class EventSwitchExample extends React.Component {
 var examples = [
   {
     title: 'Switches can be set to true or false',
-    render(): ReactElement<any> { return <BasicSwitchExample />; }
+    render(): React.Element<any> { return <BasicSwitchExample />; }
   },
   {
     title: 'Switches can be disabled',
-    render(): ReactElement<any> { return <DisabledSwitchExample />; }
+    render(): React.Element<any> { return <DisabledSwitchExample />; }
   },
   {
     title: 'Change events can be detected',
-    render(): ReactElement<any> { return <EventSwitchExample />; }
+    render(): React.Element<any> { return <EventSwitchExample />; }
   },
   {
     title: 'Switches are controlled components',
-    render(): ReactElement<any> { return <Switch />; }
+    render(): React.Element<any> { return <Switch />; }
+  },
+  {
+    title: 'Custom colors can be provided',
+    render(): React.Element<any> { return <ColorSwitchExample />; }
   }
 ];
-
-if (Platform.OS === 'ios') {
-  examples.push({
-    title: 'Custom colors can be provided',
-    render(): ReactElement<any> { return <ColorSwitchExample />; }
-  });
-}
 
 exports.title = '<Switch>';
 exports.displayName = 'SwitchExample';

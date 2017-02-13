@@ -9,9 +9,10 @@
 
 package com.facebook.react.views.art;
 
-import com.facebook.csslayout.CSSMeasureMode;
-import com.facebook.csslayout.CSSNodeAPI;
-import com.facebook.csslayout.MeasureOutput;
+import com.facebook.yoga.YogaMeasureMode;
+import com.facebook.yoga.YogaMeasureFunction;
+import com.facebook.yoga.YogaNodeAPI;
+import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.uimanager.BaseViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 
@@ -19,20 +20,20 @@ import com.facebook.react.uimanager.ThemedReactContext;
  * ViewManager for ARTSurfaceView React views. Renders as a {@link ARTSurfaceView} and handles
  * invalidating the native view on shadow view updates happening in the underlying tree.
  */
+@ReactModule(name = ARTSurfaceViewManager.REACT_CLASS)
 public class ARTSurfaceViewManager extends
     BaseViewManager<ARTSurfaceView, ARTSurfaceViewShadowNode> {
 
-  private static final String REACT_CLASS = "ARTSurfaceView";
+  protected static final String REACT_CLASS = "ARTSurfaceView";
 
-  private static final CSSNodeAPI.MeasureFunction MEASURE_FUNCTION = new CSSNodeAPI.MeasureFunction() {
+  private static final YogaMeasureFunction MEASURE_FUNCTION = new YogaMeasureFunction() {
     @Override
-    public void measure(
-        CSSNodeAPI node,
+    public long measure(
+        YogaNodeAPI node,
         float width,
-        CSSMeasureMode widthMode,
+        YogaMeasureMode widthMode,
         float height,
-        CSSMeasureMode heightMode,
-        MeasureOutput measureOutput) {
+        YogaMeasureMode heightMode) {
       throw new IllegalStateException("SurfaceView should have explicit width and height set");
     }
   };

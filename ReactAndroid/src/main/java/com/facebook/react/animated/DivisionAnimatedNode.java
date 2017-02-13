@@ -37,11 +37,18 @@ import com.facebook.react.bridge.ReadableMap;
   public void update() {
     for (int i = 0; i < mInputNodes.length; i++) {
       AnimatedNode animatedNode = mNativeAnimatedNodesManager.getNodeById(mInputNodes[i]);
-      if (animatedNode == null) {
-        throw new JSApplicationCausedNativeException("Unknown node set as an input for " +
-          "Animated.divide node");
-      }
-      if (!(animatedNode instanceof ValueAnimatedNode)) {
+      if (animatedNode != null && animatedNode instanceof ValueAnimatedNode) {
+        double value = ((ValueAnimatedNode) animatedNode).getValue();
+        if (i == 0) {
+          mValue = value;
+          continue;
+        }
+        if (value == 0) {
+          throw new JSApplicationCausedNativeException("Detected a division by zero in " +
+            "Animated.divide node");
+        }
+        mValue /= value;
+      } else {
         throw new JSApplicationCausedNativeException("Illegal node ID set as an input for " +
           "Animated.divide node");
       }

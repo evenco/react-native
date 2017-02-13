@@ -14,7 +14,7 @@
 // Note (avik): add @flow when Flow supports spread properties in propTypes
 
 var ColorPropType = require('ColorPropType');
-var NativeMethodsMixin = require('react/lib/NativeMethodsMixin');
+var NativeMethodsMixin = require('NativeMethodsMixin');
 var React = require('React');
 var ReactNativeViewAttributes = require('ReactNativeViewAttributes');
 var StyleSheet = require('StyleSheet');
@@ -27,7 +27,6 @@ var ensureComponentIsNative = require('ensureComponentIsNative');
 var ensurePositiveDelayProps = require('ensurePositiveDelayProps');
 var keyOf = require('fbjs/lib/keyOf');
 var merge = require('merge');
-var onlyChild = require('react/lib/onlyChild');
 
 type Event = Object;
 
@@ -88,9 +87,27 @@ var TouchableHighlight = React.createClass({
      */
     onHideUnderlay: React.PropTypes.func,
     /**
-     * Whether or not touches are enabled
+     * *(Apple TV only)* TV preferred focus (see documentation for the View component).
+     *
+     * @platform ios
      */
+    hasTVPreferredFocus: React.PropTypes.bool,
+    /**
+     * *(Apple TV only)* Object with properties to control Apple TV parallax effects.
+     *
+     * enabled: If true, parallax effects are enabled.  Defaults to true.
+     * shiftDistanceX: Defaults to 2.0.
+     * shiftDistanceY: Defaults to 2.0.
+     * tiltAngle: Defaults to 0.05.
+     * magnification: Defaults to 1.0.
+     *
+     * @platform ios
+     */
+    tvParallaxProperties: React.PropTypes.object,
+
+    // <Even>
     disabled: React.PropTypes.bool,
+    // </Even>
   },
 
   mixins: [NativeMethodsMixin, TimerMixin, Touchable.Mixin],
@@ -114,8 +131,11 @@ var TouchableHighlight = React.createClass({
         TOUCHABLE_STYLE,
         {backgroundColor: 'transparent'},
         props.style,
+        // <Even>
         props.disabled && {opacity: 0.66},
-      ]
+        // </Even>
+      ],
+      hasTVPreferredFocus: props.hasTVPreferredFocus
     };
   },
 
@@ -153,9 +173,11 @@ var TouchableHighlight = React.createClass({
    * defined on your component.
    */
   touchableHandleActivePressIn: function(e: Event) {
+    // <Even>
     if (this.props.disabled) {
       return;
     }
+    // </Even>
     this.clearTimeout(this._hideTimeout);
     this._hideTimeout = null;
     this._showUnderlay();
@@ -163,9 +185,11 @@ var TouchableHighlight = React.createClass({
   },
 
   touchableHandleActivePressOut: function(e: Event) {
+    // <Even>
     if (this.props.disabled) {
       return;
     }
+    // </Even>
     if (!this._hideTimeout) {
       this._hideUnderlay();
     }
@@ -173,9 +197,11 @@ var TouchableHighlight = React.createClass({
   },
 
   touchableHandlePress: function(e: SyntheticEvent) {
+    // <Even>
     if (this.props.disabled) {
       return;
     }
+    // </Even>
     this.clearTimeout(this._hideTimeout);
     this._showUnderlay();
     this._hideTimeout = this.setTimeout(this._hideUnderlay,
@@ -184,9 +210,11 @@ var TouchableHighlight = React.createClass({
   },
 
   touchableHandleLongPress: function(e: Event) {
+    // <Even>
     if (this.props.disabled) {
       return;
     }
+    // </Even>
     this.props.onLongPress && this.props.onLongPress(e);
   },
 
@@ -250,6 +278,9 @@ var TouchableHighlight = React.createClass({
         style={this.state.underlayStyle}
         onLayout={this.props.onLayout}
         hitSlop={this.props.hitSlop}
+        isTVSelectable={true}
+        tvParallaxProperties={this.props.tvParallaxProperties}
+        hasTVPreferredFocus={this.state.hasTVPreferredFocus}
         onStartShouldSetResponder={this.touchableHandleStartShouldSetResponder}
         onResponderTerminationRequest={this.touchableHandleResponderTerminationRequest}
         onResponderGrant={this.touchableHandleResponderGrant}
@@ -263,7 +294,7 @@ var TouchableHighlight = React.createClass({
         onClick={this.touchableHandlePress}
         >
         {React.cloneElement(
-          onlyChild(this.props.children),
+          React.Children.only(this.props.children),
           {
             ref: CHILD_REF,
           }

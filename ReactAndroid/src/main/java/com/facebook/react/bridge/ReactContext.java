@@ -40,7 +40,8 @@ public class ReactContext extends ContextWrapper {
 
   private static final String EARLY_JS_ACCESS_EXCEPTION_MESSAGE =
     "Tried to access a JS module before the React instance was fully set up. Calls to " +
-      "ReactContext#getJSModule should be protected by ReactContext#hasActiveCatalystInstance().";
+      "ReactContext#getJSModule should only happen once initialize() has been called on your " +
+      "native module.";
 
   private final CopyOnWriteArraySet<LifecycleEventListener> mLifecycleEventListeners =
       new CopyOnWriteArraySet<>();
@@ -161,7 +162,11 @@ public class ReactContext extends ContextWrapper {
           runOnUiQueueThread(new Runnable() {
             @Override
             public void run() {
-              listener.onHostResume();
+              try {
+                listener.onHostResume();
+              } catch (RuntimeException e) {
+                handleException(e);
+              }
             }
           });
           break;
@@ -204,9 +209,12 @@ public class ReactContext extends ContextWrapper {
     UiThreadUtil.assertOnUiThread();
     mLifecycleState = LifecycleState.RESUMED;
     mCurrentActivity = new WeakReference(activity);
-    mLifecycleState = LifecycleState.RESUMED;
     for (LifecycleEventListener listener : mLifecycleEventListeners) {
-      listener.onHostResume();
+      try {
+        listener.onHostResume();
+      } catch (RuntimeException e) {
+        handleException(e);
+      }
     }
   }
 
@@ -214,7 +222,11 @@ public class ReactContext extends ContextWrapper {
     UiThreadUtil.assertOnUiThread();
     mCurrentActivity = new WeakReference(activity);
     for (ActivityEventListener listener : mActivityEventListeners) {
-      listener.onNewIntent(intent);
+      try {
+        listener.onNewIntent(intent);
+      } catch (RuntimeException e) {
+        handleException(e);
+      }
     }
   }
 
@@ -225,7 +237,11 @@ public class ReactContext extends ContextWrapper {
     UiThreadUtil.assertOnUiThread();
     mLifecycleState = LifecycleState.BEFORE_RESUME;
     for (LifecycleEventListener listener : mLifecycleEventListeners) {
-      listener.onHostPause();
+      try {
+        listener.onHostPause();
+      } catch (RuntimeException e) {
+        handleException(e);
+      }
     }
   }
 
@@ -236,7 +252,11 @@ public class ReactContext extends ContextWrapper {
     UiThreadUtil.assertOnUiThread();
     mLifecycleState = LifecycleState.BEFORE_CREATE;
     for (LifecycleEventListener listener : mLifecycleEventListeners) {
-      listener.onHostDestroy();
+      try {
+        listener.onHostDestroy();
+      } catch (RuntimeException e) {
+        handleException(e);
+      }
     }
     mCurrentActivity = null;
   }
@@ -257,7 +277,11 @@ public class ReactContext extends ContextWrapper {
    */
   public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
     for (ActivityEventListener listener : mActivityEventListeners) {
-      listener.onActivityResult(activity, requestCode, resultCode, data);
+      try {
+        listener.onActivityResult(activity, requestCode, resultCode, data);
+      } catch (RuntimeException e) {
+        handleException(e);
+      }
     }
   }
 
@@ -338,5 +362,12 @@ public class ReactContext extends ContextWrapper {
       return null;
     }
     return mCurrentActivity.get();
+  }
+
+  /**
+   * Get the C pointer (as a long) to the JavaScriptCore context associated with this instance.
+   */
+  public long getJavaScriptContext() {
+    return mCatalystInstance.getJavaScriptContext();
   }
 }

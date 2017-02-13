@@ -9,8 +9,9 @@
 
 #import "RCTPropsAnimatedNode.h"
 
-#import "RCTLog.h"
-#import "RCTUIManager.h"
+#import <React/RCTLog.h>
+#import <React/RCTUIManager.h>
+
 #import "RCTAnimationUtils.h"
 #import "RCTStyleAnimatedNode.h"
 #import "RCTValueAnimatedNode.h"

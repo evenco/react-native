@@ -48,8 +48,6 @@ const infoLog = require('infoLog');
 const invariant = require('fbjs/lib/invariant');
 const nullthrows = require('fbjs/lib/nullthrows');
 
-import type ReactComponent from 'ReactComponent';
-
 const DEBUG = false;
 
 /**
@@ -92,15 +90,15 @@ type Props = {
    */
   renderRow: (
     rowData: any, sectionIdx: number, rowIdx: number, rowKey: string
-  ) => ?ReactElement<any>,
+  ) => ?React.Element<any>,
   /**
    * Rendered when the list is scrolled faster than rows can be rendered.
    */
-  renderWindowBoundaryIndicator?: () => ?ReactElement<any>,
+  renderWindowBoundaryIndicator?: () => ?React.Element<any>,
   /**
    * Always rendered at the bottom of all the rows.
    */
-  renderFooter?: () => ?ReactElement<any>,
+  renderFooter?: () => ?React.Element<any>,
   /**
    * Pipes through normal onScroll events from the underlying `ScrollView`.
    */
@@ -140,7 +138,7 @@ type Props = {
    * A function that returns the scrollable component in which the list rows
    * are rendered. Defaults to returning a ScrollView with the given props.
    */
-  renderScrollComponent: (props: ?Object) => ReactElement<any>,
+  renderScrollComponent: (props: ?Object) => React.Element<any>,
   /**
    * Use to disable incremental rendering when not wanted, e.g. to speed up initial render.
    */
@@ -187,7 +185,7 @@ class WindowedListView extends React.Component {
   _willComputeRowsToRender: boolean = false;
   _viewableRows: Array<number> = [];
   _cellsInProgress: Set<string> = new Set();
-  _scrollRef: ?Object;
+  _scrollRef: ?ScrollView;
 
   static defaultProps = {
     initialNumToRender: 10,
@@ -214,7 +212,7 @@ class WindowedListView extends React.Component {
       lastRow: Math.min(this.props.data.length, this.props.initialNumToRender) - 1,
     };
   }
-  getScrollResponder(): ?ReactComponent {
+  getScrollResponder(): ?ScrollView {
     return this._scrollRef &&
       this._scrollRef.getScrollResponder &&
       this._scrollRef.getScrollResponder();
@@ -259,6 +257,10 @@ class WindowedListView extends React.Component {
   _onMomentumScrollEnd = (e: Object) => {
     this._onScroll(e);
   };
+  _getFrameMetrics = (index: number): ?{length: number, offset: number} => {
+    const frame = this._rowFrames[this.props.data[index].rowKey];
+    return frame && {length: frame.height, offset: frame.y};
+  }
   _onScroll = (e: Object) => {
     const newScrollY = e.nativeEvent.contentOffset.y;
     this._isScrolling = this._scrollOffsetY !== newScrollY;
@@ -270,12 +272,12 @@ class WindowedListView extends React.Component {
       this._computeRowsToRenderBatcher.schedule();
     }
     if (this.props.onViewableRowsChanged && Object.keys(this._rowFrames).length) {
-      const viewableRows = ViewabilityHelper.computeViewableRows(
+      const viewableRows = ViewabilityHelper.computeViewableItems(
         this.props.viewablePercentThreshold,
-        this._rowFrames,
-        this.props.data,
+        this.props.data.length,
         e.nativeEvent.contentOffset.y,
-        e.nativeEvent.layoutMeasurement.height
+        e.nativeEvent.layoutMeasurement.height,
+        this._getFrameMetrics,
       );
       if (deepDiffer(viewableRows, this._viewableRows)) {
         this._viewableRows = viewableRows;
@@ -433,7 +435,7 @@ class WindowedListView extends React.Component {
     this._firstVisible = newFirstVisible;
     this._lastVisible = newLastVisible;
   }
-  render(): ReactElement<any> {
+  render(): React.Element<any> {
     const {firstRow} = this.state;
     const lastRow = clamp(0, this.state.lastRow, this.props.data.length - 1);
     const rowFrames = this._rowFrames;
@@ -588,7 +590,7 @@ type CellProps = {
    */
    renderRow: (
       rowData: mixed, sectionIdx: number, rowIdx: number, rowKey: string
-   ) => ?ReactElement<any>,
+   ) => ?React.Element<any>,
   /**
    * Index of the row, passed through to other callbacks.
    */

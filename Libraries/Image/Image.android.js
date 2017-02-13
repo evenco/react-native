@@ -11,13 +11,12 @@
  */
 'use strict';
 
-var NativeMethodsMixin = require('react/lib/NativeMethodsMixin');
+var NativeMethodsMixin = require('NativeMethodsMixin');
 var NativeModules = require('NativeModules');
 var EdgeInsetsPropType = require('EdgeInsetsPropType');
 var ImageResizeMode = require('ImageResizeMode');
 var ImageStylePropTypes = require('ImageStylePropTypes');
 var ViewStylePropTypes = require('ViewStylePropTypes');
-var PropTypes = require('react/lib/ReactPropTypes');
 var React = require('React');
 var ReactNativeViewAttributes = require('ReactNativeViewAttributes');
 var StyleSheet = require('StyleSheet');
@@ -32,6 +31,7 @@ var Set = require('Set');
 var filterObject = require('fbjs/lib/filterObject');
 var createReactNativeComponentClass = require('react/lib/createReactNativeComponentClass');
 
+var PropTypes = React.PropTypes;
 var {
   ImageLoader,
 } = NativeModules;
@@ -122,6 +122,10 @@ var Image = React.createClass({
      * Invoked on load start
      */
     onLoadStart: PropTypes.func,
+    /**
+     * Invoked on load error
+     */
+    onError: PropTypes.func,
     /**
      * Invoked when load completes successfully
      */
@@ -228,7 +232,14 @@ var Image = React.createClass({
      */
     async queryCache(urls: Array<string>): Promise<Map<string, 'memory' | 'disk'>> {
       return await ImageLoader.queryCache(urls);
-    }
+    },
+
+    /**
+     * Resolves an asset reference into an object which has the properties `uri`, `width`,
+     * and `height`. The input may either be a number (opaque type returned by
+     * require('./foo.png')) or an `ImageSource` like { uri: '<http location || file path>' }
+     */
+    resolveAssetSource: resolveAssetSource,
   },
 
   mixins: [NativeMethodsMixin],
@@ -296,10 +307,10 @@ var Image = React.createClass({
         sources = source;
       }
 
-      const {onLoadStart, onLoad, onLoadEnd} = this.props;
+      const {onLoadStart, onLoad, onLoadEnd, onError} = this.props;
       const nativeProps = merge(this.props, {
         style,
-        shouldNotifyLoadEvents: !!(onLoadStart || onLoad || onLoadEnd),
+        shouldNotifyLoadEvents: !!(onLoadStart || onLoad || onLoadEnd || onError),
         src: sources,
         capInsets: this.props.capInsets,
         loadingIndicatorSrc: loadingIndicatorSource ? loadingIndicatorSource.uri : null,

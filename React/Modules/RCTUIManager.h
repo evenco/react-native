@@ -9,11 +9,11 @@
 
 #import <UIKit/UIKit.h>
 
-#import "RCTBridge.h"
-#import "RCTBridgeModule.h"
-#import "RCTInvalidating.h"
-#import "RCTViewManager.h"
-#import "RCTRootView.h"
+#import <React/RCTBridge.h>
+#import <React/RCTBridgeModule.h>
+#import <React/RCTInvalidating.h>
+#import <React/RCTRootView.h>
+#import <React/RCTViewManager.h>
 
 /**
  * UIManager queue
@@ -71,10 +71,10 @@ RCT_EXTERN NSString *const RCTUIManagerRootViewKey;
 - (UIView *)viewForReactTag:(NSNumber *)reactTag;
 
 /**
- * Update the frame of a view. This might be in response to a screen rotation
+ * Set the size of a view. This might be in response to a screen rotation
  * or some other layout event outside of the React-managed view hierarchy.
  */
-- (void)setFrame:(CGRect)frame forView:(UIView *)view;
+- (void)setSize:(CGSize)size forView:(UIView *)view;
 
 /**
  * Set the natural size of a view, which is used when no explicit size is set.
@@ -136,6 +136,18 @@ RCT_EXTERN NSString *const RCTUIManagerRootViewKey;
  * React won't be aware of this, so we need to make sure it happens.
  */
 - (void)setNeedsLayout;
+
+@end
+
+@interface RCTUIManager (Deprecated)
+
+/**
+ * This method is deprecated and will be removed in next releases.
+ * Use `setSize:forView:` or `setIntrinsicContentSize:forView:` instead.
+ * Only frames with `origin` equals {0, 0} are supported.
+ */
+- (void)setFrame:(CGRect)frame forView:(UIView *)view
+__deprecated_msg("Use `setSize:forView:` or `setIntrinsicContentSize:forView:` instead.");
 
 @end
 

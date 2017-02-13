@@ -9,20 +9,21 @@
 
 #import "RCTNativeAnimatedNodesManager.h"
 
-#import "RCTConvert.h"
+#import <React/RCTConvert.h>
+
 #import "RCTAnimatedNode.h"
 #import "RCTAnimationDriver.h"
 #import "RCTEventAnimation.h"
 
 #import "RCTAdditionAnimatedNode.h"
 #import "RCTInterpolationAnimatedNode.h"
-#import "RCTRGBAInterpolationAnimatedNode.h"
 #import "RCTDiffClampAnimatedNode.h"
 #import "RCTDivisionAnimatedNode.h"
 #import "RCTModuloAnimatedNode.h"
 #import "RCTMultiplicationAnimatedNode.h"
 #import "RCTModuloAnimatedNode.h"
 #import "RCTPropsAnimatedNode.h"
+#import "RCTRGBAInterpolationAnimatedNode.h"
 #import "RCTStyleAnimatedNode.h"
 #import "RCTTransformAnimatedNode.h"
 #import "RCTValueAnimatedNode.h"
@@ -61,7 +62,7 @@
             @"value" : [RCTValueAnimatedNode class],
             @"props" : [RCTPropsAnimatedNode class],
             @"interpolation" : @{@"default" : [RCTInterpolationAnimatedNode class],
-                                 @"rgba"     : [RCTRGBAInterpolationAnimatedNode class]},
+                                 @"rgba"    : [RCTRGBAInterpolationAnimatedNode class]},
             @"addition" : [RCTAdditionAnimatedNode class],
             @"diffclamp": [RCTDiffClampAnimatedNode class],
             @"division" : [RCTDivisionAnimatedNode class],
@@ -72,7 +73,7 @@
 
   NSString *nodeType = [RCTConvert NSString:config[@"type"]];
   NSString *nodeOutputType = [RCTConvert NSString:config[@"outputType"]];
-  
+
   Class nodeClass;
   if ([map[nodeType] isKindOfClass:[NSDictionary class]]) {
     nodeClass = map[nodeType][nodeOutputType];
@@ -284,22 +285,18 @@
   [_eventDrivers removeObjectForKey:[NSString stringWithFormat:@"%@%@", viewTag, eventName]];
 }
 
-- (BOOL)handleAnimatedEvent:(id<RCTEvent>)event
+- (void)handleAnimatedEvent:(id<RCTEvent>)event
 {
   if (_eventDrivers.count == 0) {
-    return NO;
+    return;
   }
 
   NSString *key = [NSString stringWithFormat:@"%@%@", event.viewTag, event.eventName];
   RCTEventAnimation *driver = _eventDrivers[key];
-
-  if (!driver) {
-    return NO;
+  if (driver) {
+    [driver updateWithEvent:event];
+    [self updateAnimations];
   }
-
-  [driver updateWithEvent:event];
-  [self updateAnimations];
-  return YES;
 }
 
 #pragma mark -- Listeners
@@ -335,7 +332,14 @@
 
 - (void)stopAnimationLoopIfNeeded
 {
-  if (_displayLink && _activeAnimations.count == 0) {
+  if (_activeAnimations.count == 0) {
+    [self stopAnimationLoop];
+  }
+}
+
+- (void)stopAnimationLoop
+{
+  if (_displayLink) {
     [_displayLink invalidate];
     _displayLink = nil;
   }

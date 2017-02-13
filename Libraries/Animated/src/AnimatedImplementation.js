@@ -16,13 +16,13 @@ var InteractionManager = require('InteractionManager');
 var Interpolation = require('Interpolation');
 var NativeAnimatedHelper = require('NativeAnimatedHelper');
 var React = require('React');
+var ReactNative = require('ReactNative');
 var Set = require('Set');
 var SpringConfig = require('SpringConfig');
 var ViewStylePropTypes = require('ViewStylePropTypes');
 
 var degreeDetectRegex = /deg$/;
 
-var findNodeHandle = require('react/lib/findNodeHandle');
 var flattenStyle = require('flattenStyle');
 var invariant = require('fbjs/lib/invariant');
 var requestAnimationFrame = require('fbjs/lib/requestAnimationFrame');
@@ -45,7 +45,8 @@ function shouldUseNativeDriver(config: AnimationConfig | EventConfig): boolean {
         'Animated: `useNativeDriver` is not supported because the native ' +
         'animated module is missing. Falling back to JS-based animation. To ' +
         'resolve this, add `RCTAnimation` module to this app, or remove ' +
-        '`useNativeDriver`.'
+        '`useNativeDriver`. ' +
+        'More info: https://github.com/facebook/react-native/issues/11094#issuecomment-263240420'
       );
       warnedMissingNativeAnimated = true;
     }
@@ -305,7 +306,10 @@ class TimingAnimation extends Animation {
     this.__onEnd = onEnd;
 
     var start = () => {
-      if (this._duration === 0) {
+      // Animations that sometimes have 0 duration and sometimes do not
+      // still need to use the native driver when duration is 0 so as to
+      // not cause intermixed JS and native animations.
+      if (this._duration === 0 && !this._useNativeDriver) {
         this._onUpdate(this._toValue);
         this.__debouncedOnEnd({finished: true});
       } else {
@@ -1008,6 +1012,11 @@ class AnimatedValueXY extends AnimatedWithChildren {
     this.y.flattenOffset();
   }
 
+  extractOffset(): void {
+    this.x.extractOffset();
+    this.y.extractOffset();
+  }
+
   __getValue(): {x: number, y: number} {
     return {
       x: this.x.__getValue(),
@@ -1037,6 +1046,12 @@ class AnimatedValueXY extends AnimatedWithChildren {
     this.x.removeListener(this._listeners[id].x);
     this.y.removeListener(this._listeners[id].y);
     delete this._listeners[id];
+  }
+
+  removeAllListeners(): void {
+    this.x.removeAllListeners();
+    this.y.removeAllListeners();
+    this._listeners = {};
   }
 
   /**
@@ -1114,7 +1129,7 @@ class AnimatedInterpolation extends AnimatedWithChildren {
     return 'default';
   }
 
-  __transformDataType(range) {
+  __transformDataType(range: Array<any>) {
     // Change the string array type to number array
     // So we can reuse the same logic in iOS and Android platform
     return range.map(function (value) {
@@ -1675,14 +1690,14 @@ class AnimatedProps extends Animated {
 
   __connectAnimatedView(): void {
     invariant(this.__isNative, 'Expected node to be marked as "native"');
-    var nativeViewTag: ?number = findNodeHandle(this._animatedView);
+    var nativeViewTag: ?number = ReactNative.findNodeHandle(this._animatedView);
     invariant(nativeViewTag != null, 'Unable to locate attached view in the native tree');
     NativeAnimatedAPI.connectAnimatedNodeToView(this.__getNativeTag(), nativeViewTag);
   }
 
   __disconnectAnimatedView(): void {
     invariant(this.__isNative, 'Expected node to be marked as "native"');
-    var nativeViewTag: ?number = findNodeHandle(this._animatedView);
+    var nativeViewTag: ?number = ReactNative.findNodeHandle(this._animatedView);
     invariant(nativeViewTag != null, 'Unable to locate attached view in the native tree');
     NativeAnimatedAPI.disconnectAnimatedNodeFromView(this.__getNativeTag(), nativeViewTag);
   }
@@ -2235,7 +2250,7 @@ class AnimatedEvent {
     // Assume that the event containing `nativeEvent` is always the first argument.
     traverse(this._argMapping[0].nativeEvent, []);
 
-    const viewTag = findNodeHandle(viewRef);
+    const viewTag = ReactNative.findNodeHandle(viewRef);
 
     eventMappings.forEach((mapping) => {
       NativeAnimatedAPI.addAnimatedEventToView(viewTag, eventName, mapping);
@@ -2408,6 +2423,10 @@ module.exports = {
    * 2D value class for driving 2D animations, such as pan gestures.
    */
   ValueXY: AnimatedValueXY,
+  /**
+   * exported to use the Interpolation type in flow
+   */
+  Interpolation: AnimatedInterpolation,
 
   /**
    * Animates a value from an initial velocity to zero based on a decay

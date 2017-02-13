@@ -13,13 +13,13 @@
 
 var React = require('React');
 var ReactNative = require('ReactNative');
-var ReactElement = require('react/lib/ReactElement');
-var ReactPropTypes = require('react/lib/ReactPropTypes');
 var UIManager = require('UIManager');
 var View = require('View');
 
 var dismissKeyboard = require('dismissKeyboard');
 var requireNativeComponent = require('requireNativeComponent');
+
+var ReactPropTypes = React.PropTypes;
 
 var VIEWPAGER_REF = 'viewPager';
 
@@ -188,7 +188,7 @@ class ViewPagerAndroid extends React.Component {
           (child.type.displayName !== 'View')) {
         console.warn('Each ViewPager child must be a <View>. Was ' + child.type.displayName);
       }
-      return ReactElement.createElement(child.type, newProps);
+      return React.createElement(child.type, newProps);
     });
   };
 

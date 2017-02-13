@@ -18,7 +18,7 @@ typedef void (^AnimatedOperation)(RCTNativeAnimatedNodesManager *nodesManager);
   NSMutableArray<AnimatedOperation> *_operations;
 }
 
-RCT_EXPORT_MODULE()
+RCT_EXPORT_MODULE();
 
 // <Even>
 + (instancetype)new {
@@ -30,6 +30,11 @@ RCT_EXPORT_MODULE()
   return module;
 }
 // </Even>
+
+- (void)invalidate
+{
+  [_nodesManager stopAnimationLoop];
+}
 
 - (void)dealloc
 {
@@ -190,23 +195,13 @@ RCT_EXPORT_METHOD(removeAnimatedEventFromView:(nonnull NSNumber *)viewTag
 
   dispatch_async(dispatch_get_main_queue(), ^{
     [operations enumerateObjectsUsingBlock:^(AnimatedOperation operation, NSUInteger i, BOOL *stop) {
-      operation(_nodesManager);
+      operation(self->_nodesManager);
     }];
-    [_nodesManager updateAnimations];
+    [self->_nodesManager updateAnimations];
   });
 }
 
 #pragma mark -- Events
-
-- (void)driveAnimatedNodeValue:(nonnull NSNumber *)nodeTag
-                         value:(nonnull NSNumber *)value
-{
-  RCTAssertMainQueue();
-  [_nodesManager setAnimatedNodeValue:nodeTag value:value];
-  [_nodesManager updateAnimations];
-}
-
-#pragma mark -- Listeners
 
 - (NSArray<NSString *> *)supportedEvents
 {
@@ -219,13 +214,23 @@ RCT_EXPORT_METHOD(removeAnimatedEventFromView:(nonnull NSNumber *)viewTag
                      body:@{@"tag": node.nodeTag, @"value": @(value)}];
 }
 
-- (BOOL)eventDispatcherWillDispatchEvent:(id<RCTEvent>)event
+- (void)eventDispatcherWillDispatchEvent:(id<RCTEvent>)event
 {
   // Native animated events only work for events dispatched from the main queue.
   if (!RCTIsMainQueue()) {
-    return NO;
+    return;
   }
   return [_nodesManager handleAnimatedEvent:event];
 }
+
+// <Even>
+- (void)driveAnimatedNodeValue:(nonnull NSNumber *)nodeTag
+                         value:(nonnull NSNumber *)value
+{
+  RCTAssertMainQueue();
+  [_nodesManager setAnimatedNodeValue:nodeTag value:value];
+  [_nodesManager updateAnimations];
+}
+// </Even>
 
 @end
