@@ -9,9 +9,11 @@
 
 package com.facebook.react.animated;
 
+import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.JavaOnlyMap;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
+import com.facebook.react.common.ReactConstants;
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.facebook.react.uimanager.UIImplementation;
 
@@ -46,7 +48,9 @@ import javax.annotation.Nullable;
 
   public final void updateView(UIImplementation uiImplementation) {
     if (mConnectedViewTag == -1) {
-      throw new IllegalStateException("Node has not been attached to a view");
+      FLog.w(ReactConstants.TAG, "Node has not been attached to a view");
+//      throw new IllegalStateException("Node has not been attached to a view");
+      return;
     }
     JavaOnlyMap propsMap = new JavaOnlyMap();
     for (Map.Entry<String, Integer> entry : mPropMapping.entrySet()) {

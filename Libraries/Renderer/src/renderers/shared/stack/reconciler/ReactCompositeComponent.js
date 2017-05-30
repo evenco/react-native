@@ -26,7 +26,10 @@ if (__DEV__) {
 
 var emptyObject = require('fbjs/lib/emptyObject');
 var invariant = require('fbjs/lib/invariant');
-var shallowEqual = require('fbjs/lib/shallowEqual');
+// <Even>
+// var shallowEqual = require('fbjs/lib/shallowEqual');
+import { shallowCompare } from 'evenEquality';
+// </Even>
 var shouldUpdateReactComponent = require('shouldUpdateReactComponent');
 var warning = require('fbjs/lib/warning');
 
@@ -823,9 +826,24 @@ var ReactCompositeComponent = {
         }
       } else {
         if (this._compositeType === CompositeTypes.PureClass) {
-          shouldUpdate =
-            !shallowEqual(prevProps, nextProps) ||
-            !shallowEqual(inst.state, nextState);
+          // <Even>
+          var propsCompare = shallowCompare(prevProps, nextProps);
+          var stateCompare = shallowCompare(inst.state, nextState);
+          shouldUpdate = !propsCompare.equal || !stateCompare.equal;
+          if (__DEV__) {
+            if (shouldUpdate) {
+              var reason = propsCompare.reason || stateCompare.reason;
+              if (console.group) {
+                console.groupCollapsed('Re-rendering pure component:', inst.constructor.name, `(${reason})`);
+                console.log('Old props', prevProps);
+                console.log('New props', nextProps);
+                console.log('Old state', inst.state);
+                console.log('New state', nextState);
+                console.groupEnd();
+              }
+            }
+          }
+          // </Even>
         }
       }
     }

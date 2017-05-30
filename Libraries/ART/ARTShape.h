@@ -15,4 +15,8 @@
 
 @property (nonatomic, assign) CGPathRef d;
 
+@property (nonatomic, assign) CGFloat evenStrokeLength;
+@property (nonatomic, assign) CGFloat evenStrokeStart;
+@property (nonatomic, assign) CGFloat evenStrokeEnd;
+
 @end

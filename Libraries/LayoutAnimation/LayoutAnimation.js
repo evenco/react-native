@@ -55,12 +55,12 @@ type Anim = {
   property?: $Enum<typeof PropertiesEnum>,
 }
 
-var configChecker = createStrictShapeTypeChecker({
-  duration: PropTypes.number.isRequired,
-  create: animChecker,
-  update: animChecker,
-  delete: animChecker,
-});
+// var configChecker = createStrictShapeTypeChecker({
+//   duration: PropTypes.number.isRequired,
+//   create: animChecker,
+//   update: animChecker,
+//   delete: animChecker,
+// });
 
 export type Config = {
   duration: number,
@@ -70,7 +70,7 @@ export type Config = {
 }
 
 function configureNext(config: Config, onAnimationDidEnd?: Function) {
-  configChecker({config}, 'config', 'LayoutAnimation.configureNext');
+  // configChecker({config}, 'config', 'LayoutAnimation.configureNext');
   UIManager.configureNextLayoutAnimation(
     config, onAnimationDidEnd || function() {}, function() { /* unused */ }
   );
@@ -149,7 +149,7 @@ var LayoutAnimation = {
   create,
   Types,
   Properties,
-  configChecker: configChecker,
+  // configChecker: configChecker,
   Presets,
   easeInEaseOut: configureNext.bind(
     null, Presets.easeInEaseOut

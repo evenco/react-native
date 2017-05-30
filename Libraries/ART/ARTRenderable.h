@@ -16,10 +16,11 @@
 @interface ARTRenderable : ARTNode
 
 @property (nonatomic, strong) ARTBrush *fill;
-@property (nonatomic, assign) CGColorRef stroke;
+@property (nonatomic, strong) ARTBrush *stroke;
 @property (nonatomic, assign) CGFloat strokeWidth;
 @property (nonatomic, assign) CGLineCap strokeCap;
 @property (nonatomic, assign) CGLineJoin strokeJoin;
 @property (nonatomic, assign) ARTCGFloatArray strokeDash;
+@property (nonatomic, assign) CGFloat strokeDashOffset;
 
 @end

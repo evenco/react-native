@@ -153,6 +153,10 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:unused)
   }
 }
 
+- (void)setHidden:(BOOL)hidden {
+  [super setHidden:hidden];
+}
+
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
   BOOL canReceiveTouchEvents = ([self isUserInteractionEnabled] && ![self isHidden]);

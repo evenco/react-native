@@ -50,6 +50,9 @@ var View = React.createClass({
         if (props.opacity) {
             this._div.style.opacity = props.opacity;
         }
+        if (props.pointerEvents) {
+            this._div.className = this._classNameForPointerEvents(props.pointerEvents);
+        }
         if (props.style) {
             var style = webifyStyle(props.style);
             for (var key in style) {
@@ -81,15 +84,22 @@ var View = React.createClass({
             onLayout,
             hitSlop,
             onStartShouldSetResponder,
+            onStartShouldSetResponderCapture,
+            onMoveShouldSetResponder,
+            onMoveShouldSetResponderCapture,
             onResponderTerminationRequest,
+            onResponderStart,
             onResponderGrant,
             onResponderMove,
             onResponderRelease,
+            onResponderEnd,
             onResponderTerminate,
+            onResponderReject,
             pointerEvents,
             isTVSelectable,
             tvParallaxProperties,
             hasTVPreferredFocus,
+            renderToHardwareTextureAndroid,
             style,
             testID,
             children,
@@ -100,7 +110,7 @@ var View = React.createClass({
 
         var className;
         if (pointerEvents) {
-            className = `rn-pointer-events-${pointerEvents}`;
+            className = this._classNameForPointerEvents(pointerEvents);
         }
 
         // layout
@@ -119,6 +129,10 @@ var View = React.createClass({
                 children={children}
             />
         );
+    },
+
+    _classNameForPointerEvents: function(pointerEvents: string): string {
+        return `rn-pointer-events-${pointerEvents}`;
     },
 
     _onWindowResize: function() {

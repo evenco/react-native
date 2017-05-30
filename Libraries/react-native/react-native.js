@@ -32,6 +32,7 @@ const ReactNative = {
   get Button() { return require('Button'); },
   get DatePickerIOS() { return require('DatePickerIOS'); },
   get DrawerLayoutAndroid() { return require('DrawerLayoutAndroid'); },
+  get FlatList() { return require('FlatList'); },
   get Image() { return require('Image'); },
   get ImageEditor() { return require('ImageEditor'); },
   get ImageStore() { return require('ImageStore'); },
@@ -45,14 +46,15 @@ const ReactNative = {
   get PickerIOS() { return require('PickerIOS'); },
   get ProgressBarAndroid() { return require('ProgressBarAndroid'); },
   get ProgressViewIOS() { return require('ProgressViewIOS'); },
+  get RefreshControl() { return require('RefreshControl'); },
   get ScrollView() { return require('ScrollView'); },
+  get SectionList() { return require('SectionList'); },
   get SegmentedControlIOS() { return require('SegmentedControlIOS'); },
   get Slider() { return require('Slider'); },
   get SnapshotViewIOS() { return require('SnapshotViewIOS'); },
-  get Switch() { return require('Switch'); },
-  get RefreshControl() { return require('RefreshControl'); },
   get StatusBar() { return require('StatusBar'); },
   get SwipeableListView() { return require('SwipeableListView'); },
+  get Switch() { return require('Switch'); },
   get TabBarIOS() { return require('TabBarIOS'); },
   get Text() { return require('Text'); },
   get TextInput() { return require('TextInput'); },
@@ -119,7 +121,6 @@ const ReactNative = {
   get requireNativeComponent() { return require('requireNativeComponent'); },
   get TouchableBounce() { return require('TouchableBounce'); },
   get webifyStyle() { return require('webifyStyle'); },
-  get findNodeHandle() { return require('findNodeHandle'); },
 
   // See http://facebook.github.io/react/docs/addons.html
   addons: {

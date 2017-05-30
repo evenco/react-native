@@ -52,16 +52,6 @@ import com.facebook.react.bridge.ReadableMap;
         throw new JSApplicationCausedNativeException("Illegal node ID set as an input for " +
           "Animated.divide node");
       }
-      double value = ((ValueAnimatedNode) animatedNode).getValue();
-      if (i == 0) {
-        mValue = value;
-        continue;
-      }
-      if (value == 0) {
-        throw new JSApplicationCausedNativeException("Detected a division by zero in " +
-          "Animated.divide node");
-      }
-      mValue /= value;
     }
   }
 }

@@ -25,10 +25,13 @@ RCT_EXPORT_MODULE()
   return [self node];
 }
 
-- (RCTShadowView *)shadowView
-{
-  return nil;
-}
+// <Even>
+// shadowView required for animation
+//- (RCTShadowView *)shadowView
+//{
+//  return nil;
+//}
+// </Even>
 
 RCT_EXPORT_VIEW_PROPERTY(opacity, CGFloat)
 RCT_EXPORT_VIEW_PROPERTY(transform, CGAffineTransform)

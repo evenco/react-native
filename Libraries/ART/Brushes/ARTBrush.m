@@ -25,6 +25,11 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   return NO;
 }
 
+- (BOOL)applyStrokeColor:(CGContextRef)context
+{
+  return NO;
+}
+
 - (void)paint:(CGContextRef)context
 {
   // abstract

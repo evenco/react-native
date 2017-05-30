@@ -12,6 +12,7 @@
 #import <React/RCTFont.h>
 #import <React/RCTLog.h>
 
+#import "ARTAngularGradient.h"
 #import "ARTLinearGradient.h"
 #import "ARTPattern.h"
 #import "ARTRadialGradient.h"
@@ -124,6 +125,11 @@ RCT_ENUM_CONVERTER(CTTextAlignment, (@{
 + (ARTCGFloatArray)ARTCGFloatArray:(id)json
 {
   NSArray *arr = [self NSNumberArray:json];
+  return [self ARTCGFloatArrayForArray:arr];
+}
+
++ (ARTCGFloatArray)ARTCGFloatArrayForArray:(NSArray *)arr
+{
   NSUInteger count = arr.count;
 
   ARTCGFloatArray array;
@@ -157,6 +163,8 @@ RCT_ENUM_CONVERTER(CTTextAlignment, (@{
       return [[ARTRadialGradient alloc] initWithArray:arr];
     case 3: // pattern
       return [[ARTPattern alloc] initWithArray:arr];
+    case 4:
+      return [[ARTAngularGradient alloc] initWithArray:arr];
     default:
       RCTLogError(@"Unknown brush type: %zd", type);
       return nil;

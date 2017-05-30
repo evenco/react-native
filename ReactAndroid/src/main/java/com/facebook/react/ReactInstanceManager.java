@@ -60,6 +60,7 @@ import com.facebook.react.devsupport.ReactInstanceDevCommandsHandler;
 import com.facebook.react.devsupport.RedBoxHandler;
 import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.modules.core.ReactChoreographer;
 import com.facebook.react.modules.debug.DeveloperSettings;
 import com.facebook.react.uimanager.AppRegistry;
 import com.facebook.react.uimanager.DisplayMetricsHolder;
@@ -337,6 +338,9 @@ public class ReactInstanceManager {
     mJSCConfig = jscConfig;
     mLazyNativeModulesEnabled = lazyNativeModulesEnabled;
     mLazyViewManagersEnabled = lazyViewManagersEnabled;
+
+    // Instantiate ReactChoreographer in UI thread.
+    ReactChoreographer.initialize();
   }
 
   public DevSupportManager getDevSupportManager() {
@@ -439,15 +443,6 @@ public class ReactInstanceManager {
         new JSCJavaScriptExecutor.Factory(mJSCConfig.getConfigMap()),
         mBundleLoader);
   }
-
-  /**
-   * Recreate the react application and context. This should be called if configuration has
-   * changed or the developer has requested the app to be reloaded. It should only be called after
-   * an initial call to createReactContextInBackground.
-   *
-   * Called from UI thread.
-   */
-  public abstract void recreateReactContextInBackground();
 
   /**
    * @return whether createReactContextInBackground has been called. Will return false after

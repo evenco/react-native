@@ -9,6 +9,8 @@
 
 #import "ARTShape.h"
 
+#import "RCTConvert+ART.h"
+
 @implementation ARTShape
 
 - (void)setD:(CGPathRef)d
@@ -21,6 +23,21 @@
   _d = CGPathRetain(d);
 }
 
+- (void)setEvenStrokeLength:(CGFloat)strokeLength {
+  _evenStrokeLength = strokeLength;
+  [self invalidate];
+}
+
+- (void)setEvenStrokeStart:(CGFloat)strokeStart {
+  _evenStrokeStart = strokeStart;
+  [self invalidate];
+}
+
+- (void)setEvenStrokeEnd:(CGFloat)strokeEnd {
+  _evenStrokeEnd = strokeEnd;
+  [self invalidate];
+}
+
 - (void)dealloc
 {
   CGPathRelease(_d);
@@ -31,11 +48,25 @@
   if ((!self.fill && !self.stroke) || !self.d) {
     return;
   }
+  
+  // <Even>
+  ARTCGFloatArray strokeDash = self.strokeDash;
+  CGFloat strokeDashOffset = self.strokeDashOffset;
+  if (self.evenStrokeLength) {
+    CGFloat offsetFix = 10;
+    CGFloat fullPathLength = self.evenStrokeLength;
+    CGFloat pathOffset = self.evenStrokeStart * fullPathLength;
+    CGFloat pathLength = self.evenStrokeEnd * fullPathLength - pathOffset;
+    NSArray *arr = @[@(offsetFix), @(pathOffset), @(pathLength), @(NSIntegerMax)];
+    strokeDash = [RCTConvert ARTCGFloatArrayForArray:arr];
+    strokeDashOffset = offsetFix;
+  }
+  // </Even>
 
-  CGPathDrawingMode mode = kCGPathStroke;
+  BOOL needsFill = NO;
   if (self.fill) {
     if ([self.fill applyFillColor:context]) {
-      mode = kCGPathFill;
+      needsFill = YES;
     } else {
       CGContextSaveGState(context);
       CGContextAddPath(context, self.d);
@@ -47,22 +78,41 @@
       }
     }
   }
+
+  BOOL needsStroke = NO;
   if (self.stroke) {
-    CGContextSetStrokeColorWithColor(context, self.stroke);
     CGContextSetLineWidth(context, self.strokeWidth);
     CGContextSetLineCap(context, self.strokeCap);
     CGContextSetLineJoin(context, self.strokeJoin);
-    ARTCGFloatArray dash = self.strokeDash;
+    ARTCGFloatArray dash = strokeDash;
     if (dash.count) {
-      CGContextSetLineDash(context, 0, dash.array, dash.count);
+      CGContextSetLineDash(context, strokeDashOffset, dash.array, dash.count);
     }
-    if (mode == kCGPathFill) {
-      mode = kCGPathFillStroke;
+    if ([self.stroke applyStrokeColor:context]) {
+      needsStroke = YES;
+    } else {
+      CGContextSaveGState(context);
+      CGContextAddPath(context, self.d);
+      CGContextReplacePathWithStrokedPath(context);
+      CGContextClip(context);
+
+      [self.stroke paint:context];
+      CGContextRestoreGState(context);
     }
   }
 
-  CGContextAddPath(context, self.d);
-  CGContextDrawPath(context, mode);
+  if (needsFill || needsStroke) {
+    CGPathDrawingMode mode;
+    if (needsFill && needsStroke) {
+      mode = kCGPathFillStroke;
+    } else if (needsFill) {
+      mode = kCGPathFill;
+    } else {
+      mode = kCGPathStroke;
+    }
+    CGContextAddPath(context, self.d);
+    CGContextDrawPath(context, mode);
+  }
 }
 
 @end

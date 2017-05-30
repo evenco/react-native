@@ -32,6 +32,10 @@ ReactNativeViewAttributes.UIView = {
   collapsable: true,
   needsOffscreenAlphaCompositing: true,
   style: ReactNativeStyleAttributes,
+
+  // <Even>
+  hidden: true,
+  // </Even>
 };
 
 ReactNativeViewAttributes.RCTView = {

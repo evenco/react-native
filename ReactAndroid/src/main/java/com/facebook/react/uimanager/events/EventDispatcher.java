@@ -17,14 +17,14 @@ import java.util.Comparator;
 import java.util.Map;
 
 import android.util.LongSparseArray;
-import android.view.Choreographer;
 
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.ReactChoreographer;
+import com.facebook.react.modules.core.ChoreographerCompat;
+import com.facebook.react.modules.core.ReactChoreographer;
 import com.facebook.systrace.Systrace;
 
 /**
@@ -97,7 +97,8 @@ public class EventDispatcher implements LifecycleEventListener {
   private Event[] mEventsToDispatch = new Event[16];
   private int mEventsToDispatchSize = 0;
   private volatile @Nullable RCTEventEmitter mRCTEventEmitter;
-  private final ScheduleDispatchFrameCallback mCurrentFrameCallback;
+  private final ScheduleDispatchFrameCallback mCurrentFrameCallback =
+    new ScheduleDispatchFrameCallback();
   private short mNextEventTypeId = 0;
   private volatile boolean mHasDispatchScheduled = false;
   private volatile int mHasDispatchScheduledCount = 0;
@@ -105,7 +106,6 @@ public class EventDispatcher implements LifecycleEventListener {
   public EventDispatcher(ReactApplicationContext reactContext) {
     mReactContext = reactContext;
     mReactContext.addLifecycleEventListener(this);
-    mCurrentFrameCallback = new ScheduleDispatchFrameCallback();
   }
 
   /**
@@ -251,7 +251,7 @@ public class EventDispatcher implements LifecycleEventListener {
         (((long) coalescingKey) & 0xffff) << 48;
   }
 
-  private class ScheduleDispatchFrameCallback implements Choreographer.FrameCallback {
+  private class ScheduleDispatchFrameCallback extends ChoreographerCompat.FrameCallback {
     private volatile boolean mIsPosted = false;
     private boolean mShouldStop = false;
 
@@ -295,7 +295,7 @@ public class EventDispatcher implements LifecycleEventListener {
 
     private void post() {
       ReactChoreographer.getInstance()
-          .postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, mCurrentFrameCallback);
+        .postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, mCurrentFrameCallback);
     }
 
     public void maybePostFromNonUI() {

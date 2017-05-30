@@ -37,4 +37,10 @@
   return YES;
 }
 
+- (BOOL)applyStrokeColor:(CGContextRef)context
+{
+  CGContextSetStrokeColorWithColor(context, _color);
+  return YES;
+}
+
 @end

@@ -26,6 +26,16 @@
 - (BOOL)applyFillColor:(CGContextRef)context;
 
 /**
+ * For certain brushes we can fast path a combined fill and stroke.
+ * For those brushes we override applyStrokeColor which sets the stroke
+ * color to be used by those batch paints. Those return YES.
+ * We can't batch gradient painting in CoreGraphics, so those will
+ * return NO and paint gets called instead.
+ * @abstract
+ */
+- (BOOL)applyStrokeColor:(CGContextRef)context;
+
+/**
  * paint fills the context with a brush. The context is assumed to
  * be clipped.
  * @abstract

@@ -86,6 +86,12 @@ var RenderableAttributes = merge(NodeAttributes, {
   strokeCap: true,
   strokeJoin: true,
   strokeDash: { diff: arrayDiffer },
+  strokeDashOffset: true,
+  // <Even>
+  evenStrokeLength: true,
+  evenStrokeStart: true,
+  evenStrokeEnd: true,
+  // </Even>
 });
 
 var ShapeAttributes = merge(RenderableAttributes, {
@@ -261,6 +267,7 @@ var SOLID_COLOR = 0;
 var LINEAR_GRADIENT = 1;
 var RADIAL_GRADIENT = 2;
 var PATTERN = 3;
+var ANGULAR_GRADIENT = 4;
 
 function insertColorIntoArray(color, targetArray, atIndex) {
   var c = new Color(color);
@@ -318,41 +325,46 @@ function insertDoubleColorStopsIntoArray(stops, targetArray, atIndex) {
 }
 
 function applyBoundingBoxToBrushData(brushData, props) {
-  var type = brushData[0];
+  var newBrushData = [...brushData];
+  var type = newBrushData[0];
   var width = +props.width;
   var height = +props.height;
-  if (type === LINEAR_GRADIENT) {
-    brushData[1] *= width;
-    brushData[2] *= height;
-    brushData[3] *= width;
-    brushData[4] *= height;
+  if (type === ANGULAR_GRADIENT) {
+    newBrushData[1] *= width;
+    newBrushData[2] *= height;
+  } else if (type === LINEAR_GRADIENT) {
+    newBrushData[1] *= width;
+    newBrushData[2] *= height;
+    newBrushData[3] *= width;
+    newBrushData[4] *= height;
   } else if (type === RADIAL_GRADIENT) {
-    brushData[1] *= width;
-    brushData[2] *= height;
-    brushData[3] *= width;
-    brushData[4] *= height;
-    brushData[5] *= width;
-    brushData[6] *= height;
+    newBrushData[1] *= width;
+    newBrushData[2] *= height;
+    newBrushData[3] *= width;
+    newBrushData[4] *= height;
+    newBrushData[5] *= width;
+    newBrushData[6] *= height;
   } else if (type === PATTERN) {
     // todo
   }
+  return newBrushData;
 }
 
 function extractBrush(colorOrBrush, props) {
   if (colorOrBrush == null) {
     return null;
   }
-  if (colorOrBrush._brush) {
+  var brush = colorOrBrush._brush;
+  if (brush) {
     if (colorOrBrush._bb) {
       // The legacy API for Gradients allow for the bounding box to be used
       // as a convenience for specifying gradient positions. This should be
       // deprecated. It's not properly implemented in canvas mode. ReactART
       // doesn't handle update to the bounding box correctly. That's why we
       // mutate this so that if it's reused, we reuse the same resolved box.
-      applyBoundingBoxToBrushData(colorOrBrush._brush, props);
-      colorOrBrush._bb = false;
+      brush = applyBoundingBoxToBrushData(brush, props);
     }
-    return colorOrBrush._brush;
+    return brush;
   }
   var c = new Color(colorOrBrush);
   return [SOLID_COLOR, c.red / 255, c.green / 255, c.blue / 255, c.alpha];
@@ -396,12 +408,19 @@ class Shape extends React.Component {
       <NativeShape
         fill={extractBrush(props.fill, props)}
         opacity={extractOpacity(props)}
-        stroke={extractColor(props.stroke)}
+        stroke={extractBrush(props.stroke, props)}
         strokeCap={extractStrokeCap(props.strokeCap)}
         strokeDash={props.strokeDash || null}
+        strokeDashOffset={props.strokeDashOffset}
         strokeJoin={extractStrokeJoin(props.strokeJoin)}
         strokeWidth={extractNumber(props.strokeWidth, 1)}
         transform={extractTransform(props)}
+
+        // <Even>
+        evenStrokeLength={props.evenStrokeLength}
+        evenStrokeStart={props.evenStrokeStart}
+        evenStrokeEnd={props.evenStrokeEnd}
+        // </Even>
 
         d={d}
       />
@@ -510,26 +529,39 @@ class Text extends React.Component {
 
 // Declarative fill type objects - API design not finalized
 
+function AngularGradient(stops, x, y) {
+  var type = ANGULAR_GRADIENT;
+
+  if (!x || !y) {
+    x = y = 0.5;
+    this._bb = true;
+  }
+
+  var brushData = [type, +x, +y];
+  insertColorStopsIntoArray(stops, brushData, 3);
+  this._brush = brushData;
+}
+
 function LinearGradient(stops, x1, y1, x2, y2) {
   var type = LINEAR_GRADIENT;
 
-  if (arguments.length < 5) {
-    var angle = ((x1 == null) ? 270 : x1) * Math.PI / 180;
+  // if (arguments.length < 5) {
+    // var angle = ((x1 == null) ? 270 : x1) * Math.PI / 180;
 
-    var x = Math.cos(angle);
-    var y = -Math.sin(angle);
-    var l = (Math.abs(x) + Math.abs(y)) / 2;
+    // var x = Math.cos(angle);
+    // var y = -Math.sin(angle);
+    // var l = (Math.abs(x) + Math.abs(y)) / 2;
 
-    x *= l; y *= l;
+    // x *= l; y *= l;
 
-    x1 = 0.5 - x;
-    x2 = 0.5 + x;
-    y1 = 0.5 - y;
-    y2 = 0.5 + y;
+    // x1 = 0.5 - x;
+    // x2 = 0.5 + x;
+    // y1 = 0.5 - y;
+    // y2 = 0.5 + y;
     this._bb = true;
-  } else {
-    this._bb = false;
-  }
+  // } else {
+  //   this._bb = false;
+  // }
 
   var brushData = [type, +x1, +y1, +x2, +y2];
   insertColorStopsIntoArray(stops, brushData, 5);
@@ -568,6 +600,7 @@ function Pattern(url, width, height, left, top) {
 }
 
 var ReactART = {
+  AngularGradient: AngularGradient,
   LinearGradient: LinearGradient,
   RadialGradient: RadialGradient,
   Pattern: Pattern,

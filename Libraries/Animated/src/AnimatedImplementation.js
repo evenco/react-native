@@ -35,6 +35,7 @@ type EndCallback = (result: EndResult) => void;
 
 var NativeAnimatedAPI = NativeAnimatedHelper.API;
 
+var IDS = 0; // <Even>
 var warnedMissingNativeAnimated = false;
 
 function shouldUseNativeDriver(config: AnimationConfig | EventConfig): boolean {
@@ -59,6 +60,9 @@ function shouldUseNativeDriver(config: AnimationConfig | EventConfig): boolean {
 // Note(vjeux): this would be better as an interface but flow doesn't
 // support them yet
 class Animated {
+  constructor() {
+    this._id = IDS++;
+  }
   __attach(): void {}
   __detach(): void {
     if (this.__isNative && this.__nativeTag != null) {
@@ -93,7 +97,7 @@ class Animated {
   __getNativeConfig(): Object {
     throw new Error('This JS animated node type cannot be used as native animated node');
   }
-  toJSON(): any { return this.__getValue(); }
+  toJSON(): any { return this._id; /* <Even> for memoization */ }
 }
 
 type AnimationConfig = {

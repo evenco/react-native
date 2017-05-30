@@ -469,6 +469,8 @@ public class ReactEditText extends EditText {
           return true;
         }
       });
+    }
+  }
 
   private void updateImeOptions() {
     // Default to IME_ACTION_DONE

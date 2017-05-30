@@ -71,6 +71,12 @@ let InvertibleScrollView = React.createClass({
     };
   },
 
+  getInitialState() {
+    return {
+      contentHeight: 0,
+    };
+  },
+
   getScrollResponder(): React.Component<any, any, any> {
     return this._scrollComponent.getScrollResponder();
   },
@@ -86,18 +92,25 @@ let InvertibleScrollView = React.createClass({
       ...props,
     } = this.props;
 
+    props.children = [this._renderBottomFill(), ...props.children];
+
+    const needsLayout = !this._layout || this.state.contentHeight == 0;
+    const style = [props.style, needsLayout && styles.hidden];
+
     if (inverted) {
       if (this.props.horizontal) {
-        props.style = [styles.horizontallyInverted, props.style];
+        props.style = [styles.horizontallyInverted, ...style];
         props.children = this._renderInvertedChildren(props.children, styles.horizontallyInverted);
       } else {
-        props.style = [styles.verticallyInverted, props.style];
+        props.style = [styles.verticallyInverted, ...style];
         props.children = this._renderInvertedChildren(props.children, styles.verticallyInverted);
       }
     }
 
     return cloneReferencedElement(renderScrollComponent(props), {
       ref: component => { this._scrollComponent = component; },
+      onContentSizeChange: this._onContentSizeChange,
+      onLayout: this._onLayout,
     });
   },
 
@@ -106,9 +119,52 @@ let InvertibleScrollView = React.createClass({
       return child ? <View style={inversionStyle}>{child}</View> : child;
     });
   },
+
+  // <Even>
+  // this makes sure when content is smaller than area, it is pinned to the top
+  // move this logic into InvertibleScrollView for every InvertibleScrollView to inherit this behavior
+
+  _onLayout(e: LayoutEvent) {
+    this._layout = e.nativeEvent.layout;
+    if (this.props.onLayout) {
+      this.props.onLayout(e);
+    }
+  },
+
+  _onContentSizeChange(contentWidth, contentHeight) {
+    if (this.state.contentHeight != contentHeight) {
+      this.setState({contentHeight: contentHeight});
+    }
+    if (this.props.onContentSizeChange) {
+      this.props.onContentSizeChange(contentWidth, contentHeight);
+    }
+  },
+
+  _renderBottomFill() {
+    var layout = this._layout;
+    var contentHeight = this.state.contentHeight;
+    if (!layout || !contentHeight) {
+      return null;
+    }
+
+    var fillHeight = (layout.height - contentHeight + (this._bottomFillHeight || 0));
+    if (fillHeight <= 0) {
+      return null;
+    }
+
+    this._bottomFillHeight = fillHeight;
+
+    return (
+      <View key={'bottomFill'} style={{height: this._bottomFillHeight}} />
+    );
+  },
+
 });
 
 let styles = StyleSheet.create({
+  hidden: {
+    opacity: 0,
+  },
   verticallyInverted: {
     transform: [
       { scaleY: -1 },

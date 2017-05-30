@@ -17,14 +17,10 @@
   _fill = fill;
 }
 
-- (void)setStroke:(CGColorRef)stroke
+- (void)setStroke:(ARTBrush *)stroke
 {
-  if (stroke == _stroke) {
-    return;
-  }
   [self invalidate];
-  CGColorRelease(_stroke);
-  _stroke = CGColorRetain(stroke);
+  _stroke = stroke;
 }
 
 - (void)setStrokeWidth:(CGFloat)strokeWidth
@@ -57,9 +53,14 @@
   _strokeDash = strokeDash;
 }
 
+- (void)setStrokeDashOffset:(CGFloat)strokeDashOffset
+{
+  [self invalidate];
+  _strokeDashOffset = strokeDashOffset;
+}
+
 - (void)dealloc
 {
-  CGColorRelease(_stroke);
   if (_strokeDash.array) {
     free(_strokeDash.array);
   }

@@ -18,6 +18,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.DashPathEffect;
+import android.graphics.Shader;
 
 import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
@@ -54,6 +55,11 @@ public class ARTShapeShadowNode extends ARTVirtualNode {
   private float mStrokeWidth = 1;
   private int mStrokeCap = CAP_ROUND;
   private int mStrokeJoin = JOIN_ROUND;
+  // <Even>
+  private float mEvenStrokeLength;
+  private float mEvenStrokeStart;
+  private float mEvenStrokeEnd;
+  // </Even>
 
   @ReactProp(name = "d")
   public void setShapePath(@Nullable ReadableArray shapePath) {
@@ -97,6 +103,24 @@ public class ARTShapeShadowNode extends ARTVirtualNode {
     mStrokeJoin = strokeJoin;
     markUpdated();
   }
+
+  // <Even>
+  @ReactProp(name = "evenStrokeLength")
+  public void setEvenStrokeLength(float evenStrokeLength) {
+    mEvenStrokeLength = evenStrokeLength;
+    markUpdated();
+  }
+  @ReactProp(name = "evenStrokeStart")
+  public void setEvenStrokeStart(float evenStrokeStart) {
+    mEvenStrokeStart = evenStrokeStart;
+    markUpdated();
+  }
+  @ReactProp(name = "evenStrokeEnd")
+  public void setEvenStrokeEnd(float evenStrokeEnd) {
+    mEvenStrokeEnd = evenStrokeEnd;
+    markUpdated();
+  }
+  // </Even>
 
   @Override
   public void draw(Canvas canvas, Paint paint, float opacity) {
@@ -159,13 +183,26 @@ public class ARTShapeShadowNode extends ARTVirtualNode {
     }
     paint.setStrokeWidth(mStrokeWidth * mScale);
     paint.setARGB(
-        (int) (mStrokeColor.length > 3 ? mStrokeColor[3] * opacity * 255 : opacity * 255),
-        (int) (mStrokeColor[0] * 255),
+        (int) (mStrokeColor[4] * opacity * 255),
         (int) (mStrokeColor[1] * 255),
-        (int) (mStrokeColor[2] * 255));
-    if (mStrokeDash != null && mStrokeDash.length > 0) {
-      paint.setPathEffect(new DashPathEffect(mStrokeDash, 0));
+        (int) (mStrokeColor[2] * 255),
+        (int) (mStrokeColor[3] * 255));
+
+    // <Even>
+    float[] strokeDash = mStrokeDash;
+    float strokeDashOffset = 0;
+    if (mEvenStrokeLength > 0) {
+      float fullPathLength = mEvenStrokeLength * mScale;
+      float pathOffset = mEvenStrokeStart * fullPathLength;
+      float pathLength = mEvenStrokeEnd * fullPathLength - pathOffset;
+      strokeDash = new float[]{0, pathOffset, pathLength, fullPathLength - pathLength};
+      strokeDashOffset = 0;
     }
+    if (strokeDash != null && strokeDash.length > 0) {
+      paint.setPathEffect(new DashPathEffect(strokeDash, strokeDashOffset));
+    }
+    // </Even>
+
     return true;
   }
 

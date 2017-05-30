@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013-present, Facebook, Inc.
+ * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -11,7 +11,7 @@
  */
 'use strict';
 
-const invariant = require('invariant');
+const invariant = require('fbjs/lib/invariant');
 
 /**
  * Used to find the indices of the frames that overlap the given offsets. Useful for finding the
@@ -90,7 +90,12 @@ function computeWindowedRenderLimits(
   const visibleBegin = Math.max(0, offset);
   const visibleEnd = visibleBegin + visibleLength;
   const overscanLength = (windowSize - 1) * visibleLength;
-  const leadFactor = Math.max(0, Math.min(1, velocity / 5 + 0.5));
+
+  // Considering velocity seems to introduce more churn than it's worth.
+  const leadFactor = 0.5; // Math.max(0, Math.min(1, velocity / 25 + 0.5));
+
+  const fillPreference = velocity > 1 ? 'after' : (velocity < -1 ? 'before' : 'none');
+
   const overscanBegin = Math.max(0, visibleBegin - (1 - leadFactor) * overscanLength);
   const overscanEnd = Math.max(0, visibleEnd + leadFactor * overscanLength);
 
@@ -129,13 +134,15 @@ function computeWindowedRenderLimits(
       // possible.
       break;
     }
-    if (firstShouldIncrement) {
+    if (firstShouldIncrement &&
+        !(fillPreference === 'after' && lastShouldIncrement && lastWillAddMore)) {
       if (firstWillAddMore) {
         newCellCount++;
       }
       first--;
     }
-    if (lastShouldIncrement) {
+    if (lastShouldIncrement &&
+        !(fillPreference === 'before' && firstShouldIncrement && firstWillAddMore)) {
       if (lastWillAddMore) {
         newCellCount++;
       }

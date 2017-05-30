@@ -80,16 +80,17 @@ static void ARTFreeTextFrame(ARTTextFrame frame)
     }
   }
   if (self.stroke) {
-    CGContextSetStrokeColorWithColor(context, self.stroke);
-    CGContextSetLineWidth(context, self.strokeWidth);
-    CGContextSetLineCap(context, self.strokeCap);
-    CGContextSetLineJoin(context, self.strokeJoin);
-    ARTCGFloatArray dash = self.strokeDash;
-    if (dash.count) {
-      CGContextSetLineDash(context, 0, dash.array, dash.count);
-    }
-    if (mode == kCGTextFill) {
-      mode = kCGTextFillStroke;
+    if ([self.stroke applyStrokeColor:context]) {
+      CGContextSetLineWidth(context, self.strokeWidth);
+      CGContextSetLineCap(context, self.strokeCap);
+      CGContextSetLineJoin(context, self.strokeJoin);
+      ARTCGFloatArray dash = self.strokeDash;
+      if (dash.count) {
+        CGContextSetLineDash(context, 0, dash.array, dash.count);
+      }
+      if (mode == kCGTextFill) {
+        mode = kCGTextFillStroke;
+      }
     }
   }
 

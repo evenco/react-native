@@ -507,13 +507,21 @@ const View = React.createClass({
     // adding functionality this component that you'd want to be available in both
     // dev and prod modes.
 
+    var props = this.props;
+
     // <Even>
     // make iOS behave like android
-    var style = this.props.style;
-    style = [{overflow: 'hidden'}, style];
+    // if (__DEV__) {
+    //     if (Platform.OS === 'ios') {
+    //         props = {
+    //             ...props,
+    //             style: [{overflow: 'hidden'}, props.style],
+    //         };
+    //     }
+    // }
     // </Even>
 
-    return <RCTView {...this.props} />;
+    return <RCTView {...props} />;
   },
 });
 

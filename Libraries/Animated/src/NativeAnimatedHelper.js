@@ -110,6 +110,8 @@ const STYLES_WHITELIST = {
   transform: true,
   color: true,
   backgroundColor: true,
+  shadowOpacity: true,
+  elevation: true,
   /* legacy android transform properties */
   scaleX: true,
   scaleY: true,

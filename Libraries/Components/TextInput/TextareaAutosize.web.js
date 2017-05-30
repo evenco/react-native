@@ -10,7 +10,7 @@ import calculateNodeHeight from 'calculateNodeHeight';
 
 const emptyFunction = function() {};
 
-export default class TextareaAutosize extends React.Component {
+class TextareaAutosize extends React.Component {
 
   static propTypes = {
     /**
@@ -230,3 +230,5 @@ function clearNextFrameAction(nextFrameId) {
     window.clearTimeout(nextFrameId);
   }
 }
+
+export default TextareaAutosize;

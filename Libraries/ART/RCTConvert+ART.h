@@ -21,6 +21,7 @@
 + (CTTextAlignment)CTTextAlignment:(id)json;
 + (ARTTextFrame)ARTTextFrame:(id)json;
 + (ARTCGFloatArray)ARTCGFloatArray:(id)json;
++ (ARTCGFloatArray)ARTCGFloatArrayForArray:(NSArray *)arr;
 + (ARTBrush *)ARTBrush:(id)json;
 
 + (CGPoint)CGPoint:(id)json offset:(NSUInteger)offset;

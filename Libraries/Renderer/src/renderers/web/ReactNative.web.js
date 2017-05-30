@@ -11,8 +11,16 @@
  */
  'use strict';
 
-var ReactNative = require('react-dom');
+const ReactDOM = require('react-dom');
+const findNodeHandle = require('findNodeHandle');
 
-ReactNative.findNodeHandle = require('findNodeHandle');
+var ReactNative = {
+  hasReactNativeInitialized: false,
+  findNodeHandle: findNodeHandle,
+  render: ReactDOM.render,
+  unmountComponentAtNode: ReactDOM.unmountComponentAtNode,
+  unstable_batchedUpdates: ReactDOM.unstable_batchedUpdates,
+  unmountComponentAtNodeAndRemoveContainer: ReactDOM.unmountComponentAtNode,
+};
 
 module.exports = ReactNative;

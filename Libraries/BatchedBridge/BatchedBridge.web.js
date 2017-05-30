@@ -99,8 +99,8 @@ var remoteModules = {
       callback(0);
     }),
 
-    requestPermissions: promise((permissions) => {
-      return Promise.resolve({});
+    requestPermissions: promise((resolve) => {
+      resolve({});
     }),
 
     abandonPermissions: async(() => {
@@ -135,8 +135,8 @@ var remoteModules = {
 
   NetInfo: {
 
-    getCurrentConnectivity: promise(() => {
-      return Promise.resolve({
+    getCurrentConnectivity: promise((resolve) => {
+      resolve({
         network_info: {},
       });
     }),

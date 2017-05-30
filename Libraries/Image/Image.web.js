@@ -27,7 +27,7 @@ var Image = React.createClass({
             uri: React.PropTypes.string,
         }),
         capInsets: EdgeInsetsPropType,
-        resizeMode: React.PropTypes.oneOf(['contain', 'stretch']),
+        resizeMode: React.PropTypes.oneOf(['contain', 'center', 'stretch']),
         onLayout: React.PropTypes.func,
     },
 
@@ -61,15 +61,24 @@ var Image = React.createClass({
                 borderImage: `url(${source.uri}) ${capPercents.top}% ${capPercents.right}% ${capPercents.bottom}% ${capPercents.left}% stretch`,
             })
         }
-        if (props.resizeMode == 'stretch') {
-            style.width = '100%';
-        } else if (props.resizeMode == 'contain') {
-            style.display = 'inline';
-            style.maxWidth = '100%';
-            style.maxHeight = '100%';
-        } else {
-            style.width = source.width;
-            style.height = source.height;
+        switch (props.resizeMode) {
+            case 'stretch':
+                style.width = '100%';
+                break;
+            case 'contain':
+                style.display = 'inline';
+                style.maxWidth = '100%';
+                style.maxHeight = '100%';
+                break;
+            case 'center':
+                style.alignSelf = 'center';
+                style.width = source.width;
+                style.height = source.height;
+                break;
+            default:
+                style.width = source.width;
+                style.height = source.height;
+                break;
         }
         return {style: style};
     },
@@ -79,8 +88,8 @@ var Image = React.createClass({
             var style = webifyStyle([this.state.style, this.props.style]);
             return <div style={style} />;
 
-        } else if (this.props.resizeMode == 'contain') {
-            var outerStyle = webifyStyle([this.props.style, {textAlign: 'center'}]);
+        } else if (this.props.resizeMode == 'contain' || this.props.resizeMode == 'center') {
+            var outerStyle = webifyStyle([this.props.style, styles.container, {textAlign: 'center'}]);
             var innerStyle = webifyStyle(this.state.style);
             return (
                 <div style={outerStyle}>

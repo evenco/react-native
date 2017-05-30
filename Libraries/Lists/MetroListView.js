@@ -1,31 +1,10 @@
 /**
- * Copyright (c) 2013-present, Facebook, Inc.
+ * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
- *
- * Facebook, Inc. ("Facebook") owns all right, title and interest, including
- * all intellectual property and other proprietary rights, in and to the React
- * Native CustomComponents software (the "Software").  Subject to your
- * compliance with these terms, you are hereby granted a non-exclusive,
- * worldwide, royalty-free copyright license to (1) use and copy the Software;
- * and (2) reproduce and distribute the Software as part of your own software
- * ("Your Software").  Facebook reserves all rights not expressly granted to
- * you in this license agreement.
- *
- * THE SOFTWARE AND DOCUMENTATION, IF ANY, ARE PROVIDED "AS IS" AND ANY EXPRESS
- * OR IMPLIED WARRANTIES (INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE) ARE DISCLAIMED.
- * IN NO EVENT SHALL FACEBOOK OR ITS AFFILIATES, OFFICERS, DIRECTORS OR
- * EMPLOYEES BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * @providesModule MetroListView
  * @flow
@@ -43,13 +22,14 @@ type Item = any;
 
 type NormalProps = {
   FooterComponent?: ReactClass<*>,
-  ItemComponent: ReactClass<{item: Item, index: number}>,
-  SectionHeaderComponent?: ReactClass<{info: Object}>,
-  SeparatorComponent?: ReactClass<*>, // not supported yet
+  renderItem: (info: Object) => ?React.Element<*>,
+  renderSectionHeader?: ({section: Object}) => ?React.Element<*>,
+  SeparatorComponent?: ?ReactClass<*>, // not supported yet
 
   // Provide either `items` or `sections`
   items?: ?Array<Item>, // By default, an Item is assumed to be {key: string}
-  sections?: ?Array<{key: string, items: Array<Item>}>,
+  // $FlowFixMe - Something is a little off with the type Array<Item>
+  sections?: ?Array<{key: string, data: Array<Item>}>,
 
   /**
    * If provided, a standard RefreshControl will be added for "Pull to Refresh" functionality. Make
@@ -60,11 +40,16 @@ type NormalProps = {
    * Set this true while waiting for new data from a refresh.
    */
   refreshing?: boolean,
+  /**
+   * If true, renders items next to each other horizontally instead of stacked vertically.
+   */
+  horizontal?: ?boolean,
 };
 type DefaultProps = {
-  shouldItemUpdate: (curr: {item: Item}, next: {item: Item}) => boolean,
-  keyExtractor: (item: Item) => string,
+  keyExtractor: (item: Item, index: number) => string,
 };
+/* $FlowFixMe - the renderItem passed in from SectionList is optional there but
+ * required here */
 type Props = NormalProps & DefaultProps;
 
 /**
@@ -83,15 +68,20 @@ class MetroListView extends React.Component {
   scrollToItem(params: {animated?: ?boolean, item: Item, viewPosition?: number}) {
     throw new Error('scrollToItem not supported in legacy ListView.');
   }
+  scrollToLocation() {
+    throw new Error('scrollToLocation not supported in legacy ListView.');
+  }
   scrollToOffset(params: {animated?: ?boolean, offset: number}) {
     const {animated, offset} = params;
     this._listRef.scrollTo(
       this.props.horizontal ? {x: offset, animated} : {y: offset, animated}
     );
   }
+  getListRef() {
+    return this._listRef;
+  }
   static defaultProps: DefaultProps = {
-    shouldItemUpdate: () => true,
-    keyExtractor: (item, index) => item.key || index,
+    keyExtractor: (item, index) => item.key || String(index),
     renderScrollComponent: (props: Props) => {
       if (props.onRefresh) {
         return (
@@ -114,7 +104,7 @@ class MetroListView extends React.Component {
     this.props,
     {
       ds: new ListView.DataSource({
-        rowHasChanged: (itemA, itemB) => this.props.shouldItemUpdate({item: itemA}, {item: itemB}),
+        rowHasChanged: (itemA, itemB) => true,
         sectionHeaderHasChanged: () => true,
         getSectionHeaderData: (dataBlob, sectionID) => this.state.sectionHeaderData[sectionID],
       }),
@@ -146,7 +136,7 @@ class MetroListView extends React.Component {
       const sections = {};
       props.sections.forEach((sectionIn, ii) => {
         const sectionID = 's' + ii;
-        sections[sectionID] = sectionIn.itemData;
+        sections[sectionID] = sectionIn.data;
         sectionHeaderData[sectionID] = sectionIn;
       });
       return {
@@ -163,13 +153,12 @@ class MetroListView extends React.Component {
   }
   _renderFooter = () => <this.props.FooterComponent key="$footer" />;
   _renderRow = (item, sectionID, rowID, highlightRow) => {
-    const {ItemComponent} = this.props;
-    return <ItemComponent item={item} index={rowID} />;
+    return this.props.renderItem({item, index: rowID});
   };
   _renderSectionHeader = (section, sectionID) => {
-    const {SectionHeaderComponent} = this.props;
-    invariant(SectionHeaderComponent, 'Must provide SectionHeaderComponent with sections prop');
-    return <SectionHeaderComponent section={section} />;
+    const {renderSectionHeader} = this.props;
+    invariant(renderSectionHeader, 'Must provide renderSectionHeader with sections prop');
+    return renderSectionHeader({section});
   }
   _renderSeparator = (sID, rID) => <this.props.SeparatorComponent key={sID + rID} />;
 }

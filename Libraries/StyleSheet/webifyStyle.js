@@ -6,6 +6,7 @@
 var merge = require('merge');
 var flattenStyle = require('flattenStyle');
 var processTransform = require('processTransform');
+var normalizeColor = require('normalizeColor');
 
 var styleKeyMap = {
 
@@ -115,6 +116,21 @@ var styleKeyMap = {
             borderImage: value,
             WebkitBorderImage: value,
         };
+    },
+
+    tintColor: function(value) {
+        var color = normalizeColor(value);
+        if (!color) {
+            return {};
+        }
+        // HACK (white or black?)
+        var r = (color >> 24) & 0xff;
+        var g = (color >> 16) & 0xff;
+        var b = (color >> 8) & 0xff;
+        if (r + g + b >= 250 * 3) {
+            return {filter: 'saturate(0%) brightness(1000%)'};
+        }
+        return {filter: 'saturate(0%) brightness(0%)'};
     },
 
     transformMatrix: function(value) {

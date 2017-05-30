@@ -35,6 +35,7 @@ var Text = React.createClass({
             children,
             allowFontScaling,
             numberOfLines,
+            collapsable,
             ...props,
         } = this.props;
 
@@ -57,21 +58,28 @@ var Text = React.createClass({
         } else if (children) {
             children = [this._renderChild(children)];
         }
-
+        var finalStyle = webifyStyle([style, styles.containerSpan]);
+        if (this.props.numberOfLines == 1) {
+            finalStyle['overflow'] = 'hidden'
+        }
         return (
             <span
                 {...props}
-                style={webifyStyle([style, styles.containerSpan])}
+                style={finalStyle}
                 children={React.Children.toArray(children)}
                 />
         );
     },
 
     _renderInnerText: function(text) {
+        let style = {};
+        if (this.props.numberOfLines == 1) {
+            style['whiteSpace'] = 'nowrap'
+        }
         if (text === "\n") {
             return <br/>;
         }
-        return <span>{text}</span>
+        return <span style={style}>{text}</span>
     },
 
     _renderChild: function(child) {
