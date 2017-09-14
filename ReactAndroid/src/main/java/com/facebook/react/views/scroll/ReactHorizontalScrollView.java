@@ -30,10 +30,16 @@ import com.facebook.react.uimanager.ReactClippingViewGroup;
 import com.facebook.react.uimanager.ReactClippingViewGroupHelper;
 import com.facebook.react.views.view.ReactViewBackgroundDrawable;
 
+// <Even>
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.uimanager.PixelUtil;
+import com.facebook.react.animated.NativeAnimatedModule;
+// </Even>
+
 /**
  * Similar to {@link ReactScrollView} but only supports horizontal scrolling.
  */
-public class ReactHorizontalScrollView extends PagingHorizontalScrollView implements
+public class ReactHorizontalScrollView extends HorizontalScrollView implements
     ReactClippingViewGroup {
 
   private final OnScrollDispatchHelper mOnScrollDispatchHelper = new OnScrollDispatchHelper();
@@ -52,6 +58,11 @@ public class ReactHorizontalScrollView extends PagingHorizontalScrollView implem
   private int mEndFillColor = Color.TRANSPARENT;
   private @Nullable ReactViewBackgroundDrawable mReactBackgroundDrawable;
 
+  // <Even>
+  private final NativeAnimatedModule mAnimatedModule;
+  private int mContentOffsetXAnimatedNodeTag;
+  // </Even>
+
   public ReactHorizontalScrollView(Context context) {
     this(context, null);
   }
@@ -59,6 +70,10 @@ public class ReactHorizontalScrollView extends PagingHorizontalScrollView implem
   public ReactHorizontalScrollView(Context context, @Nullable FpsListener fpsListener) {
     super(context);
     mFpsListener = fpsListener;
+
+    // <Even>
+    mAnimatedModule = ((ReactContext) context).getNativeModule(NativeAnimatedModule.class);
+    // </Even>
   }
 
   public void setScrollPerfTag(@Nullable String scrollPerfTag) {
@@ -91,6 +106,12 @@ public class ReactHorizontalScrollView extends PagingHorizontalScrollView implem
     mPagingEnabled = pagingEnabled;
   }
 
+  // <Even>
+  public void setContentOffsetXAnimatedNodeTag(int tag) {
+    mContentOffsetXAnimatedNodeTag = tag;
+  }
+  // </Even>
+
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     MeasureSpecAssertions.assertExplicitMeasureSpec(widthMeasureSpec, heightMeasureSpec);
@@ -119,6 +140,13 @@ public class ReactHorizontalScrollView extends PagingHorizontalScrollView implem
 
       ReactScrollViewHelper.emitScrollEvent(this);
     }
+
+    // <Even>
+    if (mContentOffsetXAnimatedNodeTag != 0) {
+      int value = Math.round(PixelUtil.toDIPFromPixel(x));
+      mAnimatedModule.setAnimatedNodeValue(mContentOffsetXAnimatedNodeTag, value);
+    }
+    // </Even>
   }
 
   @Override

@@ -14,7 +14,8 @@
 #import "RCTConvert+ART.h"
 
 const CGFloat ANGLE_OFFSET = -M_PI_2;
-const CGFloat SEGMENT_OVERLAP = 0.01;
+const NSInteger SEGMENT_COUNT = 360;
+const CGFloat SEGMENT_OVERLAP = (1.0 / SEGMENT_COUNT) / 2;
 
 @implementation ARTAngularGradient
 {
@@ -98,7 +99,7 @@ const CGFloat SEGMENT_OVERLAP = 0.01;
 
   CGFloat segmentCount = 360; // TODO
 
-  for (NSInteger i = 0; i < segmentCount; i++) {
+  for (NSInteger i = 0; i < segmentCount - 1; i++) {
     CGContextSaveGState(context);
 
     CGFloat startAngle = (M_PI * 2) / segmentCount * i - SEGMENT_OVERLAP;

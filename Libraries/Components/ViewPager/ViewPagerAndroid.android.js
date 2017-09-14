@@ -143,11 +143,21 @@ class ViewPagerAndroid extends React.Component {
     * The default value is true.
     */
     scrollEnabled: ReactPropTypes.bool,
+
+    // <Even>
+    animatedScrollX: ReactPropTypes.object,
+    contentOffsetXAnimatedNodeTag: ReactPropTypes.number,
+    // </Even>
   };
 
   // <Even>
   setNativeProps(props: Object) {
     this.refs[VIEWPAGER_REF].setNativeProps(props);
+  }
+  componentWillMount() {
+    if (this.props.animatedScrollX) {
+        this.props.animatedScrollX.__makeNative();
+    }
   }
   // </Even>
 
@@ -238,9 +248,21 @@ class ViewPagerAndroid extends React.Component {
   };
 
   render() {
+    // <Even>
+    var contentOffsetXAnimatedNodeTag;
+    if (this.props.animatedScrollX && this.props.animatedScrollX.__isNative) {
+        contentOffsetXAnimatedNodeTag = this.props.animatedScrollX.__getNativeTag();
+    }
+    var props = {
+      ...this.props,
+      animatedScrollX: undefined,
+      contentOffsetXAnimatedNodeTag,
+    };
+    // </Even>
+
     return (
       <NativeAndroidViewPager
-        {...this.props}
+        {...props}
         ref={VIEWPAGER_REF}
         style={this.props.style}
         onPageScroll={this._onPageScroll}

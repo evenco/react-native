@@ -73,11 +73,6 @@ public class ReactHorizontalScrollViewManager
     view.setHorizontalScrollBarEnabled(value);
   }
 
-  @ReactProp(name = "snapToInterval")
-  public void setSnapToInterval(ReactHorizontalScrollView view, float interval) {
-    view.setSnapToInterval(interval);
-  }
-
   @ReactProp(name = ReactClippingViewGroupHelper.PROP_REMOVE_CLIPPED_SUBVIEWS)
   public void setRemoveClippedSubviews(ReactHorizontalScrollView view, boolean removeClippedSubviews) {
     view.setRemoveClippedSubviews(removeClippedSubviews);
@@ -112,6 +107,13 @@ public class ReactHorizontalScrollViewManager
   public void setPagingEnabled(ReactHorizontalScrollView view, boolean pagingEnabled) {
     view.setPagingEnabled(pagingEnabled);
   }
+
+  // <Even>
+  @ReactProp(name = "contentOffsetXAnimatedNodeTag")
+  public void setContentOffsetXAnimatedNodeTag(ReactHorizontalScrollView view, int tag) {
+    view.setContentOffsetXAnimatedNodeTag(tag);
+  }
+  // </Even>
 
   /**
    * Controls overScroll behaviour

@@ -48,9 +48,13 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
 - (void)beginRefreshing
 {
+  // <Even>
+  CGFloat height = 60; // self.frame.size.height changes???
+  // </Even>
+
   // When using begin refreshing we need to adjust the ScrollView content offset manually.
   UIScrollView *scrollView = (UIScrollView *)self.superview;
-  CGPoint offset = {scrollView.contentOffset.x, scrollView.contentOffset.y - self.frame.size.height};
+  CGPoint offset = {scrollView.contentOffset.x, scrollView.contentOffset.y - height};
 
   // `beginRefreshing` must be called after the animation is done. This is why it is impossible
   // to use `setContentOffset` with `animated:YES`.
@@ -66,11 +70,15 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
 - (void)endRefreshing
 {
+  // <Even>
+  CGFloat targetY = 0; // scrollView.contentInset.top changes to UIRefreshControlHeight during refresh???
+  // </Even>
+
   // The contentOffset of the scrollview MUST be greater than 0 before calling
   // endRefreshing otherwise the next pull to refresh will not work properly.
   UIScrollView *scrollView = (UIScrollView *)self.superview;
   if (scrollView.contentOffset.y < 0) {
-    CGPoint offset = {scrollView.contentOffset.x, -scrollView.contentInset.top};
+    CGPoint offset = {scrollView.contentOffset.x, targetY};
     [UIView animateWithDuration:0.25
                           delay:0
                         options:UIViewAnimationOptionBeginFromCurrentState

@@ -24,6 +24,7 @@ var styles = StyleSheet.create({
     },
 
     horizontalContainer: {
+        flex: 1,
         flexDirection: 'row',
     },
 
@@ -46,14 +47,27 @@ var ScrollView = React.createClass({
         return this;
     },
 
-    scrollTo: function(y, x) {
+    scrollTo: function(
+        y?: number | { x?: number, y?: number, animated?: boolean },
+        x?: number,
+        animated?: boolean
+    ) {
+        if (typeof y === 'number') {
+          console.warn('`scrollTo(y, x, animated)` is deprecated. Use `scrollTo({x: 5, y: 5, ' +
+            'animated: true})` instead.');
+        } else {
+          ({x, y, animated} = y || {});
+        }
         var node = ReactDOM.findDOMNode(this.refs.scrollView);
         node.scrollTop = y;
         node.scrollLeft = x;
+
+        this._updateAnimatedValues({x, y});
     },
 
     scrollWithoutAnimationTo: function(y, x) {
-        this.scrollTo(y, x);
+        console.warn('`scrollWithoutAnimationTo` is deprecated. Use `scrollTo` instead');
+        this.scrollTo({y, x});
     },
 
     scrollToEndOnNextContentChange: function() {
@@ -64,7 +78,7 @@ var ScrollView = React.createClass({
         var scrollProps = this.scrollProperties;
         var offsetX = scrollProps.contentSize.width - scrollProps.layout.width;
         var offsetY = scrollProps.contentSize.height - scrollProps.layout.height;
-        this.scrollTo(offsetY, offsetX);
+        this.scrollTo({y: offsetY, x: offsetX});
     },
 
     componentWillMount: function() {
@@ -98,7 +112,7 @@ var ScrollView = React.createClass({
                     this._scrollToEndOnNextContentChange = false;
                     this.scrollToEnd();
                 } else {
-                    this.scrollTo(oldScrollProps.contentOffset.y + contentDelta, 0);
+                    this.scrollTo({y: oldScrollProps.contentOffset.y + contentDelta, x: 0});
                 }
             }
         }
@@ -124,6 +138,8 @@ var ScrollView = React.createClass({
             automaticallyAdjustContentInsets,
             contentContainerStyle,
             inverted,
+            horizontal,
+            keyboardDismissMode,
             onMomentumScrollBegin,
             onMomentumScrollEnd,
             onScrollBeginDrag,
@@ -134,9 +150,13 @@ var ScrollView = React.createClass({
             onContentSizeChange,
             keyboardShouldPersistTaps,
             showsVerticalScrollIndicator,
+            showsHorizontalScrollIndicator,
             pagingEnabled,
             disableTopPull,
+            animatedScrollX,
             animatedScrollY,
+            refreshControl,
+            bounces,
             children,
             ...props,
         } = this.props;
@@ -181,6 +201,12 @@ var ScrollView = React.createClass({
             this.props.onScroll(e);
         }
     },
+
+    // HACK
+    _updateAnimatedValues({x, y}) {
+        this.props.animatedScrollX && this.props.animatedScrollX.setValue(x);
+        this.props.animatedScrollY && this.props.animatedScrollY.setValue(y);
+    }
 
 });
 

@@ -27,16 +27,19 @@ import android.view.ViewGroup;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
 
-import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.common.ReactConstants;
-import com.facebook.react.animated.NativeAnimatedModule;
 import com.facebook.react.uimanager.MeasureSpecAssertions;
 import com.facebook.react.uimanager.events.NativeGestureUtil;
 import com.facebook.react.uimanager.ReactClippingViewGroup;
 import com.facebook.react.uimanager.ReactClippingViewGroupHelper;
-import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.views.view.ReactViewBackgroundDrawable;
+
+// <Even>
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.animated.NativeAnimatedModule;
+import com.facebook.react.uimanager.PixelUtil;
+// </Even>
 
 /**
  * A simple subclass of ScrollView that doesn't dispatch measure and layout to its children and has
@@ -51,7 +54,6 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   private static boolean sTriedToGetScrollerField = false;
 
   private final OnScrollDispatchHelper mOnScrollDispatchHelper = new OnScrollDispatchHelper();
-  private final NativeAnimatedModule mAnimatedModule;
   private final OverScroller mScroller;
 
   private @Nullable Rect mClippingRect;
@@ -69,7 +71,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   private @Nullable ReactViewBackgroundDrawable mReactBackgroundDrawable;
 
   // <Even>
-  private int mContentOffsetXAnimatedNodeTag;
+  private final NativeAnimatedModule mAnimatedModule;
   private int mContentOffsetYAnimatedNodeTag;
   private VelocityTracker mVelocityTracker = VelocityTracker.obtain();
   private boolean mDisableTopPull;
@@ -82,7 +84,10 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   public ReactScrollView(ReactContext context, @Nullable FpsListener fpsListener) {
     super(context);
     mFpsListener = fpsListener;
+
+    // <Even>
     mAnimatedModule = ((ReactContext) context).getNativeModule(NativeAnimatedModule.class);
+    // </Even>
 
     if (!sTriedToGetScrollerField) {
       sTriedToGetScrollerField = true;
@@ -133,10 +138,6 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   }
 
   // <Even>
-  public void setContentOffsetXAnimatedNodeTag(int tag) {
-    mContentOffsetXAnimatedNodeTag = tag;
-  }
-
   public void setContentOffsetYAnimatedNodeTag(int tag) {
     mContentOffsetYAnimatedNodeTag = tag;
   }
@@ -189,10 +190,6 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
     }
 
     // <Even>
-    if (mContentOffsetXAnimatedNodeTag != 0) {
-      int value = Math.round(PixelUtil.toDIPFromPixel(x));
-      mAnimatedModule.setAnimatedNodeValue(mContentOffsetXAnimatedNodeTag, value);
-    }
     if (mContentOffsetYAnimatedNodeTag != 0) {
       int value = Math.round(PixelUtil.toDIPFromPixel(y));
       mAnimatedModule.setAnimatedNodeValue(mContentOffsetYAnimatedNodeTag, value);

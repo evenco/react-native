@@ -543,7 +543,7 @@ var ListView = React.createClass({
     var offset = Math.max(this.scrollProperties.contentLength - this.scrollProperties.visibleLength, 0);
     var offsetX = this.props.horizontal ? offset : 0;
     var offsetY = this.props.horizontal ? 0 : offset;
-    this.getScrollResponder().scrollTo(offsetY, offsetX);
+    this.getScrollResponder().scrollTo({y: offsetY, x: offsetX});
   },
 
   _updateChildFrames: function(childFrames) {

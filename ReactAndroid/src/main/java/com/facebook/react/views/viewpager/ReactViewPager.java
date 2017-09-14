@@ -23,6 +23,11 @@ import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
 import com.facebook.react.uimanager.events.NativeGestureUtil;
 
+// <Even>
+import com.facebook.react.uimanager.PixelUtil;
+import com.facebook.react.animated.NativeAnimatedModule;
+// </Even>
+
 /**
  * Wrapper view for {@link ViewPager}. It's forwarding calls to {@link ViewGroup#addView} to add
  * views to custom {@link PagerAdapter} instance which is used by {@link NativeViewHierarchyManager}
@@ -124,6 +129,14 @@ public class ReactViewPager extends ViewPager {
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
       mEventDispatcher.dispatchEvent(
           new PageScrollEvent(getId(), position, positionOffset));
+
+      // <Even>
+      if (mContentOffsetXAnimatedNodeTag != 0) {
+        int x = position * getMeasuredWidth() + positionOffsetPixels;
+        int value = Math.round(PixelUtil.toDIPFromPixel(x));
+        mAnimatedModule.setAnimatedNodeValue(mContentOffsetXAnimatedNodeTag, value);
+      }
+      // </Even>
     }
 
     @Override
@@ -159,12 +172,21 @@ public class ReactViewPager extends ViewPager {
   private boolean mIsCurrentItemFromJs;
   private boolean mScrollEnabled = true;
 
+  // <Even>
+  private final NativeAnimatedModule mAnimatedModule;
+  private int mContentOffsetXAnimatedNodeTag;
+  // </Even>
+
   public ReactViewPager(ReactContext reactContext) {
     super(reactContext);
     mEventDispatcher = reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher();
     mIsCurrentItemFromJs = false;
     setOnPageChangeListener(new PageChangeListener());
     setAdapter(new Adapter());
+
+    // <Even>
+    mAnimatedModule = reactContext.getNativeModule(NativeAnimatedModule.class);
+    // </Even>
   }
 
   @Override
@@ -203,6 +225,12 @@ public class ReactViewPager extends ViewPager {
   public void setScrollEnabled(boolean scrollEnabled) {
     mScrollEnabled = scrollEnabled;
   }
+
+  // <Even>
+  public void setContentOffsetXAnimatedNodeTag(int tag) {
+    mContentOffsetXAnimatedNodeTag = tag;
+  }
+  // </Even>
 
   /*package*/ void addViewToAdapter(View child, int index) {
     getAdapter().addView(child, index);

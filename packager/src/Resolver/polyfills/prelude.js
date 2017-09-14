@@ -14,3 +14,14 @@
 global.__DEV__ = false;
 
 global.__BUNDLE_START_TIME__ = Date.now();
+
+// <Even> (web)
+if (!global.process) {
+    global.process = {
+        env: {},
+        nextTick: function(fn) {
+            setTimeout(fn, 0);
+        },
+    };
+}
+// </Even>

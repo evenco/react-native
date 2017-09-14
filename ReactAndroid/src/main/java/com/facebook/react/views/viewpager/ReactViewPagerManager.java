@@ -120,4 +120,11 @@ public class ReactViewPagerManager extends ViewGroupManager<ReactViewPager> {
   public void setPageMargin(ReactViewPager pager, float margin) {
     pager.setPageMargin((int) PixelUtil.toPixelFromDIP(margin));
   }
+
+  // <Even>
+  @ReactProp(name = "contentOffsetXAnimatedNodeTag")
+  public void setContentOffsetXAnimatedNodeTag(ReactViewPager pager, int tag) {
+    pager.setContentOffsetXAnimatedNodeTag(tag);
+  }
+  // </Even>
 }
