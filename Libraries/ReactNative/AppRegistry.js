@@ -13,43 +13,59 @@
 
 const BatchedBridge = require('BatchedBridge');
 const BugReporting = require('BugReporting');
+const NativeModules = require('NativeModules');
 const ReactNative = require('ReactNative');
+const SceneTracker = require('SceneTracker');
 
 const infoLog = require('infoLog');
 const invariant = require('fbjs/lib/invariant');
 const renderApplication = require('renderApplication');
 
-const { HeadlessJsTaskSupport } = require('NativeModules');
-
-if (__DEV__) {
-  // In order to use Cmd+P to record/dump perf data, we need to make sure
-  // this module is available in the bundle
-  require('RCTRenderingPerf');
-}
-
 type Task = (taskData: any) => Promise<void>;
 type TaskProvider = () => Task;
-type ComponentProvider = () => ReactClass<any>;
-type AppConfig = {
+export type ComponentProvider = () => ReactClass<any>;
+export type ComponentProviderInstrumentationHook =
+  (component: ComponentProvider) => ReactClass<any>;
+export type AppConfig = {
   appKey: string,
   component?: ComponentProvider,
   run?: Function,
   section?: boolean,
 };
-type Runnable = {
+export type Runnable = {
   component?: ComponentProvider,
   run: Function,
 };
-type Runnables = {
+export type Runnables = {
   [appKey: string]: Runnable,
 };
+export type Registry = {
+  sections: Array<string>,
+  runnables: Runnables,
+};
+export type WrapperComponentProvider = any => ReactClass<*>;
 
 const runnables: Runnables = {};
 let runCount = 1;
 const sections: Runnables = {};
 const tasks: Map<string, TaskProvider> = new Map();
+let componentProviderInstrumentationHook: ComponentProviderInstrumentationHook =
+  (component: ComponentProvider) => component();
+
+let wrapperComponentProvider: ?WrapperComponentProvider;
 
 /**
+ * <div class="banner-crna-ejected">
+ *   <h3>Project with Native Code Required</h3>
+ *   <p>
+ *     This API only works in projects made with <code>react-native init</code>
+ *     or in those made with Create React Native App which have since ejected. For
+ *     more information about ejecting, please see
+ *     the <a href="https://github.com/react-community/create-react-native-app/blob/master/EJECTING.md" target="_blank">guide</a> on
+ *     the Create React Native App repository.
+ *   </p>
+ * </div>
+ *
  * `AppRegistry` is the JS entry point to running all React Native apps.  App
  * root components should register themselves with
  * `AppRegistry.registerComponent`, then the native system can load the bundle
@@ -65,6 +81,10 @@ const tasks: Map<string, TaskProvider> = new Map();
  * `require`d.
  */
 const AppRegistry = {
+  setWrapperComponentProvider(provider: WrapperComponentProvider) {
+    wrapperComponentProvider = provider;
+  },
+
   registerConfig(config: Array<AppConfig>): void {
     config.forEach((appConfig) => {
       if (appConfig.run) {
@@ -87,13 +107,18 @@ const AppRegistry = {
 
   registerComponent(
     appKey: string,
-    component: ComponentProvider,
+    componentProvider: ComponentProvider,
     section?: boolean,
   ): string {
     runnables[appKey] = {
-      component,
+      componentProvider,
       run: (appParameters) =>
-        renderApplication(component(), appParameters.initialProps, appParameters.rootTag)
+        renderApplication(
+          componentProviderInstrumentationHook(componentProvider),
+          appParameters.initialProps,
+          appParameters.rootTag,
+          wrapperComponentProvider && wrapperComponentProvider(appParameters),
+        )
     };
     if (section) {
       sections[appKey] = runnables[appKey];
@@ -128,6 +153,17 @@ const AppRegistry = {
     return runnables[appKey];
   },
 
+  getRegistry(): Registry {
+    return {
+      sections: AppRegistry.getSectionKeys(),
+      runnables: {...runnables},
+    };
+  },
+
+  setComponentProviderInstrumentationHook(hook: ComponentProviderInstrumentationHook) {
+    componentProviderInstrumentationHook = hook;
+  },
+
   runApplication(appKey: string, appParameters: any): void {
     const msg =
       'Running application "' + appKey + '" with appParams: ' +
@@ -139,10 +175,19 @@ const AppRegistry = {
     BugReporting.addSource('AppRegistry.runApplication' + runCount++, () => msg);
     invariant(
       runnables[appKey] && runnables[appKey].run,
-      'Application ' + appKey + ' has not been registered. This ' +
-      'is either due to a require() error during initialization ' +
-      'or failure to call AppRegistry.registerComponent.'
+      'Application ' + appKey + ' has not been registered.\n\n' +
+      'Hint: This error often happens when you\'re running the packager ' +
+      '(local dev server) from a wrong folder. For example you have ' +
+      'multiple apps and the packager is still running for the app you ' +
+      'were working on before.\nIf this is the case, simply kill the old ' +
+      'packager instance (e.g. close the packager terminal window) ' +
+      'and start the packager in the correct app folder (e.g. cd into app ' +
+      'folder and run \'npm start\').\n\n' +
+      'This error can also happen due to a require() error during ' +
+      'initialization or failure to call AppRegistry.registerComponent.\n\n'
     );
+
+    SceneTracker.setActiveScene({name: appKey});
     runnables[appKey].run(appParameters);
   },
 
@@ -177,10 +222,10 @@ const AppRegistry = {
       throw new Error(`No task registered for key ${taskKey}`);
     }
     taskProvider()(data)
-      .then(() => HeadlessJsTaskSupport.notifyTaskFinished(taskId))
+      .then(() => NativeModules.HeadlessJsTaskSupport.notifyTaskFinished(taskId))
       .catch(reason => {
         console.error(reason);
-        HeadlessJsTaskSupport.notifyTaskFinished(taskId);
+        NativeModules.HeadlessJsTaskSupport.notifyTaskFinished(taskId);
       });
   }
 

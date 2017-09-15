@@ -55,6 +55,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
 
   private final OnScrollDispatchHelper mOnScrollDispatchHelper = new OnScrollDispatchHelper();
   private final OverScroller mScroller;
+  private final VelocityHelper mVelocityHelper = new VelocityHelper();
 
   private @Nullable Rect mClippingRect;
   private boolean mDoneFlinging;
@@ -186,7 +187,10 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
         mDoneFlinging = false;
       }
 
-      ReactScrollViewHelper.emitScrollEvent(this);
+      ReactScrollViewHelper.emitScrollEvent(
+        this,
+        mOnScrollDispatchHelper.getXFlingVelocity(),
+        mOnScrollDispatchHelper.getYFlingVelocity());
     }
 
     // <Even>
@@ -245,12 +249,17 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
       return false;
     }
 
+    mVelocityHelper.calculateVelocity(ev);
     int action = ev.getAction() & MotionEvent.ACTION_MASK;
     if (action == MotionEvent.ACTION_UP && mDragging) {
-      ReactScrollViewHelper.emitScrollEndDragEvent(this);
+      ReactScrollViewHelper.emitScrollEndDragEvent(
+        this,
+        mVelocityHelper.getXVelocity(),
+        mVelocityHelper.getYVelocity());
       mDragging = false;
       disableFpsListener();
     }
+
     return super.onTouchEvent(ev);
   }
 

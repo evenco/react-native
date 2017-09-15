@@ -82,16 +82,7 @@ All we need now is to apply this patch to your source files. While the old `reac
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-<<<<<<< ours
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/HockeySDK.embeddedframework",
-					"$(PROJECT_DIR)/HockeySDK-iOS/HockeySDK.embeddedframework",
-				);
-=======
 				CURRENT_PROJECT_VERSION = 1;
->>>>>>> theirs
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -111,12 +102,6 @@ As we mentioned above, the process has to be started from your current React Nat
 Upgrading based on Git is a big improvement in developer experience and it is important to make it available to everyone. By using a separate package [react-native-git-upgrade](https://www.npmjs.com/package/react-native-git-upgrade) installed globally you can use this new code today no matter what version of React Native your project is using.
 
 One more reason is the recent [Yeoman wipeout](https://twitter.com/martinkonicek/status/800730190141857793) by Martin Konicek. We didn't want to get these Yeoman dependencies back into the `react-native` package to be able to evaluate the old template in order to create the patch.
-
-## Looking ahead
-
-The logic behind `react-native-git-upgrade` described above is going to power the standard `react-native upgrade` starting with React Native version 0.40.0.
-
-This means that if you are upgrading __from version 0.40.0 or higher__, you will be able to simply run `react-native upgrade` in your project without having to install anything globally. The `react-native-git-upgrade` is provided so anyone can enjoy this improved experience today while using older versions of React Native.
 
 ## Try it out and provide feedback
 

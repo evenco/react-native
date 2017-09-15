@@ -36,6 +36,15 @@ RCT_ENUM_CONVERTER(UIScrollViewIndicatorStyle, (@{
   @"white": @(UIScrollViewIndicatorStyleWhite),
 }), UIScrollViewIndicatorStyleDefault, integerValue)
 
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000 /* __IPHONE_11_0 */
+RCT_ENUM_CONVERTER(UIScrollViewContentInsetAdjustmentBehavior, (@{
+  @"automatic": @(UIScrollViewContentInsetAdjustmentAutomatic),
+  @"scrollableAxes": @(UIScrollViewContentInsetAdjustmentScrollableAxes),
+  @"never": @(UIScrollViewContentInsetAdjustmentNever),
+  @"always": @(UIScrollViewContentInsetAdjustmentAlways),
+}), UIScrollViewContentInsetAdjustmentNever, integerValue)
+#endif
+
 @end
 
 @implementation RCTScrollViewManager
@@ -67,7 +76,6 @@ RCT_EXPORT_VIEW_PROPERTY(scrollsToTop, BOOL)
 #endif
 RCT_EXPORT_VIEW_PROPERTY(showsHorizontalScrollIndicator, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(showsVerticalScrollIndicator, BOOL)
-RCT_EXPORT_VIEW_PROPERTY(stickyHeaderIndices, NSIndexSet)
 RCT_EXPORT_VIEW_PROPERTY(scrollEventThrottle, NSTimeInterval)
 RCT_EXPORT_VIEW_PROPERTY(zoomScale, CGFloat)
 RCT_EXPORT_VIEW_PROPERTY(contentInset, UIEdgeInsets)
@@ -80,7 +88,10 @@ RCT_EXPORT_VIEW_PROPERTY(onScroll, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onScrollEndDrag, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onMomentumScrollBegin, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onMomentumScrollEnd, RCTDirectEventBlock)
-RCT_EXPORT_VIEW_PROPERTY(onScrollAnimationEnd, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(DEPRECATED_sendUpdatedChildFrames, BOOL)
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000 /* __IPHONE_11_0 */
+RCT_EXPORT_VIEW_PROPERTY(contentInsetAdjustmentBehavior, UIScrollViewContentInsetAdjustmentBehavior)
+#endif
 
 // <Even>
 RCT_EXPORT_VIEW_PROPERTY(snapToFirstInterval, CGFloat)
@@ -186,6 +197,21 @@ RCT_EXPORT_METHOD(zoomToRect:(nonnull NSNumber *)reactTag
                   "with tag #%@", view, reactTag);
     }
   }];
+}
+
+RCT_EXPORT_METHOD(flashScrollIndicators:(nonnull NSNumber *)reactTag)
+{
+  [self.bridge.uiManager addUIBlock:
+   ^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTScrollView *> *viewRegistry){
+
+     RCTScrollView *view = viewRegistry[reactTag];
+     if (!view || ![view isKindOfClass:[RCTScrollView class]]) {
+       RCTLogError(@"Cannot find RCTScrollView with tag #%@", reactTag);
+       return;
+     }
+
+     [view.scrollView flashScrollIndicators];
+   }];
 }
 
 @end

@@ -98,6 +98,22 @@ function execute(options) {
 
   var DOCS_MD_DIR = '../docs/';
   var BLOG_MD_DIR = '../blog/';
+  var CONFIG_JSON_DIR = '../';
+
+  // Extracts the Contributor's Guide content from Contributing.md
+  // and inserts into repo's CONTRIBUTING.md
+  const contributingGuide = splitHeader(
+    fs.readFileSync(DOCS_MD_DIR + 'Contributing.md', 'utf8')
+  ).content.replace(/\(\/react-native\//g, '(https://facebook.github.io/react-native/');
+
+  let contributingReadme = fs.readFileSync('../CONTRIBUTING.md', 'utf8');
+  const guideStart = '<!-- generated_contributing_start -->';
+  const guideEnd = '<!-- generated_contributing_end -->';
+  contributingReadme =
+    contributingReadme.slice(0, contributingReadme.indexOf(guideStart) + guideStart.length) +
+    contributingGuide +
+    contributingReadme.slice(contributingReadme.indexOf(guideEnd));
+  fs.writeFileSync('../CONTRIBUTING.md', contributingReadme);
 
   glob.sync('src/react-native/docs/*.*').forEach(rmFile);
   glob.sync('src/react-native/blog/*.*').forEach(rmFile);
@@ -178,6 +194,13 @@ function execute(options) {
     .forEach((key) => {
       metadatas.config[key] = process.env[key];
     });
+
+  // load showcase apps into metadata
+  var showcaseApps = JSON.parse(fs.readFileSync(
+    path.basename(CONFIG_JSON_DIR + 'showcase.json'),
+    {encoding: 'utf8'}
+  ));
+  metadatas.showcaseApps = showcaseApps;
 
   fs.writeFileSync(
     'core/metadata.js',

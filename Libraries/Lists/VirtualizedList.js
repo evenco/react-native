@@ -235,7 +235,7 @@ class VirtualizedList extends React.PureComponent<OptionalProps, Props, State> {
       `scrollToIndex out of range: ${index} vs ${getItemCount(data) - 1}`,
     );
     invariant(
-      getItemLayout || index < this._highestMeasuredFrameIndex,
+      getItemLayout || index <= this._highestMeasuredFrameIndex,
       'scrollToIndex should be used in conjunction with getItemLayout, ' +
         'otherwise there is no way to know the location of an arbitrary index.',
     );
@@ -512,32 +512,11 @@ class VirtualizedList extends React.PureComponent<OptionalProps, Props, State> {
       );
     }
 
-    let {
-      sections,
-      extraData,
-      renderItem,
-      renderSectionHeader,
-      renderSectionFooter,
-      ItemSeparatorComponent,
-      SectionSeparatorComponent,
+    const {
       ListEmptyComponent,
       ListFooterComponent,
       ListHeaderComponent,
-      onEndReached,
-      onEndReachedThreshold,
-      initialNumToRender,
-      stickySectionHeadersEnabled,
-      disableVirtualization,
-      maxToRenderPerBatch,
-      updateCellsBatchingPeriod,
-      getItemCount,
-      getItem,
-      onViewableItemsChanged,
-      keyExtractor,
-      windowSize,
-      ...scrollViewProps,
     } = this.props;
-
     const {data, horizontal} = this.props;
     const isVirtualizationDisabled = this._isVirtualizationDisabled();
     const inversionStyle = this.props.inverted
@@ -680,7 +659,7 @@ class VirtualizedList extends React.PureComponent<OptionalProps, Props, State> {
       );
     }
     const scrollProps = {
-      ...scrollViewProps,
+      ...this.props,
       onContentSizeChange: this._onContentSizeChange,
       onLayout: this._onLayout,
       onScroll: this._onScroll,
@@ -757,12 +736,6 @@ class VirtualizedList extends React.PureComponent<OptionalProps, Props, State> {
   }
 
   _defaultRenderScrollComponent = props => {
-    let {
-      refreshing,
-      onRefresh,
-      progressViewOffset,
-      ...scrollViewProps,
-    } = props;
     if (this._isNestedWithSameOrientation()) {
       return <View {...props} />;
     } else if (props.onRefresh) {
@@ -774,18 +747,18 @@ class VirtualizedList extends React.PureComponent<OptionalProps, Props, State> {
       );
       return (
         <ScrollView
-          {...scrollViewProps}
+          {...props}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              progressViewOffset={progressViewOffset}
+              refreshing={props.refreshing}
+              onRefresh={props.onRefresh}
+              progressViewOffset={props.progressViewOffset}
             />
           }
         />
       );
     } else {
-      return <ScrollView {...scrollViewProps} />;
+      return <ScrollView {...props} />;
     }
   };
 
@@ -1188,7 +1161,7 @@ class CellRenderer extends React.Component {
     index: number,
     inversionStyle: ?StyleObj,
     item: Item,
-    onLayout?: (event: Object) => void, // This is extracted by ScrollViewStickyHeader
+    onLayout: (event: Object) => void, // This is extracted by ScrollViewStickyHeader
     onUnmount: (cellKey: string) => void,
     onUpdateSeparators: (cellKeys: Array<?string>, props: Object) => void,
     parentProps: {

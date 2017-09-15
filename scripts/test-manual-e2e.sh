@@ -36,6 +36,7 @@ rm -rf android
 
 success "Generated artifacts for Maven"
 
+npm install
 npm pack
 
 PACKAGE=$(pwd)/react-native-$PACKAGE_VERSION.tgz
@@ -70,7 +71,7 @@ info "   - Disable Chrome debugging."
 info "   - Enable Hot Reloading, change a file (index.ios.js, index.android.js) and save. The UI should refresh."
 info "   - Disable Hot Reloading."
 info ""
-info "Press any key to open the project in XCode"
+info "Press any key to open the project in Xcode"
 info ""
 read -n 1
 open "/tmp/${project_name}/ios/${project_name}.xcodeproj"

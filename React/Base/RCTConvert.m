@@ -504,10 +504,12 @@ RCT_CGSTRUCT_CONVERTER(CGAffineTransform, (@[
   if (!json) {
     return YGValueUndefined;
   } else if ([json isKindOfClass:[NSNumber class]]) {
-    return (YGValue) { [json floatValue], YGUnitPixel };
+    return (YGValue) { [json floatValue], YGUnitPoint };
   } else if ([json isKindOfClass:[NSString class]]) {
     NSString *s = (NSString *) json;
-    if ([s hasSuffix:@"%"]) {
+    if ([s isEqualToString:@"auto"]) {
+      return (YGValue) { YGUndefined, YGUnitAuto };
+    } else if ([s hasSuffix:@"%"]) {
       return (YGValue) { [[s substringToIndex:s.length] floatValue], YGUnitPercent };
     } else {
       RCTLogConvertError(json, @"a YGValue. Did you forget the % or pt suffix?");
@@ -643,6 +645,11 @@ RCT_ENUM_CONVERTER(YGOverflow, (@{
   @"scroll": @(YGOverflowScroll),
 }), YGOverflowVisible, intValue)
 
+RCT_ENUM_CONVERTER(YGDisplay, (@{
+  @"flex": @(YGDisplayFlex),
+  @"none": @(YGDisplayNone),
+}), YGDisplayFlex, intValue)
+
 RCT_ENUM_CONVERTER(YGFlexDirection, (@{
   @"row": @(YGFlexDirectionRow),
   @"row-reverse": @(YGFlexDirectionRowReverse),
@@ -664,7 +671,9 @@ RCT_ENUM_CONVERTER(YGAlign, (@{
   @"center": @(YGAlignCenter),
   @"auto": @(YGAlignAuto),
   @"stretch": @(YGAlignStretch),
-  @"baseline": @(YGAlignBaseline)
+  @"baseline": @(YGAlignBaseline),
+  @"space-between": @(YGAlignSpaceBetween),
+  @"space-around": @(YGAlignSpaceAround)
 }), YGAlignFlexStart, intValue)
 
 RCT_ENUM_CONVERTER(YGDirection, (@{
@@ -727,7 +736,7 @@ RCT_ENUM_CONVERTER(RCTAnimationType, (@{
     // thread safe, so we'll pick the lesser of two evils here and block rather
     // than run the risk of crashing
     RCTLogWarn(@"Calling [RCTConvert UIImage:] on a background thread is not recommended");
-    dispatch_sync(dispatch_get_main_queue(), ^{
+    RCTUnsafeExecuteOnMainQueueSync(^{
       image = [self UIImage:json];
     });
     return image;
@@ -736,18 +745,9 @@ RCT_ENUM_CONVERTER(RCTAnimationType, (@{
   NSURL *URL = imageSource.request.URL;
   NSString *scheme = URL.scheme.lowercaseString;
   if ([scheme isEqualToString:@"file"]) {
-    NSString *assetName = RCTBundlePathForURL(URL);
-    image = assetName ? [UIImage imageNamed:assetName] : nil;
+    image = RCTImageFromLocalAssetURL(URL);
     if (!image) {
-      // Attempt to load from the file system
-      NSString *filePath = URL.path;
-      if (filePath.pathExtension.length == 0) {
-        filePath = [filePath stringByAppendingPathExtension:@"png"];
-      }
-      image = [UIImage imageWithContentsOfFile:filePath];
-      if (!image) {
-        RCTLogConvertError(json, @"an image. File not found.");
-      }
+      RCTLogConvertError(json, @"an image. File not found.");
     }
   } else if ([scheme isEqualToString:@"data"]) {
     image = [UIImage imageWithData:[NSData dataWithContentsOfURL:URL]];

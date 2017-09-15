@@ -11,12 +11,14 @@ package com.facebook.react.views.textinput;
 
 import javax.annotation.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.Map;
 
-import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -312,6 +314,42 @@ public class ReactTextInputManager extends BaseViewManager<ReactEditText, Layout
     } else {
       view.setHighlightColor(color);
     }
+
+    setCursorColor(view, color);
+  }
+
+  private void setCursorColor(ReactEditText view, @Nullable Integer color) {
+    // Evil method that uses reflection because there is no public API to changes
+    // the cursor color programmatically.
+    // Based on http://stackoverflow.com/questions/25996032/how-to-change-programatically-edittext-cursor-color-in-android.
+    try {
+      // Get the original cursor drawable resource.
+      Field cursorDrawableResField = TextView.class.getDeclaredField("mCursorDrawableRes");
+      cursorDrawableResField.setAccessible(true);
+      int drawableResId = cursorDrawableResField.getInt(view);
+
+      Drawable drawable = ContextCompat.getDrawable(view.getContext(), drawableResId);
+      if (color != null) {
+        drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+      }
+      Drawable[] drawables = {drawable, drawable};
+
+      // Update the current cursor drawable with the new one.
+      Field editorField = TextView.class.getDeclaredField("mEditor");
+      editorField.setAccessible(true);
+      Object editor = editorField.get(view);
+      Field cursorDrawableField = editor.getClass().getDeclaredField("mCursorDrawable");
+      cursorDrawableField.setAccessible(true);
+      cursorDrawableField.set(editor, drawables);
+    } catch (NoSuchFieldException ex) {
+      // Ignore errors to avoid crashing if these private fields don't exist on modified
+      // or future android versions.
+    } catch (IllegalAccessException ex) {}
+  }
+
+  @ReactProp(name = "caretHidden", defaultBoolean = false)
+  public void setCaretHidden(ReactEditText view, boolean caretHidden) {
+    view.setCursorVisible(!caretHidden);
   }
 
   @ReactProp(name = "selectTextOnFocus", defaultBoolean = false)
@@ -330,10 +368,17 @@ public class ReactTextInputManager extends BaseViewManager<ReactEditText, Layout
 
   @ReactProp(name = "underlineColorAndroid", customType = "Color")
   public void setUnderlineColor(ReactEditText view, @Nullable Integer underlineColor) {
+    // Drawable.mutate() can sometimes crash due to an AOSP bug:
+    // See https://code.google.com/p/android/issues/detail?id=191754 for more info
+    Drawable background = view.getBackground();
+    Drawable drawableToMutate = background.getConstantState() != null ?
+      background.mutate() :
+      background;
+
     if (underlineColor == null) {
-      view.getBackground().clearColorFilter();
+      drawableToMutate.clearColorFilter();
     } else {
-      view.getBackground().setColorFilter(underlineColor, PorterDuff.Mode.SRC_IN);
+      drawableToMutate.setColorFilter(underlineColor, PorterDuff.Mode.SRC_IN);
     }
   }
 
@@ -633,26 +678,12 @@ public class ReactTextInputManager extends BaseViewManager<ReactEditText, Layout
         return;
       }
 
-      // TODO: remove contentSize from onTextChanged entirely now that onChangeContentSize exists?
-      int contentWidth = mEditText.getWidth();
-      int contentHeight = mEditText.getHeight();
-
-      // Use instead size of text content within EditText when available
-      if (mEditText.getLayout() != null) {
-        contentWidth = mEditText.getCompoundPaddingLeft() + mEditText.getLayout().getWidth() +
-          mEditText.getCompoundPaddingRight();
-        contentHeight = mEditText.getCompoundPaddingTop() + mEditText.getLayout().getHeight() +
-          mEditText.getCompoundPaddingTop();
-      }
-
       // The event that contains the event counter and updates it must be sent first.
       // TODO: t7936714 merge these events
       mEventDispatcher.dispatchEvent(
           new ReactTextChangedEvent(
               mEditText.getId(),
               s.toString(),
-              PixelUtil.toDIPFromPixel(contentWidth),
-              PixelUtil.toDIPFromPixel(contentHeight),
               mEditText.incrementAndGetEventCounter()));
 
       mEventDispatcher.dispatchEvent(
@@ -703,16 +734,29 @@ public class ReactTextInputManager extends BaseViewManager<ReactEditText, Layout
             // Any 'Enter' action will do
             if ((actionId & EditorInfo.IME_MASK_ACTION) > 0 ||
                 actionId == EditorInfo.IME_NULL) {
-              EventDispatcher eventDispatcher =
-                  reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher();
-              eventDispatcher.dispatchEvent(
-                  new ReactTextInputSubmitEditingEvent(
-                      editText.getId(),
-                      editText.getText().toString()));
-            }
+              boolean blurOnSubmit = editText.getBlurOnSubmit();
+              boolean isMultiline = ((editText.getInputType() &
+                InputType.TYPE_TEXT_FLAG_MULTI_LINE) != 0);
 
-            if (editText.getBlurOnSubmit()) {
-              editText.clearFocus();
+              // Motivation:
+              // * blurOnSubmit && isMultiline => Generate `submit` event; clear focus; prevent default behaviour (return true);
+              // * blurOnSubmit && !isMultiline => Generate `submit` event; clear focus; prevent default behaviour (return true);
+              // * !blurOnSubmit && isMultiline => Perform default behaviour (return false);
+              // * !blurOnSubmit && !isMultiline => Prevent default behaviour (return true).
+
+              if (blurOnSubmit) {
+                EventDispatcher eventDispatcher =
+                    reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher();
+
+                eventDispatcher.dispatchEvent(
+                    new ReactTextInputSubmitEditingEvent(
+                        editText.getId(),
+                        editText.getText().toString()));
+
+                editText.clearFocus();
+              }
+
+              return blurOnSubmit || !isMultiline;
             }
 
             return true;
@@ -811,11 +855,12 @@ public class ReactTextInputManager extends BaseViewManager<ReactEditText, Layout
           ScrollEventType.SCROLL,
           horiz,
           vert,
+          0f, // can't get x velocity
+          0f, // can't get y velocity
           0, // can't get content width
           0, // can't get content height
           mReactEditText.getWidth(),
-          mReactEditText.getHeight()
-        );
+          mReactEditText.getHeight());
 
         mEventDispatcher.dispatchEvent(event);
 

@@ -13,8 +13,9 @@
 
 const BatchedBridge = require('BatchedBridge');
 
-const defineLazyObjectProperty = require('defineLazyObjectProperty');
 const invariant = require('fbjs/lib/invariant');
+
+import type {ExtendedError} from 'parseErrorStack';
 
 type ModuleConfig = [
   string, /* name */
@@ -81,7 +82,7 @@ function genMethod(moduleID: number, methodID: number, type: MethodType) {
     };
   } else if (type === 'sync') {
     fn = function(...args: Array<any>) {
-      return global.nativeCallSyncHook(moduleID, methodID, args);
+      return BatchedBridge.callSyncHook(moduleID, methodID, args);
     };
   } else {
     fn = function(...args: Array<any>) {
@@ -108,13 +109,13 @@ function arrayContains<T>(array: Array<T>, value: T): boolean {
   return array.indexOf(value) !== -1;
 }
 
-function createErrorFromErrorData(errorData: {message: string}): Error {
+function createErrorFromErrorData(errorData: {message: string}): ExtendedError {
   const {
     message,
     ...extraErrorInfo
-  } = errorData;
-  const error = new Error(message);
-  (error:any).framesToPop = 1;
+  } = errorData || {};
+  const error : ExtendedError = new Error(message);
+  error.framesToPop = 1;
   return Object.assign(error, extraErrorInfo);
 }
 
@@ -125,6 +126,7 @@ if (global.nativeModuleProxy) {
   const bridgeConfig = global.__fbBatchedBridgeConfig;
   invariant(bridgeConfig, '__fbBatchedBridgeConfig is not set, cannot invoke native modules');
 
+  const defineLazyObjectProperty = require('defineLazyObjectProperty');
   (bridgeConfig.remoteModuleConfig || []).forEach((config: ModuleConfig, moduleID: number) => {
     // Initially this config will only contain the module name when running in JSC. The actual
     // configuration of the module will be lazily loaded.

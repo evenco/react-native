@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import android.view.Choreographer;
 import android.widget.EditText;
 
 import com.facebook.react.ReactRootView;
@@ -24,7 +23,6 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactTestHelper;
 import com.facebook.react.modules.core.ChoreographerCompat;
 import com.facebook.react.modules.core.ReactChoreographer;
-import com.facebook.react.uimanager.UIImplementation;
 import com.facebook.react.uimanager.UIImplementationProvider;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.ViewManager;
@@ -59,7 +57,7 @@ public class TextInputTest {
   @Rule
   public PowerMockRule rule = new PowerMockRule();
 
-  private ArrayList<Choreographer.FrameCallback> mPendingChoreographerCallbacks;
+  private ArrayList<ChoreographerCompat.FrameCallback> mPendingChoreographerCallbacks;
 
   @Before
   public void setUp() {
@@ -79,7 +77,7 @@ public class TextInputTest {
       @Override
       public Object answer(InvocationOnMock invocation) throws Throwable {
         mPendingChoreographerCallbacks
-            .add((Choreographer.FrameCallback) invocation.getArguments()[1]);
+            .add((ChoreographerCompat.FrameCallback) invocation.getArguments()[1]);
         return null;
       }
     }).when(choreographerMock).postFrameCallback(
@@ -93,7 +91,7 @@ public class TextInputTest {
 
     ReactRootView rootView = new ReactRootView(RuntimeEnvironment.application);
     rootView.setLayoutParams(new ReactRootView.LayoutParams(100, 100));
-    int rootTag = uiManager.addMeasuredRootView(rootView);
+    int rootTag = uiManager.addRootView(rootView);
     int textInputTag = rootTag + 1;
     final String hintStr = "placeholder text";
 
@@ -127,7 +125,7 @@ public class TextInputTest {
 
     ReactRootView rootView = new ReactRootView(RuntimeEnvironment.application);
     rootView.setLayoutParams(new ReactRootView.LayoutParams(100, 100));
-    int rootTag = uiManager.addMeasuredRootView(rootView);
+    int rootTag = uiManager.addRootView(rootView);
     int textInputTag = rootTag + 1;
     final String hintStr = "placeholder text";
 
@@ -170,10 +168,10 @@ public class TextInputTest {
   }
 
   private void executePendingChoreographerCallbacks() {
-    ArrayList<Choreographer.FrameCallback> callbacks =
+    ArrayList<ChoreographerCompat.FrameCallback> callbacks =
         new ArrayList<>(mPendingChoreographerCallbacks);
     mPendingChoreographerCallbacks.clear();
-    for (Choreographer.FrameCallback frameCallback : callbacks) {
+    for (ChoreographerCompat.FrameCallback frameCallback : callbacks) {
       frameCallback.doFrame(0);
     }
   }

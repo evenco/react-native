@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/Ryan/Repos/Even/even-client/vendor/react-native/Examples/UIExplorer/android/app/build/intermediates/res/merged/debug/xml/preferences.xml",
+        "source": "/Users/Ryan/Repos/Even/even-client/vendor/react-native/Examples/UIExplorer/android/app/build/intermediates/exploded-aar/com.facebook.react/ReactAndroid/0.42.0/res/xml/preferences.xml"
+    },
+    {
+        "merged": "/Users/Ryan/Repos/Even/react-native/Examples/UIExplorer/android/app/build/intermediates/res/merged/debug/xml/preferences.xml",
+        "source": "/Users/Ryan/Repos/Even/react-native/Examples/UIExplorer/android/app/build/intermediates/exploded-aar/com.facebook.react/ReactAndroid/1000.0.0-master/res/xml/preferences.xml"
+    }
+]
