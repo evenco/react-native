@@ -106,6 +106,9 @@ var DEFAULT_SCROLL_CALLBACK_THROTTLE = 50;
  *    rendering rows.
  */
 
+/* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This comment
+ * suppresses an error when upgrading Flow's support for React. To see the
+ * error delete this comment and run Flow. */
 var ListView = createReactClass({
   _childFrames: ([]: Array<Object>),
   _sentEndForContentLength: (null: ?number),
@@ -513,7 +516,12 @@ var ListView = createReactClass({
     }
     Object.assign(props, {
       onScroll: this._onScroll,
-      stickyHeaderIndices: this.props.stickyHeaderIndices.concat(stickySectionHeaderIndices),
+      /* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This
+       * comment suppresses an error when upgrading Flow's support for React.
+       * To see the error delete this comment and run Flow. */
+      stickyHeaderIndices: this.props.stickyHeaderIndices.concat(
+        stickySectionHeaderIndices,
+      ),
 
       // Do not pass these events downstream to ScrollView since they will be
       // registered in ListView's own ScrollResponder.Mixin
