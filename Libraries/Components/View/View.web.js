@@ -5,12 +5,13 @@
 'use strict';
 
 var React = require('React');
+var PropTypes = require('prop-types');
+var ReactNative = require('react-native');
 var ReactDOM = require('react-dom');
 var StyleSheet = require('StyleSheet');
 var StyleSheetPropType = require('StyleSheetPropType');
 var ViewStylePropTypes = require('ViewStylePropTypes');
 var webifyStyle = require('webifyStyle');
-var findNodeHandle = require('findNodeHandle');
 
 var stylePropType = StyleSheetPropType(ViewStylePropTypes);
 
@@ -21,29 +22,29 @@ var pixelKeys = {
     bottom: true,
 };
 
-var View = React.createClass({
+class View extends React.Component {
 
-    propTypes: {
+    static propTypes = {
         style: stylePropType,
-        stopPropagation: React.PropTypes.bool,
-    },
+        stopPropagation: PropTypes.bool,
+    };
 
-    cachedMeasurement: {
+    _cachedMeasurement = {
         width: 0,
         height: 0,
-    },
+    };
 
-    componentDidMount: function() {
+    componentDidMount() {
         // Listen for window resize as an indicator
         // that our measurements may have changed
         window.addEventListener('resize', this._onWindowResize);
-    },
+    }
 
-    componentWillUnmount: function() {
+    componentWillUnmount() {
         window.removeEventListener('resize', this._onWindowResize);
-    },
+    }
 
-    setNativeProps: function(props: Object) {
+    setNativeProps(props) {
         if (!this._div) {
             return;
         }
@@ -63,17 +64,17 @@ var View = React.createClass({
                 this._div.style[key] = value;
             }
         }
-    },
+    }
 
-    measure: function(callback?: Function) {
-        var rect = ReactDOM.findDOMNode(findNodeHandle(this)).getBoundingClientRect();
+    measure(callback) {
+        var rect = ReactDOM.findDOMNode(this).getBoundingClientRect();
         if (callback) {
             callback(rect.left, rect.top, rect.width, rect.height, rect.left, rect.top);
         }
         return rect;
-    },
+    }
 
-    render: function(): ReactElement {
+    render() {
         var {
             accessible,
             accessibilityLabel,
@@ -102,6 +103,7 @@ var View = React.createClass({
             renderToHardwareTextureAndroid,
             style,
             testID,
+            nativeID,
             children,
             ...props,
         } = this.props;
@@ -129,24 +131,24 @@ var View = React.createClass({
                 children={children}
             />
         );
-    },
+    }
 
-    _classNameForPointerEvents: function(pointerEvents: string): string {
+    _classNameForPointerEvents(pointerEvents) {
         return `rn-pointer-events-${pointerEvents}`;
-    },
+    }
 
-    _onWindowResize: function() {
+    _onWindowResize = () => {
         this._onLayout();
-    },
+    };
 
-    _onLayout: function() {
+    _onLayout = () => {
         if (!this.props.onLayout || !this._div) {
             return;
         }
         var measure = this.measure();
-        if (measure.width != this.cachedMeasurement.width ||
-            measure.height != this.cachedMeasurement.height) {
-            this.cachedMeasurement = measure;
+        if (measure.width != this._cachedMeasurement.width ||
+            measure.height != this._cachedMeasurement.height) {
+            this._cachedMeasurement = measure;
             this.props.onLayout({
                 nativeEvent: {
                     layout: {
@@ -156,9 +158,9 @@ var View = React.createClass({
                 },
             });
         }
-    },
+    };
 
-});
+}
 
 // <Even>
 // DUPED!

@@ -16,6 +16,7 @@ var PropTypes = require('prop-types');
 var ReactNative = require('ReactNative');
 var UIManager = require('UIManager');
 var ViewPropTypes = require('ViewPropTypes');
+var ReactPropTypes = require('prop-types'); // <Even />
 
 var dismissKeyboard = require('dismissKeyboard');
 var requireNativeComponent = require('requireNativeComponent');

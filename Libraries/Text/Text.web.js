@@ -19,17 +19,17 @@ var styles = StyleSheet.create({
 
 });
 
-var Text = React.createClass({
+class Text extends React.Component {
 
-    propTypes: {
+    static propTypes = {
         style: stylePropType,
-    },
+    };
 
-    setNativeProps: function(props) {
+    setNativeProps(props) {
         // TODO
-    },
+    }
 
-    render: function() {
+    render() {
         var {
             style,
             children,
@@ -69,9 +69,9 @@ var Text = React.createClass({
                 children={React.Children.toArray(children)}
                 />
         );
-    },
+    }
 
-    _renderInnerText: function(text) {
+    _renderInnerText = (text) => {
         let style = {};
         if (this.props.numberOfLines == 1) {
             style['whiteSpace'] = 'nowrap'
@@ -80,9 +80,9 @@ var Text = React.createClass({
             return <br/>;
         }
         return <span style={style}>{text}</span>
-    },
+    };
 
-    _renderChild: function(child) {
+    _renderChild = (child) => {
         if (React.isValidElement(child)) {
             return child;
         }
@@ -90,8 +90,8 @@ var Text = React.createClass({
             return child.map(this._renderChild);
         }
         return this._renderInnerText(child);
-    },
+    };
 
-});
+}
 
 module.exports = Text;

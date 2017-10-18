@@ -13,7 +13,8 @@
 
 const EventSubscription = require('EventSubscription');
 
-import type EventEmitter from 'EventEmitter';
+// <Even> circular dep
+// import type EventEmitter from 'EventEmitter';
 import type EventSubscriptionVendor from 'EventSubscriptionVendor';
 
 /**
@@ -36,7 +37,7 @@ class EmitterSubscription extends EventSubscription {
    *   listener
    */
   constructor(
-    emitter: EventEmitter,
+    emitter: any, // <Even> circular dep EventEmitter
     subscriber: EventSubscriptionVendor,
     listener: Function,
     context: ?Object

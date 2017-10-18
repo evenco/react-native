@@ -13,8 +13,8 @@
 
 const ColorPropType = require('ColorPropType');
 const NativeMethodsMixin = require('NativeMethodsMixin');
-const PropTypes = require('prop-types');
 const React = require('React');
+const PropTypes = require('prop-types');
 const ReactNativeViewAttributes = require('ReactNativeViewAttributes');
 const StyleSheet = require('StyleSheet');
 const TimerMixin = require('react-timer-mixin');
@@ -110,7 +110,7 @@ var TouchableHighlight = createReactClass({
     tvParallaxProperties: PropTypes.object,
 
     // <Even>
-    disabled: React.PropTypes.bool,
+    disabled: PropTypes.bool,
     // </Even>
   },
 

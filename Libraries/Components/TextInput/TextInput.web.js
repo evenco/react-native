@@ -4,16 +4,16 @@
 'use strict';
 
 var React = require('React');
-var PropTypes = React.PropTypes;
+var PropTypes = require('prop-types');
 var webifyStyle = require('webifyStyle');
 
 import TextareaAutosize from 'TextareaAutosize';
 
 var ENTER_KEY = '13';
 
-var TextInput = React.createClass({
+class TextInput extends React.Component {
 
-    propTypes: {
+    static propTypes = {
 
         /**
          * Can tell TextInput to automatically capitalize certain characters.
@@ -105,19 +105,17 @@ var TextInput = React.createClass({
         */
         autoResize: PropTypes.bool,
         maxNumberOfLines: PropTypes.number,
-    },
+    };
 
-    getDefaultProps: function() {
-        return {
-            editable: true,
-        };
-    },
+    static defaultProps = {
+        editable: true,
+    };
 
-    componentWillMount: function() {
+    componentWillMount() {
         this._canFocus = !this.props.delayEditability;
-    },
+    }
 
-    componentDidMount: function() {
+    componentDidMount() {
         if (this.props.delayEditability) {
             // HACK keep the input disabled long enough for all events to be processed
             // but not too long that a user's legitimate focus attempt will be discarded.
@@ -126,9 +124,9 @@ var TextInput = React.createClass({
                 this.refs.input.disabled = this._isDisabled();
             }, 100);
         }
-    },
+    }
 
-    render: function() {
+    render() {
         var {
             multiline,
             autoResize,
@@ -181,17 +179,17 @@ var TextInput = React.createClass({
                 type={password ? 'password' : 'text'}
             />
         );
-    },
+    }
 
-    _isDisabled: function() {
+    _isDisabled() {
         return !this.props.editable || this.props.manualInput;
-    },
+    }
 
-    _getDOMNode: function() {
+    _getDOMNode() {
         return this.refs.input;
-    },
+    }
 
-    _onKeyDown: function(e) {
+    _onKeyDown = (e) => {
         if (e.which == ENTER_KEY) {
             if (this.props.onSubmitEditing) {
                 e.preventDefault();
@@ -201,25 +199,25 @@ var TextInput = React.createClass({
         if (this.props.onKeyDown) {
             this.props.onKeyDown(e);
         }
-    },
+    };
 
-    _onChange: function(e) {
+    _onChange = (e) => {
         if (this.props.onChange) {
             this.props.onChange(e);
         }
         if (this.props.onChangeText) {
             this.props.onChangeText(this._getDOMNode().value);
         }
-    },
+    };
 
-    focus: function() {
+    focus() {
         this._getDOMNode().focus();
-    },
+    }
 
-    blur: function() {
+    blur() {
         this._getDOMNode().blur();
-    },
+    }
 
-});
+}
 
 module.exports = TextInput;

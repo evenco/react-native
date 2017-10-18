@@ -5,9 +5,12 @@
 'use strict';
 
 var React = require('React');
+var PropTypes = require('prop-types');
 var ScrollView = require('ScrollView');
 var StyleSheet = require('StyleSheet');
 var View = require('View');
+
+const createReactClass = require('create-react-class');
 
 function cloneReferencedElement(element, config, ...children) {
   let cloneRef = config.ref;
@@ -54,15 +57,15 @@ type DefaultProps = {
   renderScrollComponent: (props: Object) => React.Element<any>;
 };
 
-let InvertibleScrollView = React.createClass({
+const InvertibleScrollView = createReactClass({
   mixins: [ScrollableMixin],
 
   _scrollComponent: (null: any),
 
   propTypes: {
     ...ScrollView.propTypes,
-    inverted: React.PropTypes.bool,
-    renderScrollComponent: React.PropTypes.func.isRequired,
+    inverted: PropTypes.bool,
+    renderScrollComponent: PropTypes.func.isRequired,
   },
 
   getDefaultProps(): DefaultProps {
@@ -161,7 +164,7 @@ let InvertibleScrollView = React.createClass({
 
 });
 
-let styles = StyleSheet.create({
+const styles = StyleSheet.create({
   hidden: {
     opacity: 0,
   },

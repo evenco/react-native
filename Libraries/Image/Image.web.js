@@ -4,6 +4,7 @@
 'use strict';
 
 var React = require('React');
+var PropTypes = require('prop-types');
 var StyleSheet = require('StyleSheet');
 var webifyStyle = require('webifyStyle');
 var ImageResizeMode = require('ImageResizeMode');
@@ -19,31 +20,31 @@ var styles = StyleSheet.create({
 
 });
 
-var Image = React.createClass({
+class Image extends React.Component {
 
-    propTypes: {
+    static propTypes = {
         style: StyleSheetPropType(ImageStylePropTypes),
-        source: React.PropTypes.shape({
-            uri: React.PropTypes.string,
+        source: PropTypes.shape({
+            uri: PropTypes.string,
         }),
         capInsets: EdgeInsetsPropType,
-        resizeMode: React.PropTypes.oneOf(['contain', 'center', 'stretch']),
-        onLayout: React.PropTypes.func,
-    },
+        resizeMode: PropTypes.oneOf(['contain', 'center', 'stretch']),
+        onLayout: PropTypes.func,
+    };
 
-    statics: {
-        resizeMode: ImageResizeMode,
-    },
+    static resizeMode = ImageResizeMode;
 
-    getInitialState: function() {
-        return this._getStateFromProps(this.props);
-    },
+    constructor(props) {
+        super(props);
 
-    componentWillReceiveProps: function(nextProps) {
+        this.state = this._getStateFromProps(props);
+    }
+
+    componentWillReceiveProps(nextProps) {
         this.setState(this._getStateFromProps(nextProps));
-    },
+    }
 
-    _getStateFromProps: function(props) {
+    _getStateFromProps(props) {
         var style = {};
         var source = props.source;
         if (source.capInsets) {
@@ -81,9 +82,9 @@ var Image = React.createClass({
                 break;
         }
         return {style: style};
-    },
+    }
 
-    render: function() {
+    render() {
         if (this.props.source.capInsets) {
             var style = webifyStyle([this.state.style, this.props.style]);
             return <div style={style} />;
@@ -101,8 +102,8 @@ var Image = React.createClass({
             var style = webifyStyle([this.state.style, this.props.style]);
             return <img style={style} src={this.props.source.uri} />;
         }
-    },
+    }
 
-});
+}
 
 module.exports = Image;

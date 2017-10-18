@@ -20,6 +20,7 @@
 @property (nonatomic, assign, readonly) BOOL textWasPasted;
 @property (nonatomic, strong, nullable) UIFont *font;
 @property (nonatomic, assign) UIEdgeInsets textContainerInset;
+@property (nonatomic, strong, nullable) UIView *inputView; // <Even>
 @property (nonatomic, strong, nullable) UIView *inputAccessoryView;
 @property (nonatomic, weak, nullable) id<RCTBackedTextInputDelegate> textInputDelegate;
 @property (nonatomic, readonly) CGSize contentSize;

@@ -24,6 +24,7 @@ var StyleSheetPropType = require('StyleSheetPropType');
 var View = require('View');
 var ViewPropTypes = require('ViewPropTypes');
 var ViewStylePropTypes = require('ViewStylePropTypes');
+var EdgeInsetsPropType = require('EdgeInsetsPropType'); // <Even />
 
 var createReactClass = require('create-react-class');
 var filterObject = require('fbjs/lib/filterObject');

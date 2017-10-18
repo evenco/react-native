@@ -34,6 +34,7 @@
 
 var ListViewDataSource = require('ListViewDataSource');
 var React = require('React');
+var PropTypes = require('prop-types');
 var ReactNative = require('ReactNative');
 var RCTScrollViewManager = require('NativeModules').ScrollViewManager;
 var ScrollView = require('ScrollView');
@@ -42,11 +43,10 @@ var StaticRenderer = require('StaticRenderer');
 var TimerMixin = require('react-timer-mixin');
 var View = require('View');
 
+var createReactClass = require('create-react-class');
 var cloneReferencedElement = require('react-clone-referenced-element');
 var isEmpty = require('isEmpty');
 var merge = require('merge');
-
-var PropTypes = React.PropTypes;
 
 var DEFAULT_PAGE_SIZE = 1;
 var DEFAULT_INITIAL_ROWS = 10;
@@ -106,7 +106,7 @@ var DEFAULT_SCROLL_CALLBACK_THROTTLE = 50;
  *    rendering rows.
  */
 
-var ListView = React.createClass({
+var ListView = createReactClass({
   _childFrames: ([]: Array<Object>),
   _sentEndForContentLength: (null: ?number),
   _scrollComponent: (null: any),
@@ -201,12 +201,12 @@ var ListView = React.createClass({
      * A function that returns the scrollable component in which the list rows
      * are rendered. Defaults to returning a ScrollView with the given props.
      */
-    renderScrollComponent: React.PropTypes.func.isRequired,
+    renderScrollComponent: PropTypes.func.isRequired,
     /**
      * How early to start rendering rows before they come on screen, in
      * pixels.
      */
-    scrollRenderAheadDistance: React.PropTypes.number.isRequired,
+    scrollRenderAheadDistance: PropTypes.number.isRequired,
     /**
      * (visibleRows, changedRows) => void
      *
@@ -216,13 +216,13 @@ var ListView = React.createClass({
      * that have changed their visibility, with true indicating visible, and
      * false indicating the view has moved out of view.
      */
-    onChangeVisibleRows: React.PropTypes.func,
+    onChangeVisibleRows: PropTypes.func,
     /**
      * A performance optimization for improving scroll perf of
      * large lists, used in conjunction with overflow: 'hidden' on the row
      * containers. This is enabled by default.
      */
-    removeClippedSubviews: React.PropTypes.bool,
+    removeClippedSubviews: PropTypes.bool,
     /**
      * Makes the sections headers sticky. The sticky behavior means that it
      * will scroll with the content at the top of the section until it reaches
@@ -230,7 +230,7 @@ var ListView = React.createClass({
      * is pushed off the screen by the next section header.
      * @platform ios
      */
-    stickySectionHeadersEnabled: React.PropTypes.bool,
+    stickySectionHeadersEnabled: PropTypes.bool,
     /**
      * An array of child indices determining which children get docked to the
      * top of the screen when scrolling. For example, passing

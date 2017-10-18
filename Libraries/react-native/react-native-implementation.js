@@ -12,6 +12,8 @@
 'use strict';
 
 const invariant = require('fbjs/lib/invariant');
+const createReactClass = require('create-react-class');
+const PropTypes = require('prop-types');
 
 // Export React, plus some native additions.
 const ReactNative = {
@@ -134,6 +136,8 @@ const ReactNative = {
   get parseErrorStack() { return require('parseErrorStack'); },
   get TouchableBounce() { return require('TouchableBounce'); },
   get webifyStyle() { return require('webifyStyle'); },
+  get createReactClass() { return createReactClass; },
+  get PropTypes() { return PropTypes; },
 };
 
 module.exports = ReactNative;

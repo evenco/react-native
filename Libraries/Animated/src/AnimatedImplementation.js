@@ -1187,10 +1187,8 @@ class AnimatedInterpolation extends AnimatedWithChildren {
         const degrees = parseFloat(value) || 0;
         const radians = degrees * Math.PI / 180.0;
         return radians;
-      } else {
-        // Assume radians
-        return parseFloat(value) || 0;
       }
+      // <Even>
       var color = normalizeColor(value);
       if (color) {
         return [
@@ -1200,7 +1198,7 @@ class AnimatedInterpolation extends AnimatedWithChildren {
           (color) & 0xff,
         ];
       }
-      // Assume radians
+      // </Even>
       return parseFloat(value, 10) || 0;
     });
   }

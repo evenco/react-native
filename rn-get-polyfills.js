@@ -11,6 +11,7 @@
 'use strict';
 
 module.exports = () => [
+  require.resolve('./Libraries/polyfills/process.js'),
   require.resolve('./Libraries/polyfills/Object.es6.js'),
   require.resolve('./Libraries/polyfills/console.js'),
   require.resolve('./Libraries/polyfills/error-guard.js'),

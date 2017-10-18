@@ -1,9 +1,11 @@
 /**
  * @providesModule ScrollView
+ * @flow
  */
 'use strict';
 
 var React = require('React');
+var PropTypes = require('prop-types');
 var ReactDOM = require('react-dom');
 var StyleSheet = require('StyleSheet');
 var View = require('View');
@@ -30,24 +32,22 @@ var styles = StyleSheet.create({
 
 });
 
-var ScrollView = React.createClass({
+class ScrollView extends React.Component {
 
-    propTypes: {
-        horizontal: React.PropTypes.bool,
-        automaticallyAdjustContentInsets: React.PropTypes.bool,
-    },
+    static propTypes = {
+        horizontal: PropTypes.bool,
+        automaticallyAdjustContentInsets: PropTypes.bool,
+    };
 
-    getDefaultProps: function() {
-        return {
-            automaticallyAdjustContentInsets: true,
-        };
-    },
+    static defaultProps = {
+        automaticallyAdjustContentInsets: true,
+    };
 
-    getScrollResponder: function() {
+    getScrollResponder() {
         return this;
-    },
+    }
 
-    scrollTo: function(
+    scrollTo(
         y?: number | { x?: number, y?: number, animated?: boolean },
         x?: number,
         animated?: boolean
@@ -63,25 +63,25 @@ var ScrollView = React.createClass({
         node.scrollLeft = x;
 
         this._updateAnimatedValues({x, y});
-    },
+    }
 
-    scrollWithoutAnimationTo: function(y, x) {
+    scrollWithoutAnimationTo(y, x) {
         console.warn('`scrollWithoutAnimationTo` is deprecated. Use `scrollTo` instead');
         this.scrollTo({y, x});
-    },
+    }
 
-    scrollToEndOnNextContentChange: function() {
+    scrollToEndOnNextContentChange() {
         this._scrollToEndOnNextContentChange = true;
-    },
+    }
 
-    scrollToEnd: function() {
+    scrollToEnd() {
         var scrollProps = this.scrollProperties;
         var offsetX = scrollProps.contentSize.width - scrollProps.layout.width;
         var offsetY = scrollProps.contentSize.height - scrollProps.layout.height;
         this.scrollTo({y: offsetY, x: offsetX});
-    },
+    }
 
-    componentWillMount: function() {
+    componentWillMount() {
         this.scrollProperties = {
             layout: null,
             contentSize: {
@@ -93,16 +93,16 @@ var ScrollView = React.createClass({
                 y: 0,
             },
         };
-    },
+    }
 
-    componentDidMount: function() {
+    componentDidMount() {
         this._updateScrollProperties();
         if (this.props.inverted) {
             this.scrollToEnd(); // HACK don't love
         }
-    },
+    }
 
-    componentDidUpdate: function(oldProps, oldState) {
+    componentDidUpdate(oldProps, oldState) {
         if (this.props.inverted) {
             var oldScrollProps = this.scrollProperties;
             var newScrollProps = this._updateScrollProperties();
@@ -116,13 +116,13 @@ var ScrollView = React.createClass({
                 }
             }
         }
-    },
+    }
 
-    getInnerViewNode: function() {
+    getInnerViewNode() {
         return this.refs.containerView;
-    },
+    }
 
-    render: function() {
+    render() {
         var scrollStyle = [
             styles.scroll,
             (this.props.horizontal ? styles.horizontal : null),
@@ -170,9 +170,9 @@ var ScrollView = React.createClass({
                 </View>
             </View>
         );
-    },
+    }
 
-    _updateScrollProperties: function() {
+    _updateScrollProperties() {
         var layout = this.refs.scrollView.measure();
         var containerLayout = this.refs.containerView.measure();
         var scrollViewNode = ReactDOM.findDOMNode(this.refs.scrollView);
@@ -190,9 +190,9 @@ var ScrollView = React.createClass({
             contentOffset: contentOffset,
         };
         return this.scrollProperties;
-    },
+    }
 
-    _onScroll: function(e) {
+    _onScroll = (e) => {
         if (this.props.onScroll) {
             var scrollProperties = this._updateScrollProperties();
             e.nativeEvent.layoutMeasurement = scrollProperties.layout;
@@ -200,7 +200,7 @@ var ScrollView = React.createClass({
             e.nativeEvent.contentOffset = scrollProperties.contentOffset;
             this.props.onScroll(e);
         }
-    },
+    };
 
     // HACK
     _updateAnimatedValues({x, y}) {
@@ -208,6 +208,6 @@ var ScrollView = React.createClass({
         this.props.animatedScrollY && this.props.animatedScrollY.setValue(y);
     }
 
-});
+}
 
 module.exports = ScrollView;
