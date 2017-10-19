@@ -540,10 +540,12 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithBundleURL:(__unused NSURL *)bundleUR
        postNotificationName:RCTJavaScriptDidLoadNotification
        object:self->_parentBridge userInfo:@{@"bridge": self}];
 
-#if RCT_DEV
-      RCTLogWarn(@"RCTBatchedBridge is deprecated and will be removed in a future React Native release. "
-        "See https://fb.me/react-cxx-bridge for upgrade instructions.");
-#endif
+    // <Even> disable warning
+    // #if RCT_DEV
+    //   RCTLogWarn(@"RCTBatchedBridge is deprecated and will be removed in a future React Native release. "
+    //     "See https://fb.me/react-cxx-bridge for upgrade instructions.");
+    // #endif
+    // </Even>
     });
 
     [self _flushPendingCalls];
