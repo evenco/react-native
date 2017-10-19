@@ -28,10 +28,9 @@ import static com.facebook.systrace.Systrace.TRACE_TAG_REACT_JAVA_BRIDGE;
   /* package */ static final String CUSTOM_DIRECT_EVENT_TYPES_KEY = "customDirectEventTypes";
 
   /**
-   * Generates map of constants that is then exposed by {@link UIManagerModule}. The constants map
-   * contains the following predefined fields for 'customBubblingEventTypes' and
-   * 'customDirectEventTypes'. Provided list of {@param viewManagers} is then used to populate
-   * content of those predefined fields using
+   * Generates map of constants that is then exposed by {@link UIManagerModule}.
+   * Provided list of {@param viewManagers} is then used to populate content of
+   * those predefined fields using
    * {@link ViewManager#getExportedCustomBubblingEventTypeConstants} and
    * {@link ViewManager#getExportedCustomDirectEventTypeConstants} respectively. Each view manager
    * is in addition allowed to expose viewmanager-specific constants that are placed under the key
@@ -63,6 +62,7 @@ import static com.facebook.systrace.Systrace.TRACE_TAG_REACT_JAVA_BRIDGE;
         .arg("ViewManager", viewManager.getName())
         .flush();
       try {
+        Map viewManagerConstants = MapBuilder.newHashMap();
         Map viewManagerBubblingEvents = viewManager.getExportedCustomBubblingEventTypeConstants();
         if (viewManagerBubblingEvents != null) {
           recursiveMerge(allBubblingEventTypes, viewManagerBubblingEvents);
@@ -101,8 +101,9 @@ import static com.facebook.systrace.Systrace.TRACE_TAG_REACT_JAVA_BRIDGE;
       }
     }
 
-    constants.put(CUSTOM_BUBBLING_EVENT_TYPES_KEY, bubblingEventTypesConstants);
-    constants.put(CUSTOM_DIRECT_EVENT_TYPES_KEY, directEventTypesConstants);
+    // Used by https://fburl.com/6nskr82o
+    constants.put(CUSTOM_BUBBLING_EVENT_TYPES_KEY, allBubblingEventTypes);
+    constants.put(CUSTOM_DIRECT_EVENT_TYPES_KEY, allDirectEventTypes);
     constants.put("AndroidLazyViewManagersEnabled", lazyViewManagersEnabled);
 
     return constants;

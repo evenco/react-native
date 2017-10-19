@@ -22,8 +22,6 @@ import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.EventDispatcher;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -108,27 +106,6 @@ public class NativeAnimatedNodeTraversalTest {
       @Override
       public Object answer(InvocationOnMock invocation) throws Throwable {
         return MapBuilder.of("customDirectEventTypes", MapBuilder.newHashMap());
-      }
-    });
-    PowerMockito
-        .when(mUIManagerMock.getDirectEventNamesResolver())
-        .thenAnswer(new Answer<UIManagerModule.CustomEventNamesResolver>() {
-      @Override
-      public UIManagerModule.CustomEventNamesResolver answer(InvocationOnMock invocation) throws Throwable {
-        return new UIManagerModule.CustomEventNamesResolver() {
-          @Override
-          public String resolveCustomEventName(String eventName) {
-            Map<String, Map> directEventTypes =
-                (Map<String, Map>) mUIManagerMock.getConstants().get("customDirectEventTypes");
-            if (directEventTypes != null) {
-              Map<String, String> customEventType = (Map<String, String>) directEventTypes.get(eventName);
-              if (customEventType != null) {
-                return customEventType.get("registrationName");
-              }
-            }
-            return eventName;
-          }
-        };
       }
     });
     mNativeAnimatedNodesManager = new NativeAnimatedNodesManager(mUIManagerMock);
@@ -284,14 +261,31 @@ public class NativeAnimatedNodeTraversalTest {
     verifyNoMoreInteractions(valueListener);
   }
 
-  public void performSpringAnimationTestWithConfig(JavaOnlyMap config, boolean testForCriticallyDamped) {
+  @Test
+  public void testSpringAnimation() {
     createSimpleAnimatedViewWithOpacity(1000, 0d);
 
     Callback animationCallback = mock(Callback.class);
     mNativeAnimatedNodesManager.startAnimatingNode(
       1,
       1,
-      config,
+      JavaOnlyMap.of(
+        "type",
+        "spring",
+        "friction",
+        7d,
+        "tension",
+        40.0d,
+        "initialVelocity",
+        0d,
+        "toValue",
+        1d,
+        "restSpeedThreshold",
+        0.001d,
+        "restDisplacementThreshold",
+        0.001d,
+        "overshootClamping",
+        false),
       animationCallback);
 
     ArgumentCaptor<ReactStylesDiffMap> stylesCaptor =
@@ -315,74 +309,16 @@ public class NativeAnimatedNodeTraversalTest {
         wasGreaterThanOne = true;
       }
       // verify that animation step is relatively small
-      assertThat(Math.abs(currentValue - previousValue)).isLessThan(0.12d);
+      assertThat(Math.abs(currentValue - previousValue)).isLessThan(0.1d);
       previousValue = currentValue;
     }
     // verify that we've reach the final value at the end of animation
     assertThat(previousValue).isEqualTo(1d);
     // verify that value has reached some maximum value that is greater than the final value (bounce)
-    if (testForCriticallyDamped) {
-      assertThat(!wasGreaterThanOne);
-    } else {
-      assertThat(wasGreaterThanOne);
-    }
+    assertThat(wasGreaterThanOne);
     reset(mUIImplementationMock);
     mNativeAnimatedNodesManager.runUpdates(nextFrameTime());
     verifyNoMoreInteractions(mUIImplementationMock);
-  }
-
-  @Test
-  public void testUnderdampedSpringAnimation() {
-    performSpringAnimationTestWithConfig(
-      JavaOnlyMap.of(
-        "type",
-        "spring",
-        "stiffness",
-        230.2d,
-        "damping",
-        22d,
-        "mass",
-        1d,
-        "initialVelocity",
-        0d,
-        "toValue",
-        1d,
-        "restSpeedThreshold",
-        0.001d,
-        "restDisplacementThreshold",
-        0.001d,
-        "overshootClamping",
-        false
-      ),
-      false
-    );
-  }
-
-  @Test
-  public void testCriticallyDampedSpringAnimation() {
-    performSpringAnimationTestWithConfig(
-      JavaOnlyMap.of(
-        "type",
-        "spring",
-        "stiffness",
-        1000d,
-        "damping",
-        500d,
-        "mass",
-        3.0d,
-        "initialVelocity",
-        0d,
-        "toValue",
-        1d,
-        "restSpeedThreshold",
-        0.001d,
-        "restDisplacementThreshold",
-        0.001d,
-        "overshootClamping",
-        false
-      ),
-      true
-    );
   }
 
   @Test
@@ -396,12 +332,10 @@ public class NativeAnimatedNodeTraversalTest {
       JavaOnlyMap.of(
         "type",
         "spring",
-        "stiffness",
-        230.2d,
-        "damping",
-        22d,
-        "mass",
-        1d,
+        "friction",
+        7d,
+        "tension",
+        40.0d,
         "initialVelocity",
         0d,
         "toValue",
@@ -413,8 +347,7 @@ public class NativeAnimatedNodeTraversalTest {
         "overshootClamping",
         false,
         "iterations",
-        5
-      ),
+        5),
       animationCallback);
 
     ArgumentCaptor<ReactStylesDiffMap> stylesCaptor =
@@ -447,7 +380,7 @@ public class NativeAnimatedNodeTraversalTest {
       }
 
       // verify that an animation step is relatively small, unless it has come to rest and reset
-      if (!didComeToRest) assertThat(Math.abs(currentValue - previousValue)).isLessThan(0.12d);
+      if (!didComeToRest) assertThat(Math.abs(currentValue - previousValue)).isLessThan(0.1d);
 
 
        // record that the animation did come to rest when it rests on toValue
@@ -1058,52 +991,5 @@ public class NativeAnimatedNodeTraversalTest {
     mNativeAnimatedNodesManager.runUpdates(nextFrameTime());
     verify(mUIImplementationMock).synchronouslyUpdateViewOnUIThread(eq(viewTag), stylesCaptor.capture());
     assertThat(stylesCaptor.getValue().getDouble("opacity", Double.NaN)).isEqualTo(10);
-  }
-
-  @Test
-  public void testRestoreDefaultProps() {
-    int viewTag = 1000;
-    int propsNodeTag = 3;
-    mNativeAnimatedNodesManager.createAnimatedNode(
-      1,
-      JavaOnlyMap.of("type", "value", "value", 1d, "offset", 0d));
-    mNativeAnimatedNodesManager.createAnimatedNode(
-      2,
-      JavaOnlyMap.of("type", "style", "style", JavaOnlyMap.of("opacity", 1)));
-    mNativeAnimatedNodesManager.createAnimatedNode(
-      propsNodeTag,
-      JavaOnlyMap.of("type", "props", "props", JavaOnlyMap.of("style", 2)));
-    mNativeAnimatedNodesManager.connectAnimatedNodes(1, 2);
-    mNativeAnimatedNodesManager.connectAnimatedNodes(2, propsNodeTag);
-    mNativeAnimatedNodesManager.connectAnimatedNodeToView(propsNodeTag, viewTag);
-
-    JavaOnlyArray frames = JavaOnlyArray.of(0d, 0.5d, 1d);
-    Callback animationCallback = mock(Callback.class);
-    mNativeAnimatedNodesManager.startAnimatingNode(
-      1,
-      1,
-      JavaOnlyMap.of("type", "frames", "frames", frames, "toValue", 0d),
-      animationCallback);
-
-    ArgumentCaptor<ReactStylesDiffMap> stylesCaptor =
-      ArgumentCaptor.forClass(ReactStylesDiffMap.class);
-
-    reset(mUIImplementationMock);
-    mNativeAnimatedNodesManager.runUpdates(nextFrameTime());
-    verify(mUIImplementationMock).synchronouslyUpdateViewOnUIThread(eq(viewTag), stylesCaptor.capture());
-    assertThat(stylesCaptor.getValue().getDouble("opacity", Double.NaN)).isEqualTo(1);
-
-    for (int i = 0; i < frames.size(); i++) {
-      reset(mUIImplementationMock);
-      mNativeAnimatedNodesManager.runUpdates(nextFrameTime());
-    }
-
-    verify(mUIImplementationMock).synchronouslyUpdateViewOnUIThread(eq(viewTag), stylesCaptor.capture());
-    assertThat(stylesCaptor.getValue().getDouble("opacity", Double.NaN)).isEqualTo(0);
-
-    reset(mUIImplementationMock);
-    mNativeAnimatedNodesManager.restoreDefaultValues(propsNodeTag, viewTag);
-    verify(mUIImplementationMock).synchronouslyUpdateViewOnUIThread(eq(viewTag), stylesCaptor.capture());
-    assertThat(stylesCaptor.getValue().isNull("opacity"));
   }
 }
