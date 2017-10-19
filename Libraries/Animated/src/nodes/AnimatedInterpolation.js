@@ -349,6 +349,18 @@ class AnimatedInterpolation extends AnimatedWithChildren {
     super.__detach();
   }
 
+  // <Even>
+  __getOutputType(range) {
+    const value = range[0];
+    if (typeof value === 'string') {
+      if (normalizeColor(value)) {
+        return 'rgba';
+      }
+    }
+    return 'default';
+  }
+  // </Even>
+
   __transformDataType(range: Array<any>) {
     // Change the string array type to number array
     // So we can reuse the same logic in iOS and Android platform
@@ -390,6 +402,9 @@ class AnimatedInterpolation extends AnimatedWithChildren {
       extrapolateRight:
         this._config.extrapolateRight || this._config.extrapolate || 'extend',
       type: 'interpolation',
+      // <Even>
+      outputType: this.__getOutputType(this._config.outputRange),
+      // </Even>
     };
   }
 }

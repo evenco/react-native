@@ -17,7 +17,8 @@ const NativeEventEmitter = require('NativeEventEmitter');
 
 const invariant = require('fbjs/lib/invariant');
 
-import type {AnimationConfig} from './animations/Animation';
+type AnimationConfig = any; // Even fix import cycle
+// import type {AnimationConfig} from './animations/Animation';
 import type {EventConfig} from './AnimatedEvent';
 
 let __nativeAnimatedNodeTagCount = 1; /* used for animated nodes */
