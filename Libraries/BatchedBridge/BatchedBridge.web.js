@@ -237,6 +237,10 @@ class BatchedBridge {
     // noop
   }
 
+  registerLazyCallableModule(name: string, module: Object) {
+    // noop
+  }
+
   enqueueNativeCall(moduleID: number, methodID: number, params: Array<any>, onFail: ?Function, onSucc: ?Function) {
     onFail && params.push(onFail);
     onSucc && params.push(onSucc);
@@ -244,6 +248,10 @@ class BatchedBridge {
     var methodName = moduleConfig[2][methodID];
     var module = remoteModules[moduleConfig[0]];
     module[methodName].method(...params);
+  }
+
+  setImmediatesCallback(callback: Function) {
+    // noop
   }
 
 }

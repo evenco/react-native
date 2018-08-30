@@ -451,7 +451,7 @@ var ListView = createReactClass({
       scrollEventThrottle,
       scrollRenderAheadDistance,
       enableEmptySections,
-      ...props,
+      ...props
     } = this.props;
 
     Object.assign(props, {

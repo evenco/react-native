@@ -39,7 +39,7 @@ class Text extends React.Component {
             onClick,
             onPress,
             onLongPress,
-            ...props,
+            ...props
         } = this.props;
 
         onClick = onClick || onPress;

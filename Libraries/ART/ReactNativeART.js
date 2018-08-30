@@ -334,24 +334,23 @@ function applyBoundingBoxToBrushData(brushData, props) {
   const width = +props.width;
   const height = +props.height;
   if (type === ANGULAR_GRADIENT) {
-    newBrushData[1] *= width;
-    newBrushData[2] *= height;
+    brushData[1] *= width;
+    brushData[2] *= height;
   } else if (type === LINEAR_GRADIENT) {
     brushData[1] *= width;
     brushData[2] *= height;
     brushData[3] *= width;
     brushData[4] *= height;
   } else if (type === RADIAL_GRADIENT) {
-    newBrushData[1] *= width;
-    newBrushData[2] *= height;
-    newBrushData[3] *= width;
-    newBrushData[4] *= height;
-    newBrushData[5] *= width;
-    newBrushData[6] *= height;
+    brushData[1] *= width;
+    brushData[2] *= height;
+    brushData[3] *= width;
+    brushData[4] *= height;
+    brushData[5] *= width;
+    brushData[6] *= height;
   } else if (type === PATTERN) {
     // todo
   }
-  return newBrushData;
 }
 
 function extractBrush(colorOrBrush, props) {
@@ -366,7 +365,8 @@ function extractBrush(colorOrBrush, props) {
       // deprecated. It's not properly implemented in canvas mode. ReactART
       // doesn't handle update to the bounding box correctly. That's why we
       // mutate this so that if it's reused, we reuse the same resolved box.
-      brush = applyBoundingBoxToBrushData(brush, props);
+      applyBoundingBoxToBrushData(brush, props);
+      colorOrBrush._bb = false;
     }
     return brush;
   }

@@ -99,6 +99,7 @@ polyfillGlobal('regeneratorRuntime', () => {
 });
 
 // Set up timers
+if (!global.window.document) {
 const defineLazyTimer = name => {
   polyfillGlobal(name, () => require('JSTimers')[name]);
 };
@@ -112,14 +113,19 @@ defineLazyTimer('requestAnimationFrame');
 defineLazyTimer('cancelAnimationFrame');
 defineLazyTimer('requestIdleCallback');
 defineLazyTimer('cancelIdleCallback');
+}
 
 // Set up XHR
 // The native XMLHttpRequest in Chrome dev tools is CORS aware and won't
 // let you fetch anything from the internet
+if (!global.window.document) {
 polyfillGlobal('XMLHttpRequest', () => require('XMLHttpRequest'));
 polyfillGlobal('FormData', () => require('FormData'));
+}
 
+if (!global.window.document) {
 polyfillGlobal('fetch', () => require('fetch').fetch);
+}
 polyfillGlobal('Headers', () => require('fetch').Headers);
 polyfillGlobal('Request', () => require('fetch').Request);
 polyfillGlobal('Response', () => require('fetch').Response);

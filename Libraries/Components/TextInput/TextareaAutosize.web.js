@@ -81,7 +81,7 @@ class TextareaAutosize extends React.Component {
       maxRows: _maxRows,
       onHeightChange: _onHeightChange,
       useCacheForDOMMeasurements: _useCacheForDOMMeasurements,
-      ...props,
+      ...props
     } = this.props;
     if (typeof valueLink === 'object') {
       props.value = valueLink.value;

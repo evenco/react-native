@@ -149,7 +149,7 @@ class ScrollView extends React.Component {
             hitSlop,
             pointerEvents,
             hidden,
-            ...props,
+            ...props
         } = this.props;
 
         return (

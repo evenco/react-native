@@ -148,7 +148,7 @@ class TextInput extends React.Component {
             autoCapitalize,
             value,
             style,
-            ...props,
+            ...props
         } = this.props;
 
         var commonProps = {

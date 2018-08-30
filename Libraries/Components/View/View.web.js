@@ -79,6 +79,9 @@ class View extends React.Component {
             accessibilityLabel,
             accessibilityComponentType,
             accessibilityTraits,
+            accessibilityHint,
+            accessibilityRole,
+            accessibilityStates,
             collapsable,
             onPress,
             onLayout,
@@ -104,7 +107,7 @@ class View extends React.Component {
             testID,
             nativeID,
             children,
-            ...props,
+            ...props
         } = this.props;
 
         // pointer events
