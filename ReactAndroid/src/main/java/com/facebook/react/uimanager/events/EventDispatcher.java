@@ -300,7 +300,7 @@ public class EventDispatcher implements LifecycleEventListener {
 
     private void post() {
       ReactChoreographer.getInstance()
-        .postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, mCurrentFrameCallback);
+          .postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, mCurrentFrameCallback);
     }
 
     public void maybePostFromNonUI() {

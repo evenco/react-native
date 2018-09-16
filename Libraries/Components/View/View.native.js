@@ -110,22 +110,7 @@ const View = createReactClass({
     // replace wrapper component View with generated native wrapper RCTView. Avoid
     // adding functionality this component that you'd want to be available in both
     // dev and prod modes.
-
-    var props = this.props;
-
-    // <Even>
-    // make iOS behave like android
-    // if (__DEV__) {
-    //     if (Platform.OS === 'ios') {
-    //         props = {
-    //             ...props,
-    //             style: [{overflow: 'hidden'}, props.style],
-    //         };
-    //     }
-    // }
-    // </Even>
-
-    return <RCTView {...props} />;
+    return <RCTView {...this.props} />;
   },
 });
 
