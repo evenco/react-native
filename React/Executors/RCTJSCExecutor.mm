@@ -162,6 +162,10 @@ RCT_NOT_IMPLEMENTED(-(instancetype)init)
 
 RCT_EXPORT_MODULE()
 
++ (BOOL)requiresMainQueueSetup {
+  return YES;
+}
+
 + (void)runRunLoopThread
 {
   @autoreleasepool {

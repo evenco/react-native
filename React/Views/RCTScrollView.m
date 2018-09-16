@@ -169,12 +169,9 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
 #endif
 
 // <Even>
-@property (nonatomic, assign) CGFloat snapToFirstInterval;
 @property (nonatomic, strong) NSNumber *contentOffsetXAnimatedNodeTag;
 @property (nonatomic, strong) NSNumber *contentOffsetYAnimatedNodeTag;
-@property (nonatomic, assign) CGSize minContentSize;
 @property (nonatomic, assign) BOOL disableTopPull;
-@property (nonatomic, assign) BOOL disableBottomPull;
 @property (nonatomic, assign) CGPoint firstDragPoint;
 @property (nonatomic, assign) CGPoint lastDragPoint;
 @property (nonatomic, assign) CGPoint lastTouchPoint;
@@ -240,7 +237,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
   }
 
     // <Even>
-
     switch (self.panGestureRecognizer.state) {
         case UIGestureRecognizerStateBegan:
             self.firstDragPoint = [self.panGestureRecognizer locationInView:nil];
@@ -253,7 +249,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
         default:
             break;
     }
-
     // </Even>
 }
 
@@ -275,19 +270,6 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
         BOOL isBouncingAtTop = self.contentOffset.y < topContentOffset;
         BOOL probablyReversingDirection = self.lastTouchPoint.y > (self.firstDragPoint.y + self.lastDragPoint.y) / 2.0;
         if (isBouncingAtTop && !probablyReversingDirection) {
-            return NO;
-        }
-    }
-    if (self.disableBottomPull) {
-        CGFloat bottomContentOffset = self.contentSize.height - self.bounds.size.height;
-        BOOL isAtBottom = self.contentOffset.y >= bottomContentOffset;
-        CGFloat velocity = [gestureRecognizer velocityInView:nil].y;
-        if (isAtBottom && velocity < 0) {
-            return NO;
-        }
-        BOOL isBouncingAtBottom = self.contentOffset.y > bottomContentOffset;
-        BOOL probablyReversingDirection = self.lastTouchPoint.y < (self.firstDragPoint.y + self.lastDragPoint.y) / 2.0;
-        if (isBouncingAtBottom && !probablyReversingDirection) {
             return NO;
         }
     }
@@ -392,12 +374,17 @@ RCT_NOT_IMPLEMENTED(- (instancetype)init)
 
   UIEdgeInsets contentInset = self.contentInset;
   CGSize contentSize = self.contentSize;
-
-  CGSize boundsSize = self.bounds.size;
-
-  self.contentOffset = CGPointMake(
-    MAX(-contentInset.top, MIN(contentSize.width - boundsSize.width + contentInset.bottom, originalOffset.x)),
-    MAX(-contentInset.left, MIN(contentSize.height - boundsSize.height + contentInset.right, originalOffset.y)));
+  
+  // If contentSize has not been measured yet we can't check bounds.
+  if (CGSizeEqualToSize(contentSize, CGSizeZero)) {
+    self.contentOffset = originalOffset;
+  } else {
+    // Make sure offset don't exceed bounds. This could happen on screen rotation.
+    CGSize boundsSize = self.bounds.size;
+    self.contentOffset = CGPointMake(
+      MAX(-contentInset.left, MIN(contentSize.width - boundsSize.width + contentInset.right, originalOffset.x)),
+      MAX(-contentInset.top, MIN(contentSize.height - boundsSize.height + contentInset.bottom, originalOffset.y)));
+  }
 }
 
 #if !TARGET_OS_TV
@@ -844,27 +831,6 @@ RCT_SCROLL_EVENT_HANDLER(scrollViewDidZoom, onScroll)
     }
   }
 
-  // <Even>
-  if (_scrollView.snapToFirstInterval) {
-    CGFloat targetContentOffsetY = targetContentOffset->y;
-
-    NSInteger snapIndex;
-
-    if (velocity.y > 0) {
-      snapIndex = ceilf((targetContentOffsetY) / _scrollView.snapToFirstInterval);
-
-    } else {
-      snapIndex = floorf((targetContentOffsetY) / _scrollView.snapToFirstInterval);
-    }
-
-    CGFloat newTargetContentOffset = (snapIndex * _scrollView.snapToFirstInterval);
-
-    if (snapIndex <= 1) {
-      targetContentOffset->y = newTargetContentOffset;
-    }
-  }
-  // </Even>
-
   NSDictionary *userData = @{
     @"velocity": @{
       @"x": @(velocity.x),
@@ -1054,12 +1020,9 @@ RCT_SET_AND_PRESERVE_OFFSET(setZoomScale, zoomScale, CGFloat);
 RCT_SET_AND_PRESERVE_OFFSET(setScrollIndicatorInsets, scrollIndicatorInsets, UIEdgeInsets);
 
 // <Even>
-RCT_SET_AND_PRESERVE_OFFSET(setSnapToFirstInterval, snapToFirstInterval, CGFloat);
 RCT_SET_AND_PRESERVE_OFFSET(setContentOffsetXAnimatedNodeTag, contentOffsetXAnimatedNodeTag, NSNumber *);
 RCT_SET_AND_PRESERVE_OFFSET(setContentOffsetYAnimatedNodeTag, contentOffsetYAnimatedNodeTag, NSNumber *);
-RCT_SET_AND_PRESERVE_OFFSET(setMinContentSize, minContentSize, CGSize);
 RCT_SET_AND_PRESERVE_OFFSET(setDisableTopPull, disableTopPull, BOOL);
-RCT_SET_AND_PRESERVE_OFFSET(setDisableBottomPull, disableBottomPull, BOOL);
 // </Even>
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 110000 /* __IPHONE_11_0 */

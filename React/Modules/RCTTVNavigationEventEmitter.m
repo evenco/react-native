@@ -17,6 +17,10 @@ static NSString *const TVNavigationEventName = @"onTVNavEvent";
 
 RCT_EXPORT_MODULE()
 
++ (BOOL)requiresMainQueueSetup {
+  return YES;
+}
+
 - (instancetype)init
 {
   if (self = [super init]) {

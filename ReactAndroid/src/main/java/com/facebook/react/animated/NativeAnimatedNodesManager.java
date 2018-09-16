@@ -159,6 +159,24 @@ import javax.annotation.Nullable;
     mUpdatedNodes.put(tag, node);
   }
 
+  // <Even>
+  public void driveAnimatedNodeValue(int tag, double value) {
+    AnimatedNode node = mAnimatedNodes.get(tag);
+    if (node == null || !(node instanceof ValueAnimatedNode)) {
+      FLog.w(ReactConstants.TAG, "Animated node with tag " + tag +
+        " does not exists or is not a 'value' node");
+      // throw new JSApplicationIllegalArgumentException
+      return;
+    }
+    stopAnimationsForNode(node);
+    ((ValueAnimatedNode) node).mValue = value;
+
+    mRunUpdateNodeList.add(node);
+    updateNodes(mRunUpdateNodeList);
+    mRunUpdateNodeList.clear();
+  }
+  // </Even>
+
   public void setAnimatedNodeOffset(int tag, double offset) {
     AnimatedNode node = mAnimatedNodes.get(tag);
     if (node == null || !(node instanceof ValueAnimatedNode)) {

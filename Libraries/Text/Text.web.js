@@ -36,8 +36,13 @@ class Text extends React.Component {
             allowFontScaling,
             numberOfLines,
             collapsable,
+            onClick,
+            onPress,
+            onLongPress,
             ...props,
         } = this.props;
+
+        onClick = onClick || onPress;
 
         if (typeof children == 'string') {
             if (children.indexOf('\n') >= 0) {
@@ -58,17 +63,22 @@ class Text extends React.Component {
         } else if (children) {
             children = [this._renderChild(children)];
         }
-        var finalStyle = webifyStyle([style, styles.containerSpan]);
-        if (this.props.numberOfLines == 1) {
-            finalStyle['overflow'] = 'hidden'
+        var finalStyle = {
+            ...webifyStyle([style, styles.containerSpan]),
+        };
+        if (numberOfLines == 1) {
+            finalStyle.overflow = 'hidden';
         }
-        return (
-            <span
-                {...props}
-                style={finalStyle}
-                children={React.Children.toArray(children)}
-                />
-        );
+        if (onClick) {
+            finalStyle.cursor = 'pointer';
+        }
+        const finalProps = {
+            ...props,
+            style: finalStyle,
+            children: React.Children.toArray(children),
+            onClick: onClick,
+        };
+        return <span {...finalProps} />;
     }
 
     _renderInnerText = (text) => {

@@ -67,7 +67,7 @@ const TouchableWithoutFeedback = createReactClass({
     /**
     * Called as soon as the touch is released even before onPress.
     */
-     onPressOut: PropTypes.func,
+    onPressOut: PropTypes.func,
     /**
      * Invoked on mount and layout changes with
      *
@@ -108,6 +108,9 @@ const TouchableWithoutFeedback = createReactClass({
      */
     // $FlowFixMe: Expected a React PropType instead
     hitSlop: EdgeInsetsPropType,
+
+    // HACK
+    interpretHoverAsPress: PropTypes.bool,
   },
 
   getInitialState: function() {
@@ -199,9 +202,12 @@ const TouchableWithoutFeedback = createReactClass({
       onResponderRelease: this.touchableHandleResponderRelease,
       onResponderTerminate: this.touchableHandleResponderTerminate,
 
-      onMouseEnter: this.touchableHandleActivePressIn,
-      onMouseLeave: this.touchableHandleActivePressOut,
+      // HACK web events
       onClick: this.touchableHandlePress,
+      onMouseDown: this.props.interpretHoverAsPress ? undefined : this.touchableHandleActivePressIn,
+      onMouseUp: this.props.interpretHoverAsPress ? undefined : this.touchableHandleActivePressOut,
+      onMouseEnter: this.props.interpretHoverAsPress ? this.touchableHandleActivePressIn : undefined,
+      onMouseLeave: this.props.interpretHoverAsPress ? this.touchableHandleActivePressOut : undefined,
 
       style,
       children,

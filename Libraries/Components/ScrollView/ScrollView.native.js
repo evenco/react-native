@@ -433,17 +433,11 @@ const ScrollView = createReactClass({
     DEPRECATED_sendUpdatedChildFrames: PropTypes.bool,
 
     // <Even>
-    snapToFirstInterval: PropTypes.number,
     animatedScrollX: PropTypes.object,
     animatedScrollY: PropTypes.object,
     contentOffsetXAnimatedNodeTag: PropTypes.number,
     contentOffsetYAnimatedNodeTag: PropTypes.number,
-    minContentSize: PropTypes.shape({
-        width: PropTypes.number,
-        height: PropTypes.number,
-    }),
     disableTopPull: PropTypes.bool,
-    disableBottomPull: PropTypes.bool,
     // </Even>
   },
 

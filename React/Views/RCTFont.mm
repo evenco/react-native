@@ -220,9 +220,11 @@ RCT_ARRAY_CONVERTER(RCTFontVariantDescriptor)
 {
   // Defaults
   static NSString *defaultFontFamily;
+  static NSString *defaultTitleFontFamily;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     defaultFontFamily = [UIFont systemFontOfSize:14].familyName;
+    defaultTitleFontFamily = [UIFont systemFontOfSize:100].familyName;
   });
   const RCTFontWeight defaultFontWeight = UIFontWeightRegular;
   const CGFloat defaultFontSize = 14;
@@ -255,7 +257,7 @@ RCT_ARRAY_CONVERTER(RCTFontVariantDescriptor)
 
   // Handle system font as special case. This ensures that we preserve
   // the specific metrics of the standard system font as closely as possible.
-  if ([familyName isEqual:defaultFontFamily] || [familyName isEqualToString:@"System"]) {
+  if ([familyName isEqual:defaultFontFamily] || [familyName isEqual:defaultTitleFontFamily] || [familyName isEqualToString:@"System"]) {
     font = cachedSystemFont(fontSize, fontWeight);
     if (font) {
       didFindFont = YES;

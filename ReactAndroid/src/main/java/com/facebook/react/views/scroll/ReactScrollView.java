@@ -85,7 +85,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
     mFpsListener = fpsListener;
 
     // <Even>
-    mAnimatedModule = ((ReactContext) context).getNativeModule(NativeAnimatedModule.class);
+    mAnimatedModule = context.getNativeModule(NativeAnimatedModule.class);
     // </Even>
 
     if (!sTriedToGetScrollerField) {
@@ -198,7 +198,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
     // <Even>
     if (mContentOffsetYAnimatedNodeTag != 0) {
       int value = Math.round(PixelUtil.toDIPFromPixel(y));
-      mAnimatedModule.setAnimatedNodeValue(mContentOffsetYAnimatedNodeTag, value);
+      mAnimatedModule.driveAnimatedNodeValue(mContentOffsetYAnimatedNodeTag, value);
     }
     // </Even>
   }

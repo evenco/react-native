@@ -177,6 +177,7 @@ var TouchableHighlight = createReactClass({
     ensurePositiveDelayProps(nextProps);
     if (nextProps.activeOpacity !== this.props.activeOpacity ||
         nextProps.underlayColor !== this.props.underlayColor ||
+        nextProps.disabled !== this.props.disabled ||
         nextProps.style !== this.props.style) {
       this.setState(this._computeSyntheticState(nextProps));
     }

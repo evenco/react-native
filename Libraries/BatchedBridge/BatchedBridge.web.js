@@ -92,7 +92,9 @@ var remoteModules = {
     }),
 
     setApplicationIconBadgeNumber: async((number) => {
-      // noop
+      if (window.desktopIntegration) {
+        window.desktopIntegration.setBadgeCount(number);
+      }
     }),
 
     getApplicationIconBadgeNumber: async((callback) => {
@@ -129,6 +131,19 @@ var remoteModules = {
 
     showActionSheetWithOptions: async((options, failureCallback, successCallback) => {
       console.error('Not supported on this platform');
+    }),
+
+  },
+
+  LinkingManager: {
+
+    canOpenURL: promise((url, resolve) => {
+        resolve(true);
+    }),
+
+    openURL: promise((url, resolve) => {
+        window.location = url;
+        resolve(true);
     }),
 
   },

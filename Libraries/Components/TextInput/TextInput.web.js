@@ -9,7 +9,8 @@ var webifyStyle = require('webifyStyle');
 
 import TextareaAutosize from 'TextareaAutosize';
 
-var ENTER_KEY = '13';
+const ENTER_KEY = '13';
+const ESCAPE_KEY = '27';
 
 class TextInput extends React.Component {
 
@@ -139,6 +140,12 @@ class TextInput extends React.Component {
             onSubmitEditing,
             password,
             underlineColorAndroid,
+            autoGrow,
+            placeholderTextColor,
+            enablesReturnKeyAutomatically,
+            autoCorrect,
+            autoComplete,
+            autoCapitalize,
             value,
             style,
             ...props,
@@ -148,6 +155,10 @@ class TextInput extends React.Component {
             ...props,
             ref: 'input',
             value: value || '',
+            autoCorrect: onOffValue(autoCorrect),
+            autoComplete: onOffValue(autoComplete),
+            autoCapitalize: onOffValue(autoCapitalize),
+            spellCheck: trueFalseValue(autoCorrect),
             onChange: this._onChange,
             onKeyDown: this._onKeyDown,
             disabled: !this._canFocus || this._isDisabled(),
@@ -190,7 +201,9 @@ class TextInput extends React.Component {
     }
 
     _onKeyDown = (e) => {
-        if (e.which == ENTER_KEY) {
+        if (e.which == ESCAPE_KEY) {
+            this.blur();
+        } else if (e.which == ENTER_KEY) {
             if (this.props.onSubmitEditing) {
                 e.preventDefault();
                 this.props.onSubmitEditing();
@@ -219,5 +232,19 @@ class TextInput extends React.Component {
     }
 
 }
+
+const onOffValue = (v) => {
+    if (v === undefined) {
+        return v;
+    }
+    return v ? 'on' : 'off';
+};
+
+const trueFalseValue = (v) => {
+    if (v === undefined) {
+        return v;
+    }
+    return v ? 'true' : 'false';
+};
 
 module.exports = TextInput;

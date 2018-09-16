@@ -25,6 +25,11 @@ let hairlineWidth = PixelRatio.roundToNearestPixel(0.4);
 if (hairlineWidth === 0) {
   hairlineWidth = 1 / PixelRatio.get();
 }
+// <Even>
+if (hairlineWidth < 0.5) {
+    hairlineWidth *= 2;
+}
+// </Even>
 
 const absoluteFillObject = {
   position: 'absolute',

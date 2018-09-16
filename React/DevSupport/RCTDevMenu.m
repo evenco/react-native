@@ -9,25 +9,13 @@
 
 #import "RCTDevMenu.h"
 
+#import "RCTDeviceShakeManager.h"
 #import "RCTDevSettings.h"
 #import "RCTKeyCommands.h"
 #import "RCTLog.h"
 #import "RCTUtils.h"
 
 #if RCT_DEV
-
-NSString *const RCTShowDevMenuNotification = @"RCTShowDevMenuNotification";
-
-@implementation UIWindow (RCTDevMenu)
-
-- (void)RCT_motionEnded:(__unused UIEventSubtype)motion withEvent:(UIEvent *)event
-{
-  if (event.subtype == UIEventSubtypeMotionShake) {
-    [[NSNotificationCenter defaultCenter] postNotificationName:RCTShowDevMenuNotification object:nil];
-  }
-}
-
-@end
 
 @implementation RCTDevMenuItem
 {
@@ -91,14 +79,6 @@ typedef void(^RCTDevMenuAlertActionHandler)(UIAlertAction *action);
 
 RCT_EXPORT_MODULE()
 
-+ (void)initialize
-{
-  // We're swizzling here because it's poor form to override methods in a category,
-  // however UIWindow doesn't actually implement motionEnded:withEvent:, so there's
-  // no need to call the original implementation.
-  RCTSwapInstanceMethods([UIWindow class], @selector(motionEnded:withEvent:), @selector(RCT_motionEnded:withEvent:));
-}
-
 + (BOOL)requiresMainQueueSetup
 {
   return YES;
@@ -109,7 +89,7 @@ RCT_EXPORT_MODULE()
   if ((self = [super init])) {
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(showOnShake)
-                                                 name:RCTShowDevMenuNotification
+                                                 name:RCTDeviceShakeNotification
                                                object:nil];
     _extraMenuItems = [NSMutableArray new];
 

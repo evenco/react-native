@@ -35,6 +35,7 @@ import com.facebook.react.modules.camera.ImageEditingManager;
 import com.facebook.react.modules.camera.ImageStoreManager;
 import com.facebook.react.modules.clipboard.ClipboardModule;
 import com.facebook.react.modules.datepicker.DatePickerDialogModule;
+import com.facebook.react.modules.deviceshake.DeviceShakeModule;
 import com.facebook.react.modules.dialog.DialogModule;
 import com.facebook.react.modules.fresco.FrescoModule;
 import com.facebook.react.modules.i18nmanager.I18nManagerModule;
@@ -154,6 +155,14 @@ public class MainReactPackage extends LazyReactPackage {
               @Override
               public NativeModule get() {
                 return new DatePickerDialogModule(context);
+              }
+            }),
+        new ModuleSpec(
+            DeviceShakeModule.class,
+            new Provider<NativeModule>() {
+              @Override
+              public NativeModule get() {
+                return new DeviceShakeModule(context);
               }
             }),
         new ModuleSpec(

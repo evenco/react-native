@@ -134,7 +134,7 @@ public class ReactViewPager extends ViewPager {
       if (mContentOffsetXAnimatedNodeTag != 0) {
         int x = position * getMeasuredWidth() + positionOffsetPixels;
         int value = Math.round(PixelUtil.toDIPFromPixel(x));
-        mAnimatedModule.setAnimatedNodeValue(mContentOffsetXAnimatedNodeTag, value);
+        mAnimatedModule.driveAnimatedNodeValue(mContentOffsetXAnimatedNodeTag, value);
       }
       // </Even>
     }
@@ -230,6 +230,25 @@ public class ReactViewPager extends ViewPager {
   public void setContentOffsetXAnimatedNodeTag(int tag) {
     mContentOffsetXAnimatedNodeTag = tag;
   }
+  // </Even>
+
+  // <Even> https://github.com/facebook/react-native/pull/14867
+  @Override
+  protected void onAttachedToWindow() {
+    super.onAttachedToWindow();
+    this.requestLayout();
+    post(measureAndLayout);
+  }
+
+  private final Runnable measureAndLayout = new Runnable() {
+    @Override
+    public void run() {
+      measure(
+        MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
+        MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
+      layout(getLeft(), getTop(), getRight(), getBottom());
+    }
+  };
   // </Even>
 
   /*package*/ void addViewToAdapter(View child, int index) {

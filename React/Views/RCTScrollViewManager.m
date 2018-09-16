@@ -95,12 +95,9 @@ RCT_EXPORT_VIEW_PROPERTY(contentInsetAdjustmentBehavior, UIScrollViewContentInse
 #endif
 
 // <Even>
-RCT_EXPORT_VIEW_PROPERTY(snapToFirstInterval, CGFloat)
 RCT_EXPORT_VIEW_PROPERTY(contentOffsetXAnimatedNodeTag, NSNumber)
 RCT_EXPORT_VIEW_PROPERTY(contentOffsetYAnimatedNodeTag, NSNumber)
-RCT_EXPORT_VIEW_PROPERTY(minContentSize, CGSize)
 RCT_EXPORT_VIEW_PROPERTY(disableTopPull, BOOL)
-RCT_EXPORT_VIEW_PROPERTY(disableBottomPull, BOOL)
 // </Even>
 
 // overflow is used both in css-layout as well as by react-native. In css-layout

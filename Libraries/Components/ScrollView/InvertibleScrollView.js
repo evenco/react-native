@@ -128,7 +128,12 @@ const InvertibleScrollView = createReactClass({
   // move this logic into InvertibleScrollView for every InvertibleScrollView to inherit this behavior
 
   _onLayout(e: LayoutEvent) {
-    this._layout = e.nativeEvent.layout;
+    const newLayout = e.nativeEvent.layout;
+    const newHeight = this._layout && newLayout.height != this._layout.height;
+    this._layout = newLayout;
+    if (newLayout) {
+        this.forceUpdate();
+    }
     if (this.props.onLayout) {
       this.props.onLayout(e);
     }

@@ -68,13 +68,13 @@ class Image extends React.Component {
                 break;
             case 'contain':
                 style.display = 'inline';
-                style.maxWidth = '100%';
-                style.maxHeight = '100%';
+                style.width = '100%';
+                style.height = '100%';
                 break;
             case 'center':
                 style.alignSelf = 'center';
-                style.width = source.width;
-                style.height = source.height;
+                style.maxWidth = '100%';
+                style.maxHeight = '100%';
                 break;
             default:
                 style.width = source.width;

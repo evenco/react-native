@@ -150,7 +150,7 @@ public class ReactHorizontalScrollView extends HorizontalScrollView implements
     // <Even>
     if (mContentOffsetXAnimatedNodeTag != 0) {
       int value = Math.round(PixelUtil.toDIPFromPixel(x));
-      mAnimatedModule.setAnimatedNodeValue(mContentOffsetXAnimatedNodeTag, value);
+      mAnimatedModule.driveAnimatedNodeValue(mContentOffsetXAnimatedNodeTag, value);
     }
     // </Even>
   }

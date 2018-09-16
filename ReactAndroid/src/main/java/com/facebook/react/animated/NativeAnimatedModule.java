@@ -256,6 +256,12 @@ public class NativeAnimatedModule extends ReactContextBaseJavaModule implements
     });
   }
 
+  // <Even>
+  public void driveAnimatedNodeValue(final int tag, final double value) {
+    mNodesManager.driveAnimatedNodeValue(tag, value);
+  }
+  // </Even>
+
   @ReactMethod
   public void setAnimatedNodeOffset(final int tag, final double value) {
     mOperations.add(new UIThreadOperation() {

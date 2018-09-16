@@ -26,7 +26,6 @@ class View extends React.Component {
 
     static propTypes = {
         style: stylePropType,
-        stopPropagation: PropTypes.bool,
     };
 
     _cachedMeasurement = {

@@ -13,6 +13,7 @@
 
 #import "RCTAssert.h"
 #import "RCTBridge.h"
+#import "RCTDeviceShakeManager.h"
 #import "RCTEventDispatcher.h"
 #import "RCTLog.h"
 #import "RCTRootView.h"
@@ -21,10 +22,6 @@
 #import "RCTUtils.h"
 #import "RCTView.h"
 #import "UIView+React.h"
-
-#if __has_include("RCTDevMenu.h")
-#import "RCTDevMenu.h"
-#endif
 
 @implementation RCTTVRemoteHandler {
   NSMutableArray<UIGestureRecognizer *> *_tvRemoteGestureRecognizers;
@@ -116,9 +113,9 @@
 {
   [self sendAppleTVEvent:@"longPlayPause" toView:r.view];
 
-#if __has_include("RCTDevMenu.h") && RCT_DEV
+#if RCT_DEV
   // If shake to show is enabled on device, use long play/pause event to show dev menu
-  [[NSNotificationCenter defaultCenter] postNotificationName:RCTShowDevMenuNotification object:nil];
+  [[NSNotificationCenter defaultCenter] postNotificationName:RCTDeviceShakeNotification object:nil];
 #endif
 }
 

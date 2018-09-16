@@ -13,7 +13,11 @@ var View = require('View');
 var styles = StyleSheet.create({
 
     container: {
-        //
+        flex: 1,
+    },
+
+    containerHorizontal: {
+        flex: null,
     },
 
     scroll: {
@@ -42,6 +46,10 @@ class ScrollView extends React.Component {
     static defaultProps = {
         automaticallyAdjustContentInsets: true,
     };
+
+    setNativeProps(props) {
+        // noop
+    }
 
     getScrollResponder() {
         return this;
@@ -135,34 +143,23 @@ class ScrollView extends React.Component {
         ];
 
         const {
-            automaticallyAdjustContentInsets,
-            contentContainerStyle,
-            inverted,
-            horizontal,
-            keyboardDismissMode,
-            onMomentumScrollBegin,
-            onMomentumScrollEnd,
-            onScrollBeginDrag,
-            onScrollEndDrag,
-            scrollEnabled,
-            scrollEventThrottle,
-            stickyHeaderIndices,
-            onContentSizeChange,
-            keyboardShouldPersistTaps,
-            showsVerticalScrollIndicator,
-            showsHorizontalScrollIndicator,
-            pagingEnabled,
-            disableTopPull,
-            animatedScrollX,
-            animatedScrollY,
-            refreshControl,
-            bounces,
+            style,
             children,
+            onLayout,
+            hitSlop,
+            pointerEvents,
+            hidden,
             ...props,
         } = this.props;
 
         return (
-            <View {...props} style={[styles.container, props.style]}>
+            <View
+                style={[styles.container, this.props.horizontal && styles.containerHorizontal, style]}
+                onLayout={onLayout}
+                hitSlop={hitSlop}
+                pointerEvents={pointerEvents}
+                hidden={hidden}
+                >
                 <View ref="scrollView" style={scrollStyle} onScroll={this._onScroll}>
                     <View ref="containerView" style={containerStyle}>
                         {children}

@@ -60,7 +60,6 @@ class Animation {
   }
   __startNativeAnimation(animatedValue: AnimatedValue): void {
     animatedValue.__makeNative();
-    console.log('NativeAnimatedHelper', NativeAnimatedHelper);
     this.__nativeId = NativeAnimatedHelper.generateNewAnimationId();
     NativeAnimatedHelper.API.startAnimatingNode(
       this.__nativeId,

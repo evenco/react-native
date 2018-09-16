@@ -12,13 +12,6 @@
 #import <React/RCTBridge.h>
 #import <React/RCTBridgeModule.h>
 
-#if RCT_DEV
-
-RCT_EXTERN NSString *const RCTShowDevMenuNotification;
-
-#endif
-
-
 @class RCTDevMenuItem;
 
 /**
