@@ -1,28 +1,23 @@
 /**
- * Copyright (c) 2015-present, Facebook, Inc.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @providesModule ReactNative
+ * @format
  * @flow
  */
-'use strict';
 
-const ReactNativeFeatureFlags = require('ReactNativeFeatureFlags');
+'use strict';
 
 import type {ReactNativeType} from 'ReactNativeTypes';
 
 let ReactNative;
 
 if (__DEV__) {
-  ReactNative = ReactNativeFeatureFlags.useFiber
-    ? require('ReactNativeFiber-dev')
-    : require('ReactNativeStack-dev');
+  ReactNative = require('ReactNativeRenderer-dev');
 } else {
-  ReactNative = ReactNativeFeatureFlags.useFiber
-    ? require('ReactNativeFiber-prod')
-    : require('ReactNativeStack-prod');
+  ReactNative = require('ReactNativeRenderer-prod');
 }
 
 module.exports = (ReactNative: ReactNativeType);

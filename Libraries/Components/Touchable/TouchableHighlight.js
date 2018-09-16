@@ -1,42 +1,58 @@
 /**
  * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  *
- * @providesModule TouchableHighlight
  * @flow
+ * @format
  */
 'use strict';
 
 const ColorPropType = require('ColorPropType');
 const NativeMethodsMixin = require('NativeMethodsMixin');
-const React = require('React');
 const PropTypes = require('prop-types');
+const Platform = require('Platform');
+const React = require('React');
 const ReactNativeViewAttributes = require('ReactNativeViewAttributes');
 const StyleSheet = require('StyleSheet');
-const TimerMixin = require('react-timer-mixin');
 const Touchable = require('Touchable');
 const TouchableWithoutFeedback = require('TouchableWithoutFeedback');
 const View = require('View');
 const ViewPropTypes = require('ViewPropTypes');
 
 const createReactClass = require('create-react-class');
-const ensureComponentIsNative = require('ensureComponentIsNative');
 const ensurePositiveDelayProps = require('ensurePositiveDelayProps');
-const keyOf = require('fbjs/lib/keyOf');
-const merge = require('merge');
 
-import type {Event} from 'TouchableWithoutFeedback';
+import type {PressEvent} from 'CoreEventTypes';
+import type {Props as TouchableWithoutFeedbackProps} from 'TouchableWithoutFeedback';
+import type {ViewStyleProp} from 'StyleSheet';
+import type {ColorValue} from 'StyleSheetTypes';
 
 const DEFAULT_PROPS = {
   activeOpacity: 0.85,
+  delayPressOut: 100,
   underlayColor: 'black',
 };
 
 const PRESS_RETENTION_OFFSET = {top: 20, left: 20, right: 20, bottom: 30};
+
+type IOSProps = $ReadOnly<{|
+  hasTVPreferredFocus?: ?boolean,
+  tvParallaxProperties?: ?Object,
+|}>;
+
+type Props = $ReadOnly<{|
+  ...TouchableWithoutFeedbackProps,
+  ...IOSProps,
+
+  activeOpacity?: ?number,
+  underlayColor?: ?ColorValue,
+  style?: ?ViewStyleProp,
+  onShowUnderlay?: ?Function,
+  onHideUnderlay?: ?Function,
+  testOnly_pressed?: ?boolean,
+|}>;
 
 /**
  * A wrapper for making views respond properly to touches.
@@ -65,12 +81,84 @@ const PRESS_RETENTION_OFFSET = {top: 20, left: 20, right: 20, bottom: 30};
  *   );
  * },
  * ```
+ *
+ *
+ * ### Example
+ *
+ * ```ReactNativeWebPlayer
+ * import React, { Component } from 'react'
+ * import {
+ *   AppRegistry,
+ *   StyleSheet,
+ *   TouchableHighlight,
+ *   Text,
+ *   View,
+ * } from 'react-native'
+ *
+ * class App extends Component {
+ *   constructor(props) {
+ *     super(props)
+ *     this.state = { count: 0 }
+ *   }
+ *
+ *   onPress = () => {
+ *     this.setState({
+ *       count: this.state.count+1
+ *     })
+ *   }
+ *
+ *  render() {
+ *     return (
+ *       <View style={styles.container}>
+ *         <TouchableHighlight
+ *          style={styles.button}
+ *          onPress={this.onPress}
+ *         >
+ *          <Text> Touch Here </Text>
+ *         </TouchableHighlight>
+ *         <View style={[styles.countContainer]}>
+ *           <Text style={[styles.countText]}>
+ *             { this.state.count !== 0 ? this.state.count: null}
+ *           </Text>
+ *         </View>
+ *       </View>
+ *     )
+ *   }
+ * }
+ *
+ * const styles = StyleSheet.create({
+ *   container: {
+ *     flex: 1,
+ *     justifyContent: 'center',
+ *     paddingHorizontal: 10
+ *   },
+ *   button: {
+ *     alignItems: 'center',
+ *     backgroundColor: '#DDDDDD',
+ *     padding: 10
+ *   },
+ *   countContainer: {
+ *     alignItems: 'center',
+ *     padding: 10
+ *   },
+ *   countText: {
+ *     color: '#FF00FF'
+ *   }
+ * })
+ *
+ * AppRegistry.registerComponent('App', () => App)
+ * ```
+ *
  */
 
-var TouchableHighlight = createReactClass({
+const TouchableHighlight = ((createReactClass({
   displayName: 'TouchableHighlight',
   propTypes: {
     ...TouchableWithoutFeedback.propTypes,
+    /*
+     * <Even>
+     */
+    disabled: PropTypes.bool,
     /**
      * Determines what the opacity of the wrapped view should be when touch is
      * active.
@@ -81,6 +169,10 @@ var TouchableHighlight = createReactClass({
      * active.
      */
     underlayColor: ColorPropType,
+    /**
+     * Style to apply to the container/underlay. Most commonly used to make sure
+     * rounded corners match the wrapped component.
+     */
     style: ViewPropTypes.style,
     /**
      * Called immediately after the underlay is shown
@@ -104,110 +196,80 @@ var TouchableHighlight = createReactClass({
      * shiftDistanceY: Defaults to 2.0.
      * tiltAngle: Defaults to 0.05.
      * magnification: Defaults to 1.0.
+     * pressMagnification: Defaults to 1.0.
+     * pressDuration: Defaults to 0.3.
+     * pressDelay: Defaults to 0.0.
      *
      * @platform ios
      */
     tvParallaxProperties: PropTypes.object,
-
-    // <Even>
-    disabled: PropTypes.bool,
-    // </Even>
+    /**
+     * Handy for snapshot tests.
+     */
+    testOnly_pressed: PropTypes.bool,
   },
 
-  mixins: [NativeMethodsMixin, TimerMixin, Touchable.Mixin],
+  mixins: [NativeMethodsMixin, Touchable.Mixin],
 
   getDefaultProps: () => DEFAULT_PROPS,
 
-  // Performance optimization to avoid constantly re-generating these objects.
-  _computeSyntheticState: function(props) {
-    return {
-      activeProps: {
-        style: {
-          opacity: props.activeOpacity,
-        }
-      },
-      activeUnderlayProps: {
-        style: props.underlayColor && {
-          backgroundColor: props.underlayColor,
-        }
-      },
-      underlayStyle: [
-        TOUCHABLE_STYLE,
-        {backgroundColor: 'transparent'},
-        props.style,
-        // <Even>
-        props.disabled && {opacity: 0.66},
-        // </Even>
-      ],
-      hasTVPreferredFocus: props.hasTVPreferredFocus
-    };
-  },
-
   getInitialState: function() {
-    /* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This comment
-     * suppresses an error when upgrading Flow's support for React. To see the
-     * error delete this comment and run Flow. */
     this._isMounted = false;
-    return merge(
-      this.touchableGetInitialState(), this._computeSyntheticState(this.props)
-    );
+    if (this.props.testOnly_pressed) {
+      return {
+        ...this.touchableGetInitialState(),
+        extraChildStyle: {
+          opacity: this.props.activeOpacity,
+        },
+        extraUnderlayStyle: {
+          backgroundColor: this.props.underlayColor,
+        },
+      };
+    } else {
+      return {
+        ...this.touchableGetInitialState(),
+        extraChildStyle: null,
+        extraUnderlayStyle: null,
+      };
+    }
   },
 
   componentDidMount: function() {
-    /* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This comment
-     * suppresses an error when upgrading Flow's support for React. To see the
-     * error delete this comment and run Flow. */
     this._isMounted = true;
     ensurePositiveDelayProps(this.props);
-    ensureComponentIsNative(this.refs[CHILD_REF]);
   },
 
   componentWillUnmount: function() {
-    /* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This comment
-     * suppresses an error when upgrading Flow's support for React. To see the
-     * error delete this comment and run Flow. */
     this._isMounted = false;
+    clearTimeout(this._hideTimeout);
   },
 
-  componentDidUpdate: function() {
-    ensureComponentIsNative(this.refs[CHILD_REF]);
-  },
-
-  componentWillReceiveProps: function(nextProps) {
+  UNSAFE_componentWillReceiveProps: function(nextProps) {
     ensurePositiveDelayProps(nextProps);
-    if (nextProps.activeOpacity !== this.props.activeOpacity ||
-        nextProps.underlayColor !== this.props.underlayColor ||
-        nextProps.disabled !== this.props.disabled ||
-        nextProps.style !== this.props.style) {
-      this.setState(this._computeSyntheticState(nextProps));
-    }
   },
 
   viewConfig: {
     uiViewClassName: 'RCTView',
-    validAttributes: ReactNativeViewAttributes.RCTView
+    validAttributes: ReactNativeViewAttributes.RCTView,
   },
 
   /**
    * `Touchable.Mixin` self callbacks. The mixin will invoke these if they are
    * defined on your component.
    */
-  touchableHandleActivePressIn: function(e: Event) {
+  touchableHandleActivePressIn: function(e: PressEvent) {
     // <Even>
     if (this.props.disabled) {
       return;
     }
     // </Even>
-    this.clearTimeout(this._hideTimeout);
-    /* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This comment
-     * suppresses an error when upgrading Flow's support for React. To see the
-     * error delete this comment and run Flow. */
+    clearTimeout(this._hideTimeout);
     this._hideTimeout = null;
     this._showUnderlay();
     this.props.onPressIn && this.props.onPressIn(e);
   },
 
-  touchableHandleActivePressOut: function(e: Event) {
+  touchableHandleActivePressOut: function(e: PressEvent) {
     // <Even>
     if (this.props.disabled) {
       return;
@@ -219,23 +281,24 @@ var TouchableHighlight = createReactClass({
     this.props.onPressOut && this.props.onPressOut(e);
   },
 
-  touchableHandlePress: function(e: SyntheticEvent) {
+  touchableHandlePress: function(e: PressEvent) {
     // <Even>
     if (this.props.disabled) {
       return;
     }
     // </Even>
-    this.clearTimeout(this._hideTimeout);
-    this._showUnderlay();
-    /* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This comment
-     * suppresses an error when upgrading Flow's support for React. To see the
-     * error delete this comment and run Flow. */
-    this._hideTimeout = this.setTimeout(this._hideUnderlay,
-      this.props.delayPressOut || 100);
+    clearTimeout(this._hideTimeout);
+    if (!Platform.isTV) {
+      this._showUnderlay();
+      this._hideTimeout = setTimeout(
+        this._hideUnderlay,
+        this.props.delayPressOut,
+      );
+    }
     this.props.onPress && this.props.onPress(e);
   },
 
-  touchableHandleLongPress: function(e: Event) {
+  touchableHandleLongPress: function(e: PressEvent) {
     // <Even>
     if (this.props.disabled) {
       return;
@@ -268,21 +331,28 @@ var TouchableHighlight = createReactClass({
     if (!this._isMounted || !this._hasPressHandler()) {
       return;
     }
-
-    this.refs[UNDERLAY_REF].setNativeProps(this.state.activeUnderlayProps);
-    this.refs[CHILD_REF].setNativeProps(this.state.activeProps);
+    this.setState({
+      extraChildStyle: {
+        opacity: this.props.activeOpacity,
+      },
+      extraUnderlayStyle: {
+        backgroundColor: this.props.underlayColor,
+      },
+    });
     this.props.onShowUnderlay && this.props.onShowUnderlay();
   },
 
   _hideUnderlay: function() {
-    this.clearTimeout(this._hideTimeout);
-    /* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This comment
-     * suppresses an error when upgrading Flow's support for React. To see the
-     * error delete this comment and run Flow. */
+    clearTimeout(this._hideTimeout);
     this._hideTimeout = null;
-    if (this._hasPressHandler() && this.refs[UNDERLAY_REF]) {
-      this.refs[CHILD_REF].setNativeProps({style: INACTIVE_CHILD_STYLE});
-      this.refs[UNDERLAY_REF].setNativeProps({style: this.state.underlayStyle});
+    if (this.props.testOnly_pressed) {
+      return;
+    }
+    if (this._hasPressHandler()) {
+      this.setState({
+        extraChildStyle: null,
+        extraUnderlayStyle: null,
+      });
       this.props.onHideUnderlay && this.props.onHideUnderlay();
     }
   },
@@ -297,31 +367,31 @@ var TouchableHighlight = createReactClass({
   },
 
   render: function() {
+    const child = React.Children.only(this.props.children);
     return (
       <View
         accessible={this.props.accessible !== false}
-        /* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This
-         * comment suppresses an error when upgrading Flow's support for React.
-         * To see the error delete this comment and run Flow. */
         accessibilityLabel={this.props.accessibilityLabel}
-        accessibilityComponentType={this.props.accessibilityComponentType}
-        accessibilityTraits={this.props.accessibilityTraits}
-        ref={UNDERLAY_REF}
-        style={this.state.underlayStyle}
+        accessibilityHint={this.props.accessibilityHint}
+        accessibilityRole={this.props.accessibilityRole}
+        accessibilityStates={this.props.accessibilityStates}
+        style={StyleSheet.compose(
+          this.props.style,
+          this.state.extraUnderlayStyle,
+        )}
         onLayout={this.props.onLayout}
         hitSlop={this.props.hitSlop}
         isTVSelectable={true}
         tvParallaxProperties={this.props.tvParallaxProperties}
-        hasTVPreferredFocus={this.state.hasTVPreferredFocus}
+        hasTVPreferredFocus={this.props.hasTVPreferredFocus}
         onStartShouldSetResponder={this.touchableHandleStartShouldSetResponder}
-        onResponderTerminationRequest={this.touchableHandleResponderTerminationRequest}
+        onResponderTerminationRequest={
+          this.touchableHandleResponderTerminationRequest
+        }
         onResponderGrant={this.touchableHandleResponderGrant}
         onResponderMove={this.touchableHandleResponderMove}
         onResponderRelease={this.touchableHandleResponderRelease}
         onResponderTerminate={this.touchableHandleResponderTerminate}
-        /* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This
-         * comment suppresses an error when upgrading Flow's support for React.
-         * To see the error delete this comment and run Flow. */
         nativeID={this.props.nativeID}
         testID={this.props.testID}
         // <Even>
@@ -330,25 +400,19 @@ var TouchableHighlight = createReactClass({
         onClick={this.touchableHandlePress}
         // </Even>
         >
-        {React.cloneElement(
-          /* $FlowFixMe(>=0.53.0 site=react_native_fb,react_native_oss) This
-           * comment suppresses an error when upgrading Flow's support for
-           * React. To see the error delete this comment and run Flow. */
-          React.Children.only(this.props.children),
-          {
-            ref: CHILD_REF,
-          }
-        )}
-        {Touchable.renderDebugView({color: 'green', hitSlop: this.props.hitSlop})}
+        {React.cloneElement(child, {
+          style: StyleSheet.compose(
+            child.props.style,
+            this.state.extraChildStyle,
+          ),
+        })}
+        {Touchable.renderDebugView({
+          color: 'green',
+          hitSlop: this.props.hitSlop,
+        })}
       </View>
     );
-  }
-});
-
-var CHILD_REF = keyOf({childRef: null});
-var UNDERLAY_REF = keyOf({underlayRef: null});
-
-var INACTIVE_CHILD_STYLE = StyleSheet.create({x: {opacity: 1.0}}).x;
-var TOUCHABLE_STYLE = StyleSheet.create({x: {cursor: 'pointer'}}).x;
+  },
+}): any): React.ComponentType<Props>);
 
 module.exports = TouchableHighlight;

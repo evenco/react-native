@@ -1,4 +1,7 @@
-// Copyright 2004-present Facebook. All Rights Reserved.
+// Copyright (c) 2004-present, Facebook, Inc.
+
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the root directory of this source tree.
 
 #include "JSCHelpers.h"
 
@@ -14,6 +17,7 @@
 
 #include "JavaScriptCore.h"
 #include "Value.h"
+#include <privatedata/PrivateDataBase.h>
 
 #if WITH_FBJSCEXTENSIONS
 #undef ASSERT
@@ -31,6 +35,18 @@ namespace react {
 
 namespace {
 
+class JSFunctionPrivateData : public PrivateDataBase {
+ public:
+  explicit JSFunctionPrivateData(JSFunction&& function) : jsFunction_{std::move(function)} {}
+
+  JSFunction& getJSFunction() {
+    return jsFunction_;
+  }
+
+private:
+  JSFunction jsFunction_;
+};
+
 JSValueRef functionCaller(
     JSContextRef ctx,
     JSObjectRef function,
@@ -39,8 +55,9 @@ JSValueRef functionCaller(
     const JSValueRef arguments[],
     JSValueRef* exception) {
   const bool isCustomJSC = isCustomJSCPtr(ctx);
-  auto* f = static_cast<JSFunction*>(JSC_JSObjectGetPrivate(isCustomJSC, function));
-  return (*f)(ctx, thisObject, argumentCount, arguments);
+  auto* privateData = PrivateDataBase::cast<JSFunctionPrivateData>(
+    JSC_JSObjectGetPrivate(isCustomJSC, function));
+  return (privateData->getJSFunction())(ctx, thisObject, argumentCount, arguments);
 }
 
 JSClassRef createFuncClass(JSContextRef ctx) {
@@ -52,13 +69,15 @@ JSClassRef createFuncClass(JSContextRef ctx) {
   const bool isCustomJSC = isCustomJSCPtr(ctx);
   if (isCustomJSC) {
     definition.finalize = [](JSObjectRef object) {
-      auto* function = static_cast<JSFunction*>(JSC_JSObjectGetPrivate(true, object));
-      delete function;
+      auto* privateData = PrivateDataBase::cast<JSFunctionPrivateData>(
+        JSC_JSObjectGetPrivate(true, object));
+      delete privateData;
     };
   } else {
     definition.finalize = [](JSObjectRef object) {
-      auto* function = static_cast<JSFunction*>(JSC_JSObjectGetPrivate(false, object));
-      delete function;
+      auto* privateData = PrivateDataBase::cast<JSFunctionPrivateData>(
+        JSC_JSObjectGetPrivate(false, object));
+      delete privateData;
     };
   }
   definition.callAsFunction = exceptionWrapMethod<&functionCaller>();
@@ -77,8 +96,8 @@ JSObjectRef makeFunction(
   }
 
   // dealloc in kClassDef.finalize
-  JSFunction *functionPtr = new JSFunction(std::move(function));
-  auto functionObject = Object(ctx, JSC_JSObjectMake(ctx, *classRef, functionPtr));
+  JSFunctionPrivateData *functionDataPtr = new JSFunctionPrivateData(std::move(function));
+  auto functionObject = Object(ctx, JSC_JSObjectMake(ctx, *classRef, functionDataPtr));
   functionObject.setProperty("name", Value(ctx, name));
   return functionObject;
 }
@@ -131,16 +150,7 @@ void JSException::buildMessage(JSContextRef ctx, JSValueRef exn, JSStringRef sou
 
 namespace ExceptionHandling {
 
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wglobal-constructors"
-#endif
-
 PlatformErrorExtractor platformErrorExtractor;
-
-#if __clang__
-#pragma clang diagnostic pop
-#endif
 
 }
 

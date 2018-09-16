@@ -1,18 +1,21 @@
 /**
  * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 
 package com.facebook.react.views.scroll;
 
+import android.annotation.TargetApi;
 import android.graphics.Color;
+import android.support.v4.view.ViewCompat;
+import android.util.DisplayMetrics;
+
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.react.uimanager.DisplayMetricsHolder;
 import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.ReactClippingViewGroupHelper;
 import com.facebook.react.uimanager.Spacing;
@@ -22,15 +25,19 @@ import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.annotations.ReactPropGroup;
 import com.facebook.yoga.YogaConstants;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 
 /**
  * View manager for {@link ReactScrollView} components.
  *
- * <p>Note that {@link ReactScrollView} and {@link ReactHorizontalScrollView} are exposed to JS
+ * <p>Note that {@link ReactScrollView} and {@link ReactScrollView} are exposed to JS
  * as a single ScrollView component, configured via the {@code horizontal} boolean property.
  */
+@TargetApi(11)
 @ReactModule(name = ReactScrollViewManager.REACT_CLASS)
 public class ReactScrollViewManager
     extends ViewGroupManager<ReactScrollView>
@@ -62,19 +69,36 @@ public class ReactScrollViewManager
     return new ReactScrollView(context, mFpsListener);
   }
 
+  @ReactProp(name = "scrollEnabled", defaultBoolean = true)
+  public void setScrollEnabled(ReactScrollView view, boolean value) {
+    view.setScrollEnabled(value);
+  }
+
   @ReactProp(name = "showsVerticalScrollIndicator")
   public void setShowsVerticalScrollIndicator(ReactScrollView view, boolean value) {
     view.setVerticalScrollBarEnabled(value);
   }
 
-  @ReactProp(name = "showsHorizontalScrollIndicator")
-  public void setShowsHorizontalScrollIndicator(ReactScrollView view, boolean value) {
-    view.setHorizontalScrollBarEnabled(value);
+  @ReactProp(name = "decelerationRate")
+  public void setDecelerationRate(ReactScrollView view, float decelerationRate) {
+    view.setDecelerationRate(decelerationRate);
   }
 
-  @ReactProp(name = "scrollEnabled")
-  public void setScrollEnabled(ReactScrollView view, boolean value) {
-    view.setScrollEnabled(value);
+  @ReactProp(name = "snapToInterval")
+  public void setSnapToInterval(ReactScrollView view, float snapToInterval) {
+    // snapToInterval needs to be exposed as a float because of the Javascript interface.
+    DisplayMetrics screenDisplayMetrics = DisplayMetricsHolder.getScreenDisplayMetrics();
+    view.setSnapInterval((int) (snapToInterval * screenDisplayMetrics.density));
+  }
+
+  @ReactProp(name = "snapToOffsets")
+  public void setSnapToOffsets(ReactScrollView view, @Nullable ReadableArray snapToOffsets) {
+    DisplayMetrics screenDisplayMetrics = DisplayMetricsHolder.getScreenDisplayMetrics();
+    List<Integer> offsets = new ArrayList<Integer>();
+    for (int i = 0; i < snapToOffsets.size(); i++) {
+      offsets.add((int) (snapToOffsets.getDouble(i) * screenDisplayMetrics.density));
+    }
+    view.setSnapOffsets(offsets);
   }
 
   @ReactProp(name = ReactClippingViewGroupHelper.PROP_REMOVE_CLIPPED_SUBVIEWS)
@@ -103,8 +127,13 @@ public class ReactScrollViewManager
    * @param scrollPerfTag
    */
   @ReactProp(name = "scrollPerfTag")
-  public void setScrollPerfTag(ReactScrollView view, String scrollPerfTag) {
+  public void setScrollPerfTag(ReactScrollView view, @Nullable String scrollPerfTag) {
     view.setScrollPerfTag(scrollPerfTag);
+  }
+
+  @ReactProp(name = "pagingEnabled")
+  public void setPagingEnabled(ReactScrollView view, boolean pagingEnabled) {
+    view.setPagingEnabled(pagingEnabled);
   }
 
   /**
@@ -119,11 +148,14 @@ public class ReactScrollViewManager
   }
 
   // <Even>
+  @ReactProp(name = "showsHorizontalScrollIndicator")
+  public void setShowsHorizontalScrollIndicator(ReactScrollView view, boolean value) {
+    view.setHorizontalScrollBarEnabled(value);
+  }
   @ReactProp(name = "disableTopPull")
   public void setDisableTopPull(ReactScrollView view, boolean disableTopPull) {
     view.setDisableTopPull(disableTopPull);
   }
-
   @ReactProp(name = "contentOffsetYAnimatedNodeTag")
   public void setContentOffsetYAnimatedNodeTag(ReactScrollView view, int tag) {
     view.setContentOffsetYAnimatedNodeTag(tag);
@@ -136,6 +168,11 @@ public class ReactScrollViewManager
   @ReactProp(name = "overScrollMode")
   public void setOverScrollMode(ReactScrollView view, String value) {
     view.setOverScrollMode(ReactScrollViewHelper.parseOverScrollMode(value));
+  }
+
+  @ReactProp(name = "nestedScrollEnabled")
+  public void setNestedScrollEnabled(ReactScrollView view, boolean value) {
+    ViewCompat.setNestedScrollingEnabled(view, value);
   }
 
   @Override
@@ -208,8 +245,8 @@ public class ReactScrollViewManager
   }, customType = "Color")
   public void setBorderColor(ReactScrollView view, int index, Integer color) {
     float rgbComponent =
-        color == null ? YogaConstants.UNDEFINED : (float) ((int)color & 0x00FFFFFF);
-    float alphaComponent = color == null ? YogaConstants.UNDEFINED : (float) ((int)color >>> 24);
+        color == null ? YogaConstants.UNDEFINED : (float) (color & 0x00FFFFFF);
+    float alphaComponent = color == null ? YogaConstants.UNDEFINED : (float) (color >>> 24);
     view.setBorderColor(SPACING_TYPES[index], rgbComponent, alphaComponent);
   }
 
@@ -228,12 +265,12 @@ public class ReactScrollViewManager
   }
 
   @Override
-  public @Nullable Map getExportedCustomDirectEventTypeConstants() {
+  public @Nullable Map<String, Object> getExportedCustomDirectEventTypeConstants() {
     return createExportedCustomDirectEventTypeConstants();
   }
 
-  public static Map createExportedCustomDirectEventTypeConstants() {
-    return MapBuilder.builder()
+  public static Map<String, Object> createExportedCustomDirectEventTypeConstants() {
+    return MapBuilder.<String, Object>builder()
         .put(ScrollEventType.SCROLL.getJSEventName(), MapBuilder.of("registrationName", "onScroll"))
         .put(ScrollEventType.BEGIN_DRAG.getJSEventName(), MapBuilder.of("registrationName", "onScrollBeginDrag"))
         .put(ScrollEventType.END_DRAG.getJSEventName(), MapBuilder.of("registrationName", "onScrollEndDrag"))

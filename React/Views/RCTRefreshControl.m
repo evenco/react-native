@@ -1,10 +1,8 @@
 /**
  * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  */
 
 #import "RCTRefreshControl.h"
@@ -14,6 +12,7 @@
 @implementation RCTRefreshControl {
   BOOL _isInitialRender;
   BOOL _currentRefreshingState;
+  BOOL _refreshingProgrammatically;
   NSString *_title;
   UIColor *_titleColor;
 }
@@ -43,20 +42,17 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
   // If the control is refreshing when mounted we need to call
   // beginRefreshing in layoutSubview or it doesn't work.
   if (_currentRefreshingState && _isInitialRender) {
-    [self beginRefreshing];
+    [self beginRefreshingProgrammatically];
   }
   _isInitialRender = false;
 }
 
-- (void)beginRefreshing
+- (void)beginRefreshingProgrammatically
 {
-  // <Even>
-  CGFloat height = 60; // self.frame.size.height changes???
-  // </Even>
-
+  _refreshingProgrammatically = YES;
   // When using begin refreshing we need to adjust the ScrollView content offset manually.
   UIScrollView *scrollView = (UIScrollView *)self.superview;
-  CGPoint offset = {scrollView.contentOffset.x, scrollView.contentOffset.y - height};
+  CGPoint offset = {scrollView.contentOffset.x, scrollView.contentOffset.y - self.frame.size.height};
 
   // `beginRefreshing` must be called after the animation is done. This is why it is impossible
   // to use `setContentOffset` with `animated:YES`.
@@ -70,17 +66,13 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
                      }];
 }
 
-- (void)endRefreshing
+- (void)endRefreshingProgrammatically
 {
-  // <Even>
-  CGFloat targetY = 0; // scrollView.contentInset.top changes to UIRefreshControlHeight during refresh???
-  // </Even>
-
   // The contentOffset of the scrollview MUST be greater than 0 before calling
   // endRefreshing otherwise the next pull to refresh will not work properly.
   UIScrollView *scrollView = (UIScrollView *)self.superview;
-  if (scrollView.contentOffset.y < 0) {
-    CGPoint offset = {scrollView.contentOffset.x, targetY};
+  if (_refreshingProgrammatically && scrollView.contentOffset.y < 0) {
+    CGPoint offset = {scrollView.contentOffset.x, 0};
     [UIView animateWithDuration:0.25
                           delay:0
                         options:UIViewAnimationOptionBeginFromCurrentState
@@ -132,10 +124,10 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
     if (refreshing) {
       if (!_isInitialRender) {
-        [self beginRefreshing];
+        [self beginRefreshingProgrammatically];
       }
     } else {
-      [self endRefreshing];
+      [self endRefreshingProgrammatically];
     }
   }
 }
@@ -143,6 +135,7 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 - (void)refreshControlValueChanged
 {
   _currentRefreshingState = super.refreshing;
+  _refreshingProgrammatically = NO;
 
   if (_onRefresh) {
     _onRefresh(nil);
