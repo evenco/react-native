@@ -92,7 +92,7 @@ const InvertibleScrollView = createReactClass({
     var {
       inverted,
       renderScrollComponent,
-      ...props,
+      ...props
     } = this.props;
 
     props.children = [this._renderBottomFill(), ...props.children];

@@ -70,7 +70,7 @@ RCT_EXPORT_SHADOW_PROPERTY(placeholder, NSString)
 RCT_EXPORT_SHADOW_PROPERTY(onContentSizeChange, RCTBubblingEventBlock)
 
 // <Even>
-RCT_CUSTOM_VIEW_PROPERTY(manualInput, BOOL, RCTTextField)
+RCT_CUSTOM_VIEW_PROPERTY(manualInput, BOOL, RCTBaseTextInputView)
 {
   if (json && [RCTConvert BOOL:json]) {
     view.backedTextInputView.inputView = [UIView new];

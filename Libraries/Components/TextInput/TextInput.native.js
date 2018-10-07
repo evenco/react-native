@@ -810,11 +810,7 @@ const TextInput = createReactClass({
   _focusSubscription: (undefined: ?Function),
   _lastNativeText: (undefined: ?string),
   _lastNativeSelection: (undefined: ?Selection),
-<<<<<<< HEAD:Libraries/Components/TextInput/TextInput.native.js
-  _layoutHeight: (-1: number),
   _securedTextEntry: (false: bool),
-=======
->>>>>>> 0.57-stable:Libraries/Components/TextInput/TextInput.js
 
   componentDidMount: function() {
     this._lastNativeText = this.props.value;
@@ -856,7 +852,6 @@ const TextInput = createReactClass({
     }
   },
 
-<<<<<<< HEAD:Libraries/Components/TextInput/TextInput.native.js
   componentWillReceiveProps: function(nextProps) {
     if (nextProps.secureTextEntry !== this.props.secureTextEntry) {
         this._securedTextEntry = nextProps.secureTextEntry ? true : false;
@@ -869,11 +864,6 @@ const TextInput = createReactClass({
 
   childContextTypes: {
     isInAParentText: PropTypes.bool
-=======
-  contextTypes: {
-    onFocusRequested: PropTypes.func,
-    focusEmitter: PropTypes.instanceOf(EventEmitter),
->>>>>>> 0.57-stable:Libraries/Components/TextInput/TextInput.js
   },
 
   /**
@@ -1096,15 +1086,11 @@ const TextInput = createReactClass({
         disableFullscreenUI={this.props.disableFullscreenUI}
         textBreakStrategy={this.props.textBreakStrategy}
         onScroll={this._onScroll}
-<<<<<<< HEAD:Libraries/Components/TextInput/TextInput.native.js
         // <Even>
         manualInput={this.props.manualInput}
         // </Even>
-      />;
-=======
       />
     );
->>>>>>> 0.57-stable:Libraries/Components/TextInput/TextInput.js
 
     return (
       <TouchableWithoutFeedback
@@ -1199,7 +1185,6 @@ const TextInput = createReactClass({
     // that we have in JS.
     const nativeProps = {};
 
-<<<<<<< HEAD:Libraries/Components/TextInput/TextInput.native.js
     if (this._lastNativeText !== this.props.value && typeof this.props.value === 'string') {
         /*Once secureTextEntry switches to true, if the user types another character, iOS behavior will replace entire
         previously entered text with the new character.
@@ -1216,31 +1201,17 @@ const TextInput = createReactClass({
             nativeProps.text = this.props.value;
         }
 
-=======
-    if (
-      this._lastNativeText !== this.props.value &&
-      typeof this.props.value === 'string'
-    ) {
-      nativeProps.text = this.props.value;
->>>>>>> 0.57-stable:Libraries/Components/TextInput/TextInput.js
     }
 
     // Selection is also a controlled prop, if the native value doesn't match
     // JS, update to the JS value.
     const {selection} = this.props;
-<<<<<<< HEAD:Libraries/Components/TextInput/TextInput.native.js
-
-    if (this._lastNativeSelection && selection &&
-        (this._lastNativeSelection.start !== selection.start ||
-        this._lastNativeSelection.end !== selection.end)) {
-=======
     if (
       this._lastNativeSelection &&
       selection &&
       (this._lastNativeSelection.start !== selection.start ||
         this._lastNativeSelection.end !== selection.end)
     ) {
->>>>>>> 0.57-stable:Libraries/Components/TextInput/TextInput.js
       nativeProps.selection = this.props.selection;
     }
 
