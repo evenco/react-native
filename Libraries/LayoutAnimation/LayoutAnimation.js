@@ -65,7 +65,7 @@ const configType = PropTypes.shape({
   delete: animType,
 });
 
-export type Config = {
+type Config = {
   duration: number,
   create?: Anim,
   update?: Anim,

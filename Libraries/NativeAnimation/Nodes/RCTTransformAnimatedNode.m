@@ -36,7 +36,6 @@
   for (NSDictionary *transformConfig in transformConfigs) {
     NSString *type = transformConfig[@"type"];
     NSString *property = transformConfig[@"property"];
-
     NSNumber *value;
     if ([type isEqualToString: @"animated"]) {
       NSNumber *nodeTag = transformConfig[@"nodeTag"];

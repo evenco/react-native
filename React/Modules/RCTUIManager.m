@@ -992,9 +992,6 @@ RCT_EXPORT_METHOD(updateView:(nonnull NSNumber *)reactTag
 {
   RCTAssertMainQueue();
   RCTComponentData *componentData = _componentDataByName[viewName];
-  if (componentData == nil) {
-    RCTLogError(@"No component data available");
-  }
   UIView *view = _viewRegistry[reactTag];
   [componentData setProps:props forView:view];
 }

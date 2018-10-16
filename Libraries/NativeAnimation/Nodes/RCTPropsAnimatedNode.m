@@ -35,9 +35,6 @@
              viewName:(NSString *)viewName
             uiManager:(RCTUIManager *)uiManager
 {
-  if (viewName == nil) {
-    RCTLogError(@"View name is required");
-  }
   _connectedViewTag = viewTag;
   _connectedViewName = viewName;
   _uiManager = uiManager;

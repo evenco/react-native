@@ -810,7 +810,7 @@ const TextInput = createReactClass({
   _focusSubscription: (undefined: ?Function),
   _lastNativeText: (undefined: ?string),
   _lastNativeSelection: (undefined: ?Selection),
-  _securedTextEntry: (false: bool),
+  _securedTextEntry: (false: bool), // <Even>
 
   componentDidMount: function() {
     this._lastNativeText = this.props.value;
@@ -852,19 +852,13 @@ const TextInput = createReactClass({
     }
   },
 
+  // <Even>
   componentWillReceiveProps: function(nextProps) {
     if (nextProps.secureTextEntry !== this.props.secureTextEntry) {
         this._securedTextEntry = nextProps.secureTextEntry ? true : false;
     } 
   },
-
-  getChildContext: function(): Object {
-    return {isInAParentText: true};
-  },
-
-  childContextTypes: {
-    isInAParentText: PropTypes.bool
-  },
+  // </Even>
 
   /**
    * Removes all text from the `TextInput`.
@@ -1132,26 +1126,28 @@ const TextInput = createReactClass({
       });
     }
 
-    const text = event.nativeEvent.text;
+    /*
+    <Even>
+    Below if statement addresses iOS' behavior that clears entire entry when secureTextEntry switches to
+    true and user enters a new character. Without the if statement below, the entire textinput value would be 
+    replaced with the single character the user typed after switching back to secureTextEntry. The <= 1 is to 
+    account for the fact that the iOS clear text behavior triggers two separate onChange calls, one with a blank text, 
+    and one with the single character typed by the user. The only situation that will not be addressed is if the user
+    types password in plain text, switches back to  secureText, tries to highlight entire text and delete
+    (because it will it hit the text.length <= 1 use case).
+    </Even>
+    */
+    let text = event.nativeEvent.text;
+    if (Platform.OS === 'ios' && this._securedTextEntry) {
+      if (text.length <= 1) {
+        text = this._lastNativeText + text;
+      } else {
+        this._securedTextEntry = false;
+      }
+    }
+
     this.props.onChange && this.props.onChange(event);
     this.props.onChangeText && this.props.onChangeText(text);
-
-    /*Below if statement addresses iOS' behavior that clears entire entry when secureTextEntry switches to
-     true and user enters a new character. Without the if statement below, the entire textinput value would be 
-     replaced with the single character the user typed after switching back to secureTextEntry. The <= 1 is to 
-     account for the fact that the iOS clear text behavior triggers two separate onChange calls, one with a blank text, 
-     and one with the single character typed by the user. 
-
-     The only situation that will not be addressed is if the user types password in plain text, switches back to 
-     secureText, tries to highlight entire text and delete (because it will it hit the text.length <= 1 use case) 
-    */
-    if (Platform.OS === 'ios' && this._securedTextEntry) {
-        if (text.length <= 1) {
-            text = this._lastNativeText + text;
-        } else {
-            this._securedTextEntry = false;
-        }
-    }
 
     if (!this._inputRef) {
       // calling `this.props.onChange` or `this.props.onChangeText`
@@ -1185,22 +1181,22 @@ const TextInput = createReactClass({
     // that we have in JS.
     const nativeProps = {};
 
-    if (this._lastNativeText !== this.props.value && typeof this.props.value === 'string') {
-        /*Once secureTextEntry switches to true, if the user types another character, iOS behavior will replace entire
-        previously entered text with the new character.
-
-        The if statement below will catch this use case and will use previously entered text instead of the single
-        character when user toggles between showing and hiding password.
-        */
-
-        if (Platform.OS === 'ios' 
-            && (this._securedTextEntry || 
-                (this.props.value.length === 1 && this._lastNativeText.length > 1))) {
-            nativeProps.text = this._lastNativeText;
-        } else {
-            nativeProps.text = this.props.value;
-        }
-
+    if (
+      this._lastNativeText !== this.props.value &&
+      typeof this.props.value === 'string'
+    ) {
+      /*
+      <Even>
+      Once secureTextEntry switches to true, if the user types another character, iOS behavior will replace entire
+      previously entered text with the new character. The if statement below will catch this use case and will use
+      previously entered text instead of the single character when user toggles between showing and hiding password.
+      </Even>
+      */
+      if (Platform.OS === 'ios' && (this._securedTextEntry || (this.props.value.length === 1 && this._lastNativeText.length > 1))) {
+        nativeProps.text = this._lastNativeText;
+      } else {
+        nativeProps.text = this.props.value;
+      }
     }
 
     // Selection is also a controlled prop, if the native value doesn't match

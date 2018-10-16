@@ -144,7 +144,7 @@ class ScrollViewStickyHeader extends React.Component<Props, State> {
         style={[child.props.style, styles.header, {transform: [{translateY}]}]}>
         {React.cloneElement(child, {
           style: styles.fill, // We transfer the child style to the wrapper.
-          onLayout: () => {}, // we call this manually through our this._onLayout
+          onLayout: undefined, // we call this manually through our this._onLayout
         })}
       </AnimatedView>
     );

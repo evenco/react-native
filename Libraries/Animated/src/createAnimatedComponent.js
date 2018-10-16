@@ -63,10 +63,6 @@ function createAnimatedComponent(Component: any): any {
     }
 
     _attachNativeEvents() {
-      // <Even> HACK null check (https://github.com/facebook/react-native/issues/10635)
-      if (!this._component) {
-        return;
-      }
       // Make sure to get the scrollable node for components that implement
       // `ScrollResponder.Mixin`.
       const scrollableNode = this._component.getScrollableNode

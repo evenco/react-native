@@ -60,7 +60,6 @@ class Alert {
       alert(title + (message ? ` — ${message}` : ''));
     }
   }
-
 }
 
 /**

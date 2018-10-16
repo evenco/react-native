@@ -272,7 +272,7 @@ const SOLID_COLOR = 0;
 const LINEAR_GRADIENT = 1;
 const RADIAL_GRADIENT = 2;
 const PATTERN = 3;
-var ANGULAR_GRADIENT = 4;
+const ANGULAR_GRADIENT = 4;
 
 function insertColorIntoArray(color, targetArray, atIndex) {
   const c = new Color(color);
@@ -333,10 +333,7 @@ function applyBoundingBoxToBrushData(brushData, props) {
   const type = brushData[0];
   const width = +props.width;
   const height = +props.height;
-  if (type === ANGULAR_GRADIENT) {
-    brushData[1] *= width;
-    brushData[2] *= height;
-  } else if (type === LINEAR_GRADIENT) {
+  if (type === LINEAR_GRADIENT) {
     brushData[1] *= width;
     brushData[2] *= height;
     brushData[3] *= width;
@@ -350,6 +347,9 @@ function applyBoundingBoxToBrushData(brushData, props) {
     brushData[6] *= height;
   } else if (type === PATTERN) {
     // todo
+  } else if (type === ANGULAR_GRADIENT) {
+    brushData[1] *= width;
+    brushData[2] *= height;
   }
 }
 
@@ -357,18 +357,17 @@ function extractBrush(colorOrBrush, props) {
   if (colorOrBrush == null) {
     return null;
   }
-  var brush = colorOrBrush._brush;
-  if (brush) {
+  if (colorOrBrush._brush) {
     if (colorOrBrush._bb) {
       // The legacy API for Gradients allow for the bounding box to be used
       // as a convenience for specifying gradient positions. This should be
       // deprecated. It's not properly implemented in canvas mode. ReactART
       // doesn't handle update to the bounding box correctly. That's why we
       // mutate this so that if it's reused, we reuse the same resolved box.
-      applyBoundingBoxToBrushData(brush, props);
+      applyBoundingBoxToBrushData(colorOrBrush._brush, props);
       colorOrBrush._bb = false;
     }
-    return brush;
+    return colorOrBrush._brush;
   }
   const c = new Color(colorOrBrush);
   return [SOLID_COLOR, c.red / 255, c.green / 255, c.blue / 255, c.alpha];
