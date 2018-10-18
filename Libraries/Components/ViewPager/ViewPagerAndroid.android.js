@@ -81,6 +81,8 @@ class ViewPagerAndroid extends React.Component<{
   peekEnabled?: boolean,
   keyboardDismissMode?: 'none' | 'on-drag',
   scrollEnabled?: boolean,
+  animatedScrollX?: Object,
+  contentOffsetXAnimatedNodeTag?: number,
 }> {
   /* $FlowFixMe(>=0.78.0 site=react_native_android_fb) This issue was found
    * when making Flow check .android.js files. */
@@ -150,8 +152,8 @@ class ViewPagerAndroid extends React.Component<{
     peekEnabled: PropTypes.bool,
 
     // <Even>
-    animatedScrollX: ReactPropTypes.object,
-    contentOffsetXAnimatedNodeTag: ReactPropTypes.number,
+    animatedScrollX: PropTypes.object,
+    contentOffsetXAnimatedNodeTag: PropTypes.number,
     // </Even>
   };
 

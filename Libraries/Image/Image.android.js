@@ -25,15 +25,12 @@ const flattenStyle = require('flattenStyle');
 const merge = require('merge');
 const requireNativeComponent = require('requireNativeComponent');
 const resolveAssetSource = require('resolveAssetSource');
-const createReactNativeComponentClass = require('createReactNativeComponentClass');
 
 const {ImageLoader} = NativeModules;
 
 const RKImage = requireNativeComponent('RCTImageView');
 const RCTTextInlineImage = requireNativeComponent('RCTTextInlineImage');
-const RCTCapInsetsImageView = createReactNativeComponentClass({
-  uiViewClassName: 'RCTCapInsetsImageView',
-});
+const RCTCapInsetsImageView = requireNativeComponent('RCTCapInsetsImageView');
 
 import type {ImageProps as ImagePropsType} from 'ImageProps';
 
@@ -259,16 +256,16 @@ let Image = (
       : null,
     ref: forwardedRef,
     // <Even>
-    capInsets: this.props.capInsets,
+    capInsets: props.capInsets,
     // </Even>
   });
 
   return (
     <TextAncestor.Consumer>
-      {hasTextAncestor => () => {
+      {(hasTextAncestor) => {
         if (hasTextAncestor) {
           return <RCTTextInlineImage {...nativeProps} />;
-        } else if (this.props.capInsets) {
+        } else if (props.capInsets) {
           return <RCTCapInsetsImageView {...nativeProps} />;
         } else {
           return <RKImage {...nativeProps} />

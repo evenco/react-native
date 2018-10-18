@@ -164,7 +164,6 @@ const STYLES_WHITELIST = {
   // <Even>
   color: true,
   backgroundColor: true,
-  shadowOpacity: true,
   elevation: true,
   // </Even>
 };

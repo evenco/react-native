@@ -78,7 +78,7 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   private ReactViewBackgroundManager mReactBackgroundManager;
 
   // <Even>
-  private final NativeAnimatedModule mAnimatedModule;
+  private NativeAnimatedModule mAnimatedModule;
   private int mContentOffsetYAnimatedNodeTag;
   private VelocityTracker mVelocityTracker = VelocityTracker.obtain();
   private boolean mDisableTopPull;
@@ -96,15 +96,15 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
     mScroller = getOverScrollerFromParent();
     setOnHierarchyChangeListener(this);
     setScrollBarStyle(SCROLLBARS_OUTSIDE_OVERLAY);
+
+    // <Even>
+    mAnimatedModule = context.getNativeModule(NativeAnimatedModule.class);
+    // </Even>
   }
 
   @Nullable
   private OverScroller getOverScrollerFromParent() {
     OverScroller scroller;
-
-    // <Even>
-    mAnimatedModule = context.getNativeModule(NativeAnimatedModule.class);
-    // </Even>
 
     if (!sTriedToGetScrollerField) {
       sTriedToGetScrollerField = true;
@@ -197,9 +197,14 @@ public class ReactScrollView extends ScrollView implements ReactClippingViewGrou
   }
 
   @Override
+  protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    // Call with the present values in order to re-layout if necessary
+    scrollTo(getScrollX(), getScrollY());
+  }
+
+  @Override
   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
-
     if (mRemoveClippedSubviews) {
       updateClippingRect();
     }
